@@ -3,12 +3,29 @@
  */
 package CCDetect.lsp;
 
+import org.eclipse.lsp4j.jsonrpc.Launcher;
+import org.eclipse.lsp4j.launch.LSPLauncher;
+import org.eclipse.lsp4j.services.LanguageClient;
+import org.eclipse.lsp4j.services.LanguageClientAware;
+import org.eclipse.lsp4j.services.LanguageServer;
+
 public class App {
-    public String getGreeting() {
-        return "Hello World!";
+
+    public static Launcher<LanguageClient> createLauncher(LanguageServer server) {
+        Launcher<LanguageClient> launcher = LSPLauncher.createServerLauncher(
+            server,
+            System.in,
+            System.out
+        );
+        LanguageClient client = launcher.getRemoteProxy();
+        ((LanguageClientAware)server).connect(client);
+
+        return launcher;
     }
 
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+        LanguageServer server = new CCLanguageServer();
+        Launcher<LanguageClient> launcher = createLauncher(server);
+        launcher.startListening();
     }
 }
