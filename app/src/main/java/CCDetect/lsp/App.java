@@ -27,5 +27,6 @@ public class App {
         LanguageServer server = new CCLanguageServer();
         Launcher<LanguageClient> launcher = createLauncher(server);
         launcher.startListening();
+
     }
 }

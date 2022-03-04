@@ -3,7 +3,6 @@ package CCDetect.lsp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.Command;
@@ -17,6 +16,9 @@ import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.TextDocumentService;
+
+import CCDetect.lsp.codeactions.DeleteRangeActionProvider;
+import CCDetect.lsp.codeactions.ExtractMethodActionProvider;
 
 /**
  * CCTextDocumentService
@@ -58,20 +60,22 @@ public class CCTextDocumentService implements TextDocumentService {
     }
 
     @Override
-    public CompletableFuture<List<Either<Command, CodeAction>>> codeAction(CodeActionParams params) {
-        // TODO Auto-generated method stub
+    public CompletableFuture<List<Either<Command, CodeAction>>> codeAction(
+        CodeActionParams params
+    ) {
         return CompletableFuture.supplyAsync(() -> {
-        List<Either<Command, CodeAction>> codeActions = new ArrayList<>();
-        try {
-            CodeAction testAction = new CodeAction("Test code action");
-            codeActions.add(Either.forRight(testAction));
+            List<Either<Command, CodeAction>> codeActions = new ArrayList<>();
+            try {
+                CodeAction deleteRangeAction = DeleteRangeActionProvider.getCodeAction(params);
+                CodeAction extractMethodAction = ExtractMethodActionProvider.getCodeAction(params);
+                codeActions.add(Either.forRight(deleteRangeAction));
+                codeActions.add(Either.forRight(extractMethodAction));
+            } catch (Exception e) {}
 
-        } catch (Exception e) {}
-
-        return codeActions;
-
+            return codeActions;
         });
     }
+
 
     @Override
     public void didOpen(DidOpenTextDocumentParams params) {
