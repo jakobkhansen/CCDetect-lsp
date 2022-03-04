@@ -32,6 +32,7 @@ public class CCLanguageServer implements LanguageServer,LanguageClientAware {
         // Set the capabilities of the LS to inform the client.
         initializeResult.getCapabilities().setTextDocumentSync(TextDocumentSyncKind.Full);
         CompletionOptions completionOptions = new CompletionOptions();
+        initializeResult.getCapabilities().setCodeActionProvider(true);
         initializeResult.getCapabilities().setCompletionProvider(completionOptions);
         return CompletableFuture.supplyAsync(()->initializeResult);
     }
