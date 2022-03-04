@@ -11,6 +11,14 @@ import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
 
 public class CCLanguageServer implements LanguageServer,LanguageClientAware {
+    private TextDocumentService textDocumentService;
+    private WorkspaceService workspaceService;
+
+
+    public CCLanguageServer() {
+        this.textDocumentService = new CCTextDocumentService();
+        this.workspaceService = new CCWorkspaceService();
+    }
 
     @Override
     public CompletableFuture<InitializeResult> initialize(InitializeParams params) {
@@ -32,17 +40,17 @@ public class CCLanguageServer implements LanguageServer,LanguageClientAware {
     @Override
     public TextDocumentService getTextDocumentService() {
         // TODO Auto-generated method stub
-        return null;
+        return textDocumentService;
     }
 
     @Override
     public WorkspaceService getWorkspaceService() {
         // TODO Auto-generated method stub
-        return null;
+        return workspaceService;
     }
 
     @Override
     public void connect(LanguageClient client) {
-        // TODO Auto-generated method stub
+        System.err.println("Client connected!!!");
     }
 }
