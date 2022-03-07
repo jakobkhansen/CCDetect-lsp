@@ -1,4 +1,4 @@
-package CCDetect.lsp;
+package CCDetect.lsp.server;
 
 import java.util.concurrent.CompletableFuture;
 import org.eclipse.lsp4j.CompletionOptions;

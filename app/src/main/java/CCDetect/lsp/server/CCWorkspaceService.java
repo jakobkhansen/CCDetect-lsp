@@ -1,4 +1,4 @@
-package CCDetect.lsp;
+package CCDetect.lsp.server;
 
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams;

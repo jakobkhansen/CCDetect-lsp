@@ -1,4 +1,4 @@
-package CCDetect.lsp;
+package CCDetect.lsp.server;
 
 import java.util.ArrayList;
 import java.util.List;
