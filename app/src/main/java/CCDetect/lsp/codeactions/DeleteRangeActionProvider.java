@@ -6,21 +6,31 @@ import java.util.List;
 
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionParams;
-import org.eclipse.lsp4j.TextDocumentItem;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceEdit;
 
+import CCDetect.lsp.server.DocumentModel;
+import CCDetect.lsp.server.DocumentModel.DocumentLine;
+
 public class DeleteRangeActionProvider {
-    public static CodeAction getCodeAction(CodeActionParams params) {
+    CodeActionParams params;
+    DocumentModel document;
+
+    public DeleteRangeActionProvider(CodeActionParams params, DocumentModel document) {
+        this.params = params;
+        this.document = document;
+    }
+
+    public CodeAction getCodeAction() {
         System.err.println(params.getTextDocument().getUri());
         CodeAction action = new CodeAction("Delete range");
         action.getCommand();
-        action.setEdit(getEdit(params));
+        action.setEdit(getEdit());
 
         return action;
     }
 
-    private static WorkspaceEdit getEdit(CodeActionParams params) {
+    private WorkspaceEdit getEdit() {
         WorkspaceEdit edit = new WorkspaceEdit();
 
         HashMap<String, List<TextEdit>> changes = new HashMap<>();

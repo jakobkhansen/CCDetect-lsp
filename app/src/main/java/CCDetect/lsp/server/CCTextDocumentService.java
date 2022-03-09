@@ -1,8 +1,13 @@
 package CCDetect.lsp.server;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.Command;
@@ -14,6 +19,7 @@ import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
+import org.eclipse.lsp4j.TextDocumentItem;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.TextDocumentService;
 
@@ -24,6 +30,8 @@ import CCDetect.lsp.codeactions.ExtractMethodActionProvider;
  * CCTextDocumentService
  */
 public class CCTextDocumentService implements TextDocumentService {
+    // URI -> TextDocumentItem
+    private final Map<String, DocumentModel> docs = Collections.synchronizedMap(new HashMap<>());
 
     @Override
     public CompletableFuture<Either<List<CompletionItem>, CompletionList>> completion(
@@ -59,6 +67,7 @@ public class CCTextDocumentService implements TextDocumentService {
         });
     }
 
+
     @Override
     public CompletableFuture<List<Either<Command, CodeAction>>> codeAction(
         CodeActionParams params
@@ -66,8 +75,14 @@ public class CCTextDocumentService implements TextDocumentService {
         return CompletableFuture.supplyAsync(() -> {
             List<Either<Command, CodeAction>> codeActions = new ArrayList<>();
             try {
-                CodeAction deleteRangeAction = DeleteRangeActionProvider.getCodeAction(params);
-                CodeAction extractMethodAction = ExtractMethodActionProvider.getCodeAction(params);
+                DocumentModel document = docs.get(params.getTextDocument().getUri());
+
+                DeleteRangeActionProvider deleteRangeProvider = new DeleteRangeActionProvider(params, document);
+                ExtractMethodActionProvider extractProvider = new ExtractMethodActionProvider(params, document);
+
+                CodeAction deleteRangeAction = deleteRangeProvider.getCodeAction();
+                CodeAction extractMethodAction = extractProvider.getCodeAction();
+
                 codeActions.add(Either.forRight(deleteRangeAction));
                 codeActions.add(Either.forRight(extractMethodAction));
             } catch (Exception e) {}
@@ -76,16 +91,18 @@ public class CCTextDocumentService implements TextDocumentService {
         });
     }
 
-
     @Override
     public void didOpen(DidOpenTextDocumentParams params) {
-        // TODO Auto-generated method stub
-
+        DocumentModel model = new DocumentModel(params.getTextDocument().getText());
+        docs.put(params.getTextDocument().getUri(), model);
     }
 
     @Override
     public void didChange(DidChangeTextDocumentParams params) {
         // TODO Auto-generated method stub
+        DocumentModel model = new DocumentModel(params.getContentChanges().get(0).getText());
+        this.docs.put(params.getTextDocument().getUri(), model);
+        
 
     }
 

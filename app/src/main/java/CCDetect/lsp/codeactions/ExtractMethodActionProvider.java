@@ -9,46 +9,58 @@ import java.util.Scanner;
 
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionParams;
+import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.TextDocumentItem;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceEdit;
 
+import CCDetect.lsp.server.DocumentModel;
+import CCDetect.lsp.server.DocumentModel.DocumentLine;
+
 public class ExtractMethodActionProvider {
-    public static CodeAction getCodeAction(CodeActionParams params) {
-        System.err.println(params.getTextDocument().getUri());
+    CodeActionParams params;
+    DocumentModel document;
+
+    public ExtractMethodActionProvider(CodeActionParams params, DocumentModel document) {
+        this.params = params;
+        this.document = document;
+    }
+
+
+    public CodeAction getCodeAction() {
         CodeAction action = new CodeAction("Extract Method");
         action.getCommand();
-        action.setEdit(getEdit(params));
+        action.setEdit(getEdit());
 
         return action;
     }
 
-    private static WorkspaceEdit getEdit(CodeActionParams params) {
+    private WorkspaceEdit getEdit() {
+
         WorkspaceEdit edit = new WorkspaceEdit();
 
         HashMap<String, List<TextEdit>> changes = new HashMap<>();
 
-        URL url = null;
-        InputStream stream = null;
-        Scanner scanner = null;
-        try {
-            url = new URL(params.getTextDocument().getUri()); 
-            stream = url.openStream();
-            scanner = new Scanner(stream);
-
-        } catch (Exception e) {
-            //TODO: handle exception
-        }
-        String documentContent = scanner.nextLine();
-        System.err.println(documentContent);
-
         List<TextEdit> edits = new ArrayList<>();
 
-        TextEdit textEdit = new TextEdit();
+        TextEdit removeEdit = new TextEdit();
 
 
-        textEdit.setNewText("");
-        textEdit.setRange(params.getRange());
-        edits.add(textEdit);
+        removeEdit.setNewText("");
+        removeEdit.setRange(params.getRange());
+
+
+
+        // Place at bottom
+        TextEdit placeEdit = new TextEdit();
+        placeEdit.setNewText(document.getLineTextInRange(params.getRange()));
+        Position lastLine = new Position(document.getLines().size(), 0);
+
+        placeEdit.setRange(new Range(lastLine, lastLine));
+
+        edits.add(removeEdit);
+        edits.add(placeEdit);
 
         changes.put(params.getTextDocument().getUri(), edits);
         edit.setChanges(changes);
