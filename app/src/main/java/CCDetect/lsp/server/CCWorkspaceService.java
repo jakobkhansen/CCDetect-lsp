@@ -18,6 +18,5 @@ public class CCWorkspaceService implements WorkspaceService {
     @Override
     public void didChangeWatchedFiles(DidChangeWatchedFilesParams params) {
         // TODO Auto-generated method stub
-        
     } 
 }

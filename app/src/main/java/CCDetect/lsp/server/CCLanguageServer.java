@@ -18,10 +18,10 @@ public class CCLanguageServer implements LanguageServer, LanguageClientAware {
     private TextDocumentService textDocumentService;
     private WorkspaceService workspaceService;
     private int errorCode = 1;
-    private LanguageClient client;
+    LanguageClient client;
 
     public CCLanguageServer() {
-        this.textDocumentService = new CCTextDocumentService();
+        this.textDocumentService = new CCTextDocumentService(this);
         this.workspaceService = new CCWorkspaceService();
     }
 

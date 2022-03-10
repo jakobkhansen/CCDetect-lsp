@@ -47,7 +47,7 @@ public class ExtractMethodActionProvider {
         TextEdit removeEdit = new TextEdit();
 
 
-        removeEdit.setNewText("");
+        removeEdit.setNewText("    extracted();");
         removeEdit.setRange(params.getRange());
 
 

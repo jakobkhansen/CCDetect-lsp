@@ -15,12 +15,19 @@ import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionItemKind;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.CompletionParams;
+import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
+import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.PublishDiagnosticsParams;
+import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
 import org.eclipse.lsp4j.TextDocumentItem;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
+import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 
 import CCDetect.lsp.codeactions.DeleteRangeActionProvider;
@@ -32,6 +39,12 @@ import CCDetect.lsp.codeactions.ExtractMethodActionProvider;
 public class CCTextDocumentService implements TextDocumentService {
     // URI -> TextDocumentItem
     private final Map<String, DocumentModel> docs = Collections.synchronizedMap(new HashMap<>());
+    private final CCLanguageServer server;
+
+    public CCTextDocumentService(CCLanguageServer server) {
+        this.server = server;
+    }
+
 
     @Override
     public CompletableFuture<Either<List<CompletionItem>, CompletionList>> completion(
@@ -95,15 +108,18 @@ public class CCTextDocumentService implements TextDocumentService {
     public void didOpen(DidOpenTextDocumentParams params) {
         DocumentModel model = new DocumentModel(params.getTextDocument().getText());
         docs.put(params.getTextDocument().getUri(), model);
+
+        testDiagnostic(params.getTextDocument().getUri());
     }
 
     @Override
     public void didChange(DidChangeTextDocumentParams params) {
         // TODO Auto-generated method stub
-        DocumentModel model = new DocumentModel(params.getContentChanges().get(0).getText());
+        TextDocumentContentChangeEvent lastChange = params.getContentChanges().get(params.getContentChanges().size()-1);
+        DocumentModel model = new DocumentModel(lastChange.getText());
         this.docs.put(params.getTextDocument().getUri(), model);
         
-
+        testDiagnostic(params.getTextDocument().getUri());
     }
 
     @Override
@@ -115,6 +131,23 @@ public class CCTextDocumentService implements TextDocumentService {
     @Override
     public void didSave(DidSaveTextDocumentParams params) {
         // TODO Auto-generated method stub
+        System.err.println("didSave");
+
+    }
+
+    public void testDiagnostic(String uri) {
+        List<Diagnostic> diagnostics = new ArrayList<>();
+        Range range1 = new Range(new Position(0, 0), new Position(0,11));
+        Range range2 = new Range(new Position(1, 0), new Position(1,5));
+        Diagnostic diagnostic1 = new Diagnostic(range1, "This is a diagnostic");
+        Diagnostic diagnostic2 = new Diagnostic(range2, "This is a warning", DiagnosticSeverity.Warning, "source");
+        diagnostics.add(diagnostic1);
+        diagnostics.add(diagnostic2);
+        CompletableFuture.runAsync(() ->
+			server.client.publishDiagnostics(
+				new PublishDiagnosticsParams(uri, diagnostics)
+			)
+		);
 
     }
 }
