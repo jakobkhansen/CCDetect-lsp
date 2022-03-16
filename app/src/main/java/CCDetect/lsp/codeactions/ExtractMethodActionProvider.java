@@ -1,22 +1,18 @@
 package CCDetect.lsp.codeactions;
 
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Scanner;
 
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionParams;
+import org.eclipse.lsp4j.Command;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
-import org.eclipse.lsp4j.TextDocumentItem;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceEdit;
 
 import CCDetect.lsp.server.DocumentModel;
-import CCDetect.lsp.server.DocumentModel.DocumentLine;
 
 public class ExtractMethodActionProvider {
     CodeActionParams params;
@@ -30,7 +26,7 @@ public class ExtractMethodActionProvider {
 
     public CodeAction getCodeAction() {
         CodeAction action = new CodeAction("Extract Method");
-        action.getCommand();
+        action.setCommand(new Command("Hello", "showDocument"));
         action.setEdit(getEdit());
 
         return action;
@@ -49,7 +45,6 @@ public class ExtractMethodActionProvider {
 
         removeEdit.setNewText("    extracted();");
         removeEdit.setRange(params.getRange());
-
 
 
         // Place at bottom

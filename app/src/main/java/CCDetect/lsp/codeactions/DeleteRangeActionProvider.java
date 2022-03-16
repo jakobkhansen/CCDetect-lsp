@@ -22,7 +22,6 @@ public class DeleteRangeActionProvider {
     }
 
     public CodeAction getCodeAction() {
-        System.err.println(params.getTextDocument().getUri());
         CodeAction action = new CodeAction("Delete range");
         action.getCommand();
         action.setEdit(getEdit());
@@ -39,8 +38,6 @@ public class DeleteRangeActionProvider {
 
         TextEdit textEdit = new TextEdit();
 
-        System.err.println(params.getRange().getStart().toString());
-        System.err.println(params.getRange().getEnd().toString());
         textEdit.setRange(params.getRange());
         textEdit.setNewText("");
         edits.add(textEdit);

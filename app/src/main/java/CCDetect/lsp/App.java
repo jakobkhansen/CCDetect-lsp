@@ -3,6 +3,8 @@
  */
 package CCDetect.lsp;
 
+import java.io.IOException;
+
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
@@ -10,9 +12,10 @@ import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
 
 import CCDetect.lsp.server.CCLanguageServer;
+import CCDetect.lsp.utils.CCFileStateLogger;
+import CCDetect.lsp.utils.CCGeneralLogger;
 
 public class App {
-
     public static Launcher<LanguageClient> createLauncher(LanguageServer server) {
         Launcher<LanguageClient> launcher = LSPLauncher.createServerLauncher(
             server,
@@ -25,10 +28,19 @@ public class App {
         return launcher;
     }
 
+    public static void setupLogging() {
+        try {
+            CCGeneralLogger.setup();
+            CCFileStateLogger.setup();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
-        LanguageServer server = new CCLanguageServer();
+        setupLogging();
+        LanguageServer server = CCLanguageServer.getInstance();
         Launcher<LanguageClient> launcher = createLauncher(server);
         launcher.startListening();
-
     }
 }

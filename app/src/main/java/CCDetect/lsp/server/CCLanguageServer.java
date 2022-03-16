@@ -1,12 +1,18 @@
 package CCDetect.lsp.server;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Logger;
+
 import org.eclipse.lsp4j.CompletionOptions;
+import org.eclipse.lsp4j.ExecuteCommandOptions;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
+import org.eclipse.lsp4j.MessageParams;
+import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
-import org.eclipse.lsp4j.WorkspaceFolder;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
@@ -15,15 +21,25 @@ import org.eclipse.lsp4j.services.WorkspaceService;
 
 public class CCLanguageServer implements LanguageServer, LanguageClientAware {
 
+    private static CCLanguageServer instance;
+
+    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
     private TextDocumentService textDocumentService;
     private WorkspaceService workspaceService;
     private int errorCode = 1;
-    LanguageClient client;
+    public LanguageClient client;
 
-    public CCLanguageServer() {
-        this.textDocumentService = new CCTextDocumentService(this);
+    private CCLanguageServer() {
+        this.textDocumentService = new CCTextDocumentService();
         this.workspaceService = new CCWorkspaceService();
     }
+
+    public void testShowMessage() {
+        // MessageParams params = new MessageParams(MessageType.Info, "Hello World");
+        // client.showMessage(params);
+    }
+
 
     @Override
     public CompletableFuture<InitializeResult> initialize(
@@ -43,6 +59,11 @@ public class CCLanguageServer implements LanguageServer, LanguageClientAware {
         initializeResult
             .getCapabilities()
             .setCompletionProvider(completionOptions);
+        initializeResult.getCapabilities().setTextDocumentSync(TextDocumentSyncKind.Full);
+        initializeResult.getCapabilities().setExecuteCommandProvider(new ExecuteCommandOptions(Arrays.asList(new String[]{"showDocument"})));
+
+        LOGGER.info("Server initialized");
+
         return CompletableFuture.supplyAsync(() -> initializeResult);
     }
 
@@ -62,6 +83,8 @@ public class CCLanguageServer implements LanguageServer, LanguageClientAware {
         return textDocumentService;
     }
 
+    
+
     @Override
     public WorkspaceService getWorkspaceService() {
         return workspaceService;
@@ -70,5 +93,13 @@ public class CCLanguageServer implements LanguageServer, LanguageClientAware {
     @Override
     public void connect(LanguageClient client) {
         this.client = client;
+    }
+
+    public static CCLanguageServer getInstance() {
+        if (instance == null) {
+            instance = new CCLanguageServer();
+        }
+
+        return instance;
     }
 }
