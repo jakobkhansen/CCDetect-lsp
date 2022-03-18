@@ -7,7 +7,7 @@ import CCDetect.lsp.CodeClone;
 /**
  * DocumentIndex
  */
-public interface DocumentIndex {
+public interface DocumentIndex extends Iterable<DocumentModel> {
 
     void indexProject();
     void updateDocument(String uri, DocumentModel updatedDocument);

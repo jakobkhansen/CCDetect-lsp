@@ -1,6 +1,5 @@
 package CCDetect.lsp.server;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
@@ -9,8 +8,6 @@ import org.eclipse.lsp4j.CompletionOptions;
 import org.eclipse.lsp4j.ExecuteCommandOptions;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
-import org.eclipse.lsp4j.MessageParams;
-import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.services.LanguageClient;
@@ -27,8 +24,8 @@ public class CCLanguageServer implements LanguageServer, LanguageClientAware {
 
     private CCTextDocumentService textDocumentService;
     private CCWorkspaceService workspaceService;
-    private int errorCode = 1;
     public LanguageClient client;
+    private int errorCode = 1;
 
     private CCLanguageServer() {
         this.textDocumentService = new CCTextDocumentService();
@@ -62,10 +59,11 @@ public class CCLanguageServer implements LanguageServer, LanguageClientAware {
         initializeResult.getCapabilities().setTextDocumentSync(TextDocumentSyncKind.Full);
         initializeResult.getCapabilities().setExecuteCommandProvider(new ExecuteCommandOptions(Arrays.asList(new String[]{"showDocument"})));
 
-        LOGGER.info("Server initialized");
+        // Initialize index and detector
         String rootUri = params.getWorkspaceFolders().get(0).getUri();
+        textDocumentService.initialize(rootUri);
 
-        textDocumentService.createIndex(rootUri);
+        LOGGER.info("Server initialized");
 
         return CompletableFuture.supplyAsync(() -> initializeResult);
     }

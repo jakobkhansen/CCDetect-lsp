@@ -1,17 +1,22 @@
 package CCDetect.lsp.codeactions;
 
-import java.util.logging.Logger;
-
-import org.eclipse.lsp4j.ExecuteCommandParams;
-import org.eclipse.lsp4j.ShowDocumentParams;
-
 import CCDetect.lsp.server.CCLanguageServer;
+import CCDetect.lsp.utils.JSONUtility;
+import java.util.List;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import org.eclipse.lsp4j.ExecuteCommandParams;
+import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.ShowDocumentParams;
 
 /**
  * CommandHandler
  */
 public class CommandHandler {
-    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
+    private static final Logger LOGGER = Logger.getLogger(
+        Logger.GLOBAL_LOGGER_NAME
+    );
     private final ExecuteCommandParams command;
 
     public CommandHandler(ExecuteCommandParams command) {
@@ -19,20 +24,41 @@ public class CommandHandler {
     }
 
     public void execute() {
+        LOGGER.info(command.getCommand());
         switch (command.getCommand()) {
             case "showDocument":
-                executeShowDocument();
+                executeShowDocument(command);
                 break;
-
             default:
                 break;
         }
     }
 
-    private void executeShowDocument() {
-        LOGGER.info("executeShowDocument");
-        ShowDocumentParams params = new ShowDocumentParams("file:///home/jakob/CompilaServerTest/test02.cmp");
-        params.setTakeFocus(true);
-        CCLanguageServer.getInstance().client.showDocument(params);
+    private void executeShowDocument(ExecuteCommandParams command) {
+        try {
+            List<Object> args = command
+                .getArguments()
+                .stream()
+                .map(element -> {
+                    return JSONUtility.toModel(element, Object.class);
+                })
+                .collect(Collectors.toList());
+
+            String uri = JSONUtility.toModel(args.get(0), String.class);
+            Range range = JSONUtility.toModel(args.get(1), Range.class);
+
+            LOGGER.info(uri.toString());
+            LOGGER.info(range.toString());
+
+            ShowDocumentParams params = new ShowDocumentParams(uri);
+            params.setSelection(range);
+            params.setTakeFocus(true);
+            LOGGER.info("Sending command");
+
+            CCLanguageServer.getInstance().client.showDocument(params);
+        } catch (Exception e) {
+            LOGGER.info(e.getMessage());
+            LOGGER.info("FUCK");
+        }
     }
 }

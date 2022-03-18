@@ -33,10 +33,12 @@ public class DocumentModel {
         }
     }
 
+    private final String uri;
     private final List<DocumentLine> lines = new ArrayList<>();
     private List<CodeClone> clones;
 
-    public DocumentModel(String text) {
+    public DocumentModel(String uri, String text) {
+        this.uri = uri;
         try (
             Reader r = new StringReader(text);
             BufferedReader reader = new BufferedReader(r);
@@ -55,6 +57,10 @@ public class DocumentModel {
 
     public List<DocumentLine> getLines() {
         return lines;
+    }
+
+    public String getUri() {
+        return uri;
     }
 
     public List<DocumentLine> getLinesInRange(Range range) {
@@ -78,6 +84,19 @@ public class DocumentModel {
 
         return linesString.toString();
     }
+
+    public void setClones(List<CodeClone> clones) {
+        this.clones = clones;
+    }
+
+    public void addClone(CodeClone clone) {
+        this.clones.add(clone);
+    }
+
+    public List<CodeClone> getClones() {
+        return this.clones;
+    }
+
 
     public String toString() {
         StringBuilder out = new StringBuilder();

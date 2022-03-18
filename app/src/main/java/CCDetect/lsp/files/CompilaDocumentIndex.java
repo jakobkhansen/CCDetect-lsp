@@ -1,6 +1,5 @@
 package CCDetect.lsp.files;
 
-import CCDetect.lsp.CodeClone;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URI;
@@ -11,11 +10,13 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
+import CCDetect.lsp.CodeClone;
 
 /**
  * DocumentIndex
@@ -47,7 +48,7 @@ public class CompilaDocumentIndex implements DocumentIndex {
             if (documentContent != null) {
                 documents.put(
                     p.toUri().toString(),
-                    new DocumentModel(documentContent)
+                    new DocumentModel(p.toUri().toString(), documentContent)
                 );
             }
         }
@@ -103,7 +104,6 @@ public class CompilaDocumentIndex implements DocumentIndex {
     @Override
     public void updateDocument(String uri, DocumentModel updatedDocument) {
         documents.put(uri, updatedDocument);
-        
     }
 
     @Override
@@ -113,8 +113,19 @@ public class CompilaDocumentIndex implements DocumentIndex {
 
     @Override
     public void updateClones(List<CodeClone> clones) {
-        // TODO Auto-generated method stub
+        for (DocumentModel doc : documents.values()) {
+            doc.setClones(new ArrayList<>());
+        }
 
+        for (CodeClone clone : clones) {
+            documents.get(clone.getUri()).addClone(clone);
+        }
+
+    }
+
+    @Override
+    public Iterator<DocumentModel> iterator() {
+        return documents.values().iterator();
     }
 
 }
