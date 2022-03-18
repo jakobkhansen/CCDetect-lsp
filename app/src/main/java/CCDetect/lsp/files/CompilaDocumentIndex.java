@@ -1,20 +1,37 @@
 package CCDetect.lsp.files;
 
+import CCDetect.lsp.CodeClone;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import CCDetect.lsp.CodeClone;
+import java.util.Objects;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * DocumentIndex
  */
 public class CompilaDocumentIndex implements DocumentIndex {
-    Map<String, DocumentModel> documents = Collections.synchronizedMap(new HashMap<>());
+
+    private static final Logger LOGGER = Logger.getLogger(
+        Logger.GLOBAL_LOGGER_NAME
+    );
+    private static final Logger FILE_LOGGER = Logger.getLogger(
+        "CCFileStateLogger"
+    );
+
+    Map<String, DocumentModel> documents = Collections.synchronizedMap(
+        new HashMap<>()
+    );
     String rootUri;
 
     public CompilaDocumentIndex(String rootUri) {
@@ -23,21 +40,70 @@ public class CompilaDocumentIndex implements DocumentIndex {
 
     @Override
     public void indexProject() {
-        // TODO Auto-generated method stub
+        List<Path> filePaths = getFilePathsInProject();
+        LOGGER.info("Indexing files");
+        for (Path p : filePaths) {
+            String documentContent = getDocumentContent(p);
+            if (documentContent != null) {
+                documents.put(
+                    p.toUri().toString(),
+                    new DocumentModel(documentContent)
+                );
+            }
+        }
+        for (DocumentModel doc : documents.values()) {
+            LOGGER.info(doc.toString());
+            FILE_LOGGER.info(doc.toString());
+        }
     }
 
-    private List<String> getFilePathsInProject() {
-        List<String> filePaths = new ArrayList<>();
-        
+    private List<Path> getFilePathsInProject() {
+        List<Path> filePaths = new ArrayList<>();
+
         try {
             URI uri = new URI(rootUri);
-        } catch (URISyntaxException e) {
-
+            filePaths =
+                Files
+                    .find(
+                        Paths.get(uri),
+                        Integer.MAX_VALUE,
+                        (filePath, fileAttr) ->
+                            (
+                                fileAttr.isRegularFile() ||
+                                fileAttr.isDirectory()
+                            ) &&
+                            com.google.common.io.Files
+                                .getFileExtension(filePath.toString())
+                                .equals("cmp")
+                    )
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
-
         return filePaths;
+    }
+
+    private String getDocumentContent(Path file) {
+        try (
+            BufferedReader reader = Files.newBufferedReader(
+                file,
+                Charset.forName("UTF-8")
+            )
+        ) {
+            String content = reader.lines().collect(Collectors.joining("\n"));
+            return content;
+        } catch (IOException ex) {
+            ex.printStackTrace(); //handle an exception here
+        }
+
+        return null;
+    }
+
+    @Override
+    public void updateDocument(String uri, DocumentModel updatedDocument) {
+        documents.put(uri, updatedDocument);
+        
     }
 
     @Override
@@ -48,9 +114,7 @@ public class CompilaDocumentIndex implements DocumentIndex {
     @Override
     public void updateClones(List<CodeClone> clones) {
         // TODO Auto-generated method stub
-        
+
     }
 
-    
-    
 }

@@ -36,8 +36,6 @@ public class DocumentModel {
     private final List<DocumentLine> lines = new ArrayList<>();
     private List<CodeClone> clones;
 
-
-
     public DocumentModel(String text) {
         try (
             Reader r = new StringReader(text);
@@ -73,14 +71,20 @@ public class DocumentModel {
         List<DocumentLine> rangeLines = lines.subList(startLine, endLine+1);
         StringBuilder linesString = new StringBuilder();
 
-        linesString.append("\nprocedure extracted()");
-        linesString.append("\nbegin");
         for (DocumentLine line : rangeLines) {
             linesString.append("\n" + line.toString());
         }
-        linesString.append("\nend");
 
 
         return linesString.toString();
+    }
+
+    public String toString() {
+        StringBuilder out = new StringBuilder();
+        for (DocumentLine line : lines) {
+            out.append(line + "\n");
+        }
+
+        return out.toString();
     }
 }

@@ -25,8 +25,8 @@ public class CCLanguageServer implements LanguageServer, LanguageClientAware {
 
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-    private TextDocumentService textDocumentService;
-    private WorkspaceService workspaceService;
+    private CCTextDocumentService textDocumentService;
+    private CCWorkspaceService workspaceService;
     private int errorCode = 1;
     public LanguageClient client;
 
@@ -63,6 +63,9 @@ public class CCLanguageServer implements LanguageServer, LanguageClientAware {
         initializeResult.getCapabilities().setExecuteCommandProvider(new ExecuteCommandOptions(Arrays.asList(new String[]{"showDocument"})));
 
         LOGGER.info("Server initialized");
+        String rootUri = params.getWorkspaceFolders().get(0).getUri();
+
+        textDocumentService.createIndex(rootUri);
 
         return CompletableFuture.supplyAsync(() -> initializeResult);
     }

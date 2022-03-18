@@ -34,6 +34,8 @@ import org.eclipse.lsp4j.services.TextDocumentService;
 import CCDetect.lsp.codeactions.DeleteRangeActionProvider;
 import CCDetect.lsp.codeactions.ExtractMethodActionProvider;
 import CCDetect.lsp.codeactions.JumpToDocumentActionProvider;
+import CCDetect.lsp.files.CompilaDocumentIndex;
+import CCDetect.lsp.files.DocumentIndex;
 import CCDetect.lsp.files.DocumentModel;
 
 /**
@@ -43,8 +45,13 @@ public class CCTextDocumentService implements TextDocumentService {
     // URI -> TextDocumentItem
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     private final static Logger FILE_LOGGER = Logger.getLogger("CCFileStateLogger");
-    private final Map<String, DocumentModel> docs = Collections.synchronizedMap(new HashMap<>());
+    private DocumentIndex index;
 
+
+    public void createIndex(String rootUri) {
+        index = new CompilaDocumentIndex(rootUri);
+        index.indexProject();
+    }
 
     @Override
     public CompletableFuture<Either<List<CompletionItem>, CompletionList>> completion(
@@ -89,7 +96,7 @@ public class CCTextDocumentService implements TextDocumentService {
             try {
                 LOGGER.info("codeAction called");
                 LOGGER.info(params.getRange().toString());
-                DocumentModel document = docs.get(params.getTextDocument().getUri());
+                DocumentModel document = index.getDocument(params.getTextDocument().getUri());
 
                 DeleteRangeActionProvider deleteRangeProvider = new DeleteRangeActionProvider(params, document);
                 ExtractMethodActionProvider extractProvider = new ExtractMethodActionProvider(params, document);
@@ -111,9 +118,8 @@ public class CCTextDocumentService implements TextDocumentService {
 
     @Override
     public void didOpen(DidOpenTextDocumentParams params) {
-        LOGGER.info(params.getTextDocument().getUri());
         DocumentModel model = new DocumentModel(params.getTextDocument().getText());
-        docs.put(params.getTextDocument().getUri(), model);
+        index.updateDocument(params.getTextDocument().getUri(), model);
 
         testDiagnostic(params.getTextDocument().getUri());
     }
@@ -124,9 +130,8 @@ public class CCTextDocumentService implements TextDocumentService {
         CCLanguageServer.getInstance().testShowMessage();
 
         TextDocumentContentChangeEvent lastChange = params.getContentChanges().get(params.getContentChanges().size()-1);
-        FILE_LOGGER.info(lastChange.getText());
         DocumentModel model = new DocumentModel(lastChange.getText());
-        this.docs.put(params.getTextDocument().getUri(), model);
+        index.updateDocument(params.getTextDocument().getUri(), model);
         
         testDiagnostic(params.getTextDocument().getUri());
     }

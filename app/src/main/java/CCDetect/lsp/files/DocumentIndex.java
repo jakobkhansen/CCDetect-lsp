@@ -10,6 +10,7 @@ import CCDetect.lsp.CodeClone;
 public interface DocumentIndex {
 
     void indexProject();
+    void updateDocument(String uri, DocumentModel updatedDocument);
     DocumentModel getDocument(String uri);
     void updateClones(List<CodeClone> clones);
 }

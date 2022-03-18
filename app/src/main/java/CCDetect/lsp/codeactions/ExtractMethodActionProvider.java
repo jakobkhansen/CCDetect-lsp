@@ -26,7 +26,6 @@ public class ExtractMethodActionProvider {
 
     public CodeAction getCodeAction() {
         CodeAction action = new CodeAction("Extract Method");
-        action.setCommand(new Command("Hello", "showDocument"));
         action.setEdit(getEdit());
 
         return action;
@@ -49,7 +48,12 @@ public class ExtractMethodActionProvider {
 
         // Place at bottom
         TextEdit placeEdit = new TextEdit();
-        placeEdit.setNewText(document.getLineTextInRange(params.getRange()));
+        StringBuilder newProcedureText = new StringBuilder();
+        newProcedureText.append("\nprocedure extracted");
+        newProcedureText.append("\nbegin");
+        newProcedureText.append(document.getLineTextInRange(params.getRange()));
+        newProcedureText.append("\nend");
+        placeEdit.setNewText(newProcedureText.toString());
         Position lastLine = new Position(document.getLines().size(), 0);
 
         placeEdit.setRange(new Range(lastLine, lastLine));
