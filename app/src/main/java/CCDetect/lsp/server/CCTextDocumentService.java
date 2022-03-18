@@ -34,6 +34,7 @@ import org.eclipse.lsp4j.services.TextDocumentService;
 import CCDetect.lsp.codeactions.DeleteRangeActionProvider;
 import CCDetect.lsp.codeactions.ExtractMethodActionProvider;
 import CCDetect.lsp.codeactions.JumpToDocumentActionProvider;
+import CCDetect.lsp.files.DocumentModel;
 
 /**
  * CCTextDocumentService

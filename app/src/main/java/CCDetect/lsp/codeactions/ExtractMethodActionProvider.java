@@ -12,7 +12,7 @@ import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceEdit;
 
-import CCDetect.lsp.server.DocumentModel;
+import CCDetect.lsp.files.DocumentModel;
 
 public class ExtractMethodActionProvider {
     CodeActionParams params;

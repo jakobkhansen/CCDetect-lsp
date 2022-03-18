@@ -9,8 +9,8 @@ import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceEdit;
 
-import CCDetect.lsp.server.DocumentModel;
-import CCDetect.lsp.server.DocumentModel.DocumentLine;
+import CCDetect.lsp.files.DocumentModel;
+import CCDetect.lsp.files.DocumentModel.DocumentLine;
 
 public class DeleteRangeActionProvider {
     CodeActionParams params;
