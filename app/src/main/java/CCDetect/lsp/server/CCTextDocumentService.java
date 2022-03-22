@@ -22,10 +22,8 @@ import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.TextDocumentService;
 
 import CCDetect.lsp.CodeClone;
+import CCDetect.lsp.codeactions.CodeActionProvider;
 import CCDetect.lsp.codeactions.CodeCloneJumpProvider;
-import CCDetect.lsp.codeactions.DeleteRangeActionProvider;
-import CCDetect.lsp.codeactions.ExtractMethodActionProvider;
-import CCDetect.lsp.codeactions.JumpToDocumentActionProvider;
 import CCDetect.lsp.detection.CloneDetector;
 import CCDetect.lsp.detection.MockDetector;
 import CCDetect.lsp.diagnostics.DiagnosticsPublisher;
@@ -63,20 +61,10 @@ public class CCTextDocumentService implements TextDocumentService {
         CodeActionParams params
     ) {
         return CompletableFuture.supplyAsync(() -> {
-            List<Either<Command, CodeAction>> codeActions = new ArrayList<>();
-            try {
-                LOGGER.info("codeAction");
-                DocumentModel document = index.getDocument(params.getTextDocument().getUri());
-                Range range = params.getRange();
+            DocumentModel document = index.getDocument(params.getTextDocument().getUri());
+            Range range = params.getRange();
 
-                CodeAction jumpAction = CodeCloneJumpProvider.createJumpAction(document, range);
-
-                if (jumpAction != null) {
-                    codeActions.add(Either.forRight(jumpAction));
-                }
-            } catch (Exception e) {}
-
-            return codeActions;
+            return CodeActionProvider.createCodeActions(document, range);
         });
     }
 
@@ -118,22 +106,5 @@ public class CCTextDocumentService implements TextDocumentService {
 
     public void updateDiagnostics() {
         DiagnosticsPublisher.publishCloneDiagnosticsFromIndex(index);
-    }
-
-    // TODO Remove
-    public void testDiagnostic(String uri) {
-        List<Diagnostic> diagnostics = new ArrayList<>();
-        Range range1 = new Range(new Position(0, 0), new Position(0,11));
-        Range range2 = new Range(new Position(1, 0), new Position(1,5));
-        Diagnostic diagnostic1 = new Diagnostic(range1, "This is a diagnostic");
-        Diagnostic diagnostic2 = new Diagnostic(range2, "This is a warning", DiagnosticSeverity.Warning, "source");
-        diagnostics.add(diagnostic1);
-        diagnostics.add(diagnostic2);
-        CompletableFuture.runAsync(() ->
-			CCLanguageServer.getInstance().client.publishDiagnostics(
-				new PublishDiagnosticsParams(uri, diagnostics)
-			)
-		);
-
     }
 }

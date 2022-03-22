@@ -24,9 +24,6 @@ public class CodeCloneJumpProvider {
 
     public static CodeAction createJumpAction(DocumentModel document, Range range) {
         for (CodeClone clone : document.getClones()) {
-            LOGGER.info("Clone in doc");
-            LOGGER.info("Clone range: " + clone.getRange().toString());
-
             if (clone.isInRange(range)) {
                 CodeClone otherClone = clone.getPairMatch();
                 CodeAction action = new CodeAction("Jump to matching clone");
