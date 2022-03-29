@@ -8,6 +8,10 @@ import java.util.logging.Logger;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.Command;
+import org.eclipse.lsp4j.CompletionItem;
+import org.eclipse.lsp4j.CompletionItemKind;
+import org.eclipse.lsp4j.CompletionList;
+import org.eclipse.lsp4j.CompletionParams;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
@@ -53,6 +57,38 @@ public class CCTextDocumentService implements TextDocumentService {
 
     public void createDetector() {
         detector = new MockDetector();
+    }
+
+    @Override
+    public CompletableFuture<Either<List<CompletionItem>, CompletionList>> completion(CompletionParams position) {
+        return CompletableFuture.supplyAsync(() -> {
+            List<CompletionItem> completionItems = new ArrayList<>();
+            try {
+                // Sample Completion item for sayHello
+                CompletionItem completionItem = new CompletionItem();
+                // Define the text to be inserted in to the file if the completion item is selected.
+                completionItem.setInsertText(
+                    "sayHello() {\n    print(\"hello\")\n}"
+                );
+                // Set the label that shows when the completion drop down appears in the Editor.
+                completionItem.setLabel("sayHello()");
+                // Set the completion kind. This is a snippet.
+                // That means it replace character which trigger the completion and
+                // replace it with what defined in inserted text.
+                completionItem.setKind(CompletionItemKind.Snippet);
+                // This will set the details for the snippet code which will help user to
+                // understand what this completion item is.
+                completionItem.setDetail(
+                    "sayHello()\n this will say hello to the people"
+                );
+
+                // Add the sample completion item to the list.
+                completionItems.add(completionItem);
+            } catch (Exception e) {}
+
+            // Return the list of completion items.
+            return Either.forLeft(completionItems);
+        });
     }
 
 
