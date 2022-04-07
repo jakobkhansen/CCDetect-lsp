@@ -30,6 +30,7 @@ import CCDetect.lsp.codeactions.CodeActionProvider;
 import CCDetect.lsp.codeactions.CodeCloneJumpProvider;
 import CCDetect.lsp.detection.CloneDetector;
 import CCDetect.lsp.detection.MockDetector;
+import CCDetect.lsp.detection.tokenbased.RealTimeHybridDetector;
 import CCDetect.lsp.diagnostics.DiagnosticsPublisher;
 import CCDetect.lsp.files.CompilaDocumentIndex;
 import CCDetect.lsp.files.DocumentIndex;
@@ -56,7 +57,7 @@ public class CCTextDocumentService implements TextDocumentService {
     }
 
     public void createDetector() {
-        detector = new MockDetector();
+        detector = new RealTimeHybridDetector();
     }
 
     @Override

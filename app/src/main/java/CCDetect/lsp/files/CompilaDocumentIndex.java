@@ -42,7 +42,6 @@ public class CompilaDocumentIndex implements DocumentIndex {
     @Override
     public void indexProject() {
         List<Path> filePaths = getFilePathsInProject();
-        LOGGER.info("Indexing files");
         for (Path p : filePaths) {
             String documentContent = getDocumentContent(p);
             if (documentContent != null) {
@@ -51,10 +50,6 @@ public class CompilaDocumentIndex implements DocumentIndex {
                     new DocumentModel(p.toUri().toString(), documentContent)
                 );
             }
-        }
-        for (DocumentModel doc : documents.values()) {
-            LOGGER.info(doc.toString());
-            FILE_LOGGER.info(doc.toString());
         }
     }
 

@@ -16,6 +16,7 @@ import CCDetect.lsp.utils.CCFileStateLogger;
 import CCDetect.lsp.utils.CCGeneralLogger;
 
 public class App {
+
     public static Launcher<LanguageClient> createLauncher(LanguageServer server) {
         Launcher<LanguageClient> launcher = LSPLauncher.createServerLauncher(
             server,
