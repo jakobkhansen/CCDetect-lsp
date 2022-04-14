@@ -13,26 +13,6 @@ import CCDetect.lsp.CodeClone;
 
 public class DocumentModel {
 
-    public static class DocumentLine {
-
-        final int line;
-        final String text;
-
-        public DocumentLine(int line, String text) {
-            this.line = line;
-            this.text = text;
-        }
-
-        public String getInRange(int start, int end) {
-            return text.substring(start, end);
-        }
-
-        @Override
-        public String toString() {
-            return text;
-        }
-    }
-
     private final String uri;
     private final List<DocumentLine> lines = new ArrayList<>();
     private List<CodeClone> clones;
@@ -46,7 +26,7 @@ public class DocumentModel {
             String lineText;
             int lineNumber = 0;
             while ((lineText = reader.readLine()) != null) {
-                DocumentLine line = new DocumentLine(lineNumber, lineText);
+                DocumentLine line = new DocumentLine(uri, lineNumber, lineText);
                 lines.add(line);
                 lineNumber++;
             }

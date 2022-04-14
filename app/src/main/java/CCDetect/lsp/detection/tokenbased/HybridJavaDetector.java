@@ -3,6 +3,7 @@ package CCDetect.lsp.detection.tokenbased;
 import CCDetect.lsp.CodeClone;
 import CCDetect.lsp.detection.CloneDetector;
 import CCDetect.lsp.files.DocumentIndex;
+import CCDetect.lsp.files.DocumentLine;
 import CCDetect.lsp.files.DocumentModel;
 import CCDetect.lsp.utils.RangeConverter;
 import com.github.javaparser.JavaParser;
@@ -24,7 +25,7 @@ import org.eclipse.lsp4j.Range;
 /**
  * RealTimeHybridDetector
  */
-public class RealTimeHybridDetector implements CloneDetector {
+public class HybridJavaDetector implements CloneDetector {
 
     List<CodeClone> clones = new ArrayList<>();
     JavaParser parser = new JavaParser();
@@ -38,35 +39,53 @@ public class RealTimeHybridDetector implements CloneDetector {
         return clones;
     }
 
+    // Runs every time index changes
     @Override
     public void onIndexChange(DocumentIndex index) {
         clones = new ArrayList<>();
+        LimeEngine matchingEngine = new LimeEngine();
         LOGGER.info("onIndexChange");
+
+        // Contains tokens for each file
         HashMap<DocumentModel, List<JavaToken>> tokensPerFile = new HashMap<>();
+
+        // Contains lines of tokens per file
+        HashMap<DocumentModel, List<DocumentLine>> linesPerFile = new HashMap<>();
+
         for (DocumentModel document : index) {
-            tokensPerFile.put(document, getTokensFromFile(document));
+            tokensPerFile.put(document, getTokensFromDocument(document));
         }
 
         for (DocumentModel document : index) {
-            clones.add(
-                tokensToClone(
-                    document,
-                    tokensPerFile.get(document).get(0),
-                    tokensPerFile.get(document).get(3)
-                )
+            linesPerFile.put(
+                document,
+                getLinesFromTokens(document, tokensPerFile.get(document))
             );
         }
+
+        for (DocumentModel document : index) {
+            List<DocumentLine> linesForDocument = linesPerFile.get(document);
+            matchingEngine.addDocumentLines(document, linesForDocument);
+        }
+
+        LOGGER.info(matchingEngine.toString());
     }
 
-    public List<JavaToken> getTokensFromFile(DocumentModel document) {
+    // Get the AST of a document
+    private CompilationUnit getASTFromDocument(DocumentModel document) {
         JavaParser parser = new JavaParser();
 
         String sourceCode = document.toString();
 
         ParseResult<CompilationUnit> cu = parser.parse(sourceCode);
         CompilationUnit res = cu.getResult().orElse(null);
+        return res;
+    }
 
+    public List<JavaToken> getTokensFromDocument(DocumentModel document) {
         List<JavaToken> tokens = new ArrayList<>();
+
+        CompilationUnit res = getASTFromDocument(document);
 
         res
             .findRootNode()
@@ -87,35 +106,33 @@ public class RealTimeHybridDetector implements CloneDetector {
     }
 
     private boolean filterToken(JavaToken token) {
-        return (
-            token.getCategory() != Category.WHITESPACE_NO_EOL &&
-            token.getCategory() != Category.EOL
-        );
+        return (token.getCategory() != Category.WHITESPACE_NO_EOL);
     }
 
-    private CodeClone tokensToClone(
+    private List<DocumentLine> getLinesFromTokens(
         DocumentModel document,
-        JavaToken startToken,
-        JavaToken endToken
+        List<JavaToken> tokens
     ) {
-        // TODO Convert between JavaParser Range and LSP4J Range
-        RangeConverter converter = new RangeConverter();
-        LOGGER.info("Tokens in clone:");
+        List<DocumentLine> lines = new ArrayList<>();
 
-        com.github.javaparser.Range firstTokenRange = startToken
-            .getRange()
-            .orElse(null);
-        com.github.javaparser.Range lastTokenRange = endToken
-            .getRange()
-            .orElse(null);
+        int lineNumber = 0;
+        StringBuilder currentLine = new StringBuilder();
+        for (JavaToken token : tokens) {
+            if (token.getCategory() == Category.EOL) {
+                lines.add(
+                    new DocumentLine(
+                        document.getUri(),
+                        lineNumber,
+                        currentLine.toString()
+                    )
+                );
+                currentLine = new StringBuilder();
+                lineNumber++;
+            } else {
+                currentLine.append(token.getText());
+            }
+        }
 
-        com.github.javaparser.Range newRange = new com.github.javaparser.Range(
-            firstTokenRange.begin,
-            lastTokenRange.end
-        );
-
-        Range lspRange = converter.convertFromRight(newRange);
-
-        return new CodeClone(document.getUri(), lspRange);
+        return lines;
     }
 }
