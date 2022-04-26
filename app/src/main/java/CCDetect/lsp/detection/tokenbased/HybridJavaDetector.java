@@ -56,7 +56,9 @@ public class HybridJavaDetector implements CloneDetector {
         // getFileLines(index, matchingEngine);
 
         // Adds methods to engine
-        HashMap<DocumentModel, List<DocumentMethod>> methods = extractMethodsFromIndex(index);
+        HashMap<DocumentModel, List<DocumentMethod>> methods = extractMethodsFromIndex(
+            index
+        );
 
         for (DocumentModel document : methods.keySet()) {
             for (DocumentMethod method : methods.get(document)) {
@@ -68,11 +70,16 @@ public class HybridJavaDetector implements CloneDetector {
         clones = matchingEngine.match();
     }
 
-    private HashMap<DocumentModel, List<DocumentMethod>> extractMethodsFromIndex(DocumentIndex index) {
+    private HashMap<DocumentModel, List<DocumentMethod>> extractMethodsFromIndex(
+        DocumentIndex index
+    ) {
         HashMap<DocumentModel, List<DocumentMethod>> methodsPerDocument = new HashMap<>();
 
         for (DocumentModel document : index) {
-            methodsPerDocument.put(document, extractMethodsFromDocument(document));
+            methodsPerDocument.put(
+                document,
+                extractMethodsFromDocument(document)
+            );
         }
 
         return methodsPerDocument;
@@ -84,6 +91,12 @@ public class HybridJavaDetector implements CloneDetector {
         List<DocumentMethod> methods = new ArrayList<>();
 
         CompilationUnit ast = getASTFromDocument(document);
+
+        LOGGER.info(ast.findRootNode().getTokenRange().toString());
+
+        LOGGER.info(
+            "Num Methods: " + ast.findAll(MethodDeclaration.class).size()
+        );
 
         ast
             .findAll(MethodDeclaration.class)
@@ -106,9 +119,15 @@ public class HybridJavaDetector implements CloneDetector {
                                                     tokens
                                                 )
                                             );
+
                                         List<DocumentLine> lines = getLinesFromTokens(
                                             document,
-                                            tokens
+                                            tokens,
+                                            t
+                                                .getBegin()
+                                                .getRange()
+                                                .get()
+                                                .begin.line
                                         );
                                         methods.add(new DocumentMethod(lines));
                                     }
@@ -119,33 +138,6 @@ public class HybridJavaDetector implements CloneDetector {
             );
         return methods;
     }
-
-    // TODO DELETE IF NOT NEEDED
-    // private void getFileLines(DocumentIndex index, LimeEngine matchingEngine) {
-    //     // Contains tokens for each file
-    //     HashMap<DocumentModel, List<JavaToken>> tokensPerFile = new HashMap<>();
-    //
-    //     // Contains lines of tokens per file
-    //     HashMap<DocumentModel, List<DocumentLine>> linesPerFile = new HashMap<>();
-    //
-    //     for (DocumentModel document : index) {
-    //         tokensPerFile.put(document, getTokensFromDocument(document));
-    //     }
-    //
-    //     for (DocumentModel document : index) {
-    //         linesPerFile.put(
-    //             document,
-    //             getLinesFromTokens(document, tokensPerFile.get(document))
-    //         );
-    //     }
-    //
-    //     for (DocumentModel document : index) {
-    //         List<DocumentLine> linesForDocument = linesPerFile.get(document);
-    //         matchingEngine.addMethod(document, linesForDocument);
-    //     }
-    //
-    //     LOGGER.info(matchingEngine.toString());
-    // }
 
     // Get the AST of a document
     private CompilationUnit getASTFromDocument(DocumentModel document) {
@@ -187,23 +179,25 @@ public class HybridJavaDetector implements CloneDetector {
 
     private List<DocumentLine> getLinesFromTokens(
         DocumentModel document,
-        List<JavaToken> tokens
+        List<JavaToken> tokens,
+        int lineOffset
     ) {
         List<DocumentLine> lines = new ArrayList<>();
 
-        int lineNumber = 0;
+        LOGGER.info("Hello?");
         StringBuilder currentLine = new StringBuilder();
         for (JavaToken token : tokens) {
+            LOGGER.info(token.getText());
             if (token.getCategory() == Category.EOL) {
                 lines.add(
                     new DocumentLine(
                         document.getUri(),
-                        lineNumber,
+                        lineOffset,
                         currentLine.toString()
                     )
                 );
                 currentLine = new StringBuilder();
-                lineNumber++;
+                lineOffset++;
             } else {
                 currentLine.append(token.getText());
             }
