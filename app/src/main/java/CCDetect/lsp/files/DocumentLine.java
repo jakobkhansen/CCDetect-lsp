@@ -18,6 +18,6 @@ public class DocumentLine {
 
     @Override
     public String toString() {
-        return "Line: " + text + "\nLineNumber: " + line;
+        return text;
     }
 }

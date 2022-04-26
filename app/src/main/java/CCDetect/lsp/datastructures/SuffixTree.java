@@ -200,7 +200,6 @@ public class SuffixTree {
             for (Node child : internal.children) {
                 matchPositions.add(child.position);
             }
-            matchPositions.add(internal.position);
             matches.add(new Match(length, matchPositions));
         }
 
@@ -208,7 +207,7 @@ public class SuffixTree {
     }
 
     public static void main(String[] args) {
-        String input = "1234#5234#";
+        String input = "0123456AA$012784569AA#";
         SuffixTree tree = new SuffixTree(input);
         
         System.out.println(tree);
@@ -217,6 +216,7 @@ public class SuffixTree {
             for (Node child : internal.children) {
                 System.out.println(child.position);
             }
+            System.out.println();
         }
     }
 

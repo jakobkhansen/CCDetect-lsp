@@ -19,10 +19,4 @@ public class DocumentMethod {
         this.lines = lines;
     }
 
-
-    @Override
-    public String toString() {
-        // TODO Auto-generated method stub
-        return super.toString();
-    }
 }
