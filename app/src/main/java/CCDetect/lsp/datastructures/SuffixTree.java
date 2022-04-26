@@ -200,6 +200,7 @@ public class SuffixTree {
             for (Node child : internal.children) {
                 matchPositions.add(child.position);
             }
+            matchPositions.add(internal.position);
             matches.add(new Match(length, matchPositions));
         }
 

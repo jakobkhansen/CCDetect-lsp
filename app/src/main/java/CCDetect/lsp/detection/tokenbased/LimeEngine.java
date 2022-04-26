@@ -1,18 +1,16 @@
 package CCDetect.lsp.detection.tokenbased;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.logging.Logger;
-
-import org.eclipse.lsp4j.Position;
-import org.eclipse.lsp4j.Range;
-
 import CCDetect.lsp.CodeClone;
 import CCDetect.lsp.datastructures.SuffixTree;
 import CCDetect.lsp.datastructures.SuffixTree.Match;
 import CCDetect.lsp.files.DocumentLine;
 import CCDetect.lsp.files.DocumentModel;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.logging.Logger;
+import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.Range;
 
 /**
  * LimeEngine
@@ -31,6 +29,7 @@ import CCDetect.lsp.files.DocumentModel;
    Plan is to take all lines, fingerprint them (to integer) and put them in a suffix tree. From
 */
 public class LimeEngine {
+
     private static final Logger LOGGER = Logger.getLogger(
         Logger.GLOBAL_LOGGER_NAME
     );
@@ -45,20 +44,25 @@ public class LimeEngine {
     // Map from index in fingerprint list back to line
     HashMap<Integer, DocumentLine> indexToLineMapping = new HashMap<>();
 
-
     // Fingerprint for all files/methods/... (granularity)
     StringBuilder fingerprint = new StringBuilder();
 
     int lineFingerprintCounter = 1;
 
     public void addMethod(DocumentModel document, DocumentMethod method) {
-        List<DocumentMethod> methods = methodsInDocument.getOrDefault(document, new ArrayList<>());
+        List<DocumentMethod> methods = methodsInDocument.getOrDefault(
+            document,
+            new ArrayList<>()
+        );
         methods.add(method);
         methodsInDocument.put(document, methods);
 
         for (DocumentLine line : method.getLines()) {
             if (!lineToIntegerMapping.containsKey(line.toString())) {
-                lineToIntegerMapping.put(line.toString(), lineFingerprintCounter);
+                lineToIntegerMapping.put(
+                    line.toString(),
+                    lineFingerprintCounter
+                );
                 lineFingerprintCounter++;
             }
             int lineFingerprint = lineToIntegerMapping.get(line.toString());
@@ -75,31 +79,29 @@ public class LimeEngine {
 
         List<Match> matches = tree.getMatches(LINE_MATCH_THRESHOLD);
 
-        LOGGER.info("" + matches.size());
         for (Match match : matches) {
-            LOGGER.info("Match found with length: " + match.length);
             List<CodeClone> cloneMatches = new ArrayList<>();
             for (int pos : match.positions) {
-                LOGGER.info("Match at line: ");
                 List<DocumentLine> lines = new ArrayList<>();
-                for (int i = pos; i < pos+match.length; i++) {
+                for (int i = pos; i < pos + match.length; i++) {
                     if (fingerprint.charAt(i) != '#') {
-                        LOGGER.info("" + indexToLineMapping.get(i));
                         lines.add(indexToLineMapping.get(i));
                     }
                 }
 
                 DocumentLine firstLine = lines.get(0);
-                DocumentLine lastLine = lines.get(lines.size()-1);
-                Range range = new Range(new Position(firstLine.line, 0), new Position(lastLine.line, lastLine.text.length()-1));
+                DocumentLine lastLine = lines.get(lines.size() - 1);
+                Range range = new Range(
+                    new Position(firstLine.line-1, 0),
+                    new Position(lastLine.line-1, 1000)
+                );
 
                 clones.add(new CodeClone(firstLine.uri, range));
             }
             for (CodeClone clone : cloneMatches) {
-
-            for (CodeClone otherClone : cloneMatches) {
-                clone.setMatchingClone(otherClone);
-            }
+                for (CodeClone otherClone : cloneMatches) {
+                    CodeClone.setMatch(clone, otherClone);
+                }
             }
         }
 
