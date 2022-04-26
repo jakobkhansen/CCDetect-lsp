@@ -3,7 +3,14 @@ package CCDetect.lsp.detection.tokenbased;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Logger;
 
+import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.Range;
+
+import CCDetect.lsp.CodeClone;
+import CCDetect.lsp.datastructures.SuffixTree;
+import CCDetect.lsp.datastructures.SuffixTree.Match;
 import CCDetect.lsp.files.DocumentLine;
 import CCDetect.lsp.files.DocumentModel;
 
@@ -24,8 +31,13 @@ import CCDetect.lsp.files.DocumentModel;
    Plan is to take all lines, fingerprint them (to integer) and put them in a suffix tree. From
 */
 public class LimeEngine {
-    // Table of all tokens per file
-    HashMap<DocumentModel, List<DocumentLine>> linesInDocument = new HashMap<>();
+    private static final Logger LOGGER = Logger.getLogger(
+        Logger.GLOBAL_LOGGER_NAME
+    );
+
+    int LINE_MATCH_THRESHOLD = 4;
+    // Table of all methods per file
+    HashMap<DocumentModel, List<DocumentMethod>> methodsInDocument = new HashMap<>();
 
     // Table from source-code line to an integer, for use in fingerprint
     HashMap<String, Integer> lineToIntegerMapping = new HashMap<>();
@@ -35,35 +47,70 @@ public class LimeEngine {
 
 
     // Fingerprint for all files/methods/... (granularity)
-    List<Integer> fingerprint = new ArrayList<>();
+    StringBuilder fingerprint = new StringBuilder();
 
-    int lineFingerprintCounter = 0;
+    int lineFingerprintCounter = 1;
 
+    public void addMethod(DocumentModel document, DocumentMethod method) {
+        List<DocumentMethod> methods = methodsInDocument.getOrDefault(document, new ArrayList<>());
+        methods.add(method);
+        methodsInDocument.put(document, methods);
 
-    public void addDocumentLines(DocumentModel document, List<DocumentLine> lines) {
-        linesInDocument.put(document, lines);
-        for (DocumentLine line : lines) {
+        for (DocumentLine line : method.getLines()) {
             if (!lineToIntegerMapping.containsKey(line.toString())) {
                 lineToIntegerMapping.put(line.toString(), lineFingerprintCounter);
                 lineFingerprintCounter++;
             }
             int lineFingerprint = lineToIntegerMapping.get(line.toString());
-            int index = fingerprint.size();
-            fingerprint.add(lineFingerprint);
+            int index = fingerprint.length();
+            fingerprint.append(lineFingerprint);
             indexToLineMapping.put(index, line);
         }
-        fingerprint.add(-1);
+        fingerprint.append("#");
+    }
+
+    public List<CodeClone> match() {
+        List<CodeClone> clones = new ArrayList<>();
+        SuffixTree tree = new SuffixTree(fingerprint.toString());
+
+        List<Match> matches = tree.getMatches(LINE_MATCH_THRESHOLD);
+
+        LOGGER.info("" + matches.size());
+        for (Match match : matches) {
+            LOGGER.info("Match found with length: " + match.length);
+            List<CodeClone> cloneMatches = new ArrayList<>();
+            for (int pos : match.positions) {
+                LOGGER.info("Match at line: ");
+                List<DocumentLine> lines = new ArrayList<>();
+                for (int i = pos; i < pos+match.length; i++) {
+                    if (fingerprint.charAt(i) != '#') {
+                        LOGGER.info("" + indexToLineMapping.get(i));
+                        lines.add(indexToLineMapping.get(i));
+                    }
+                }
+
+                DocumentLine firstLine = lines.get(0);
+                DocumentLine lastLine = lines.get(lines.size()-1);
+                Range range = new Range(new Position(firstLine.line, 0), new Position(lastLine.line, lastLine.text.length()-1));
+
+                clones.add(new CodeClone(firstLine.uri, range));
+            }
+            for (CodeClone clone : cloneMatches) {
+
+            for (CodeClone otherClone : cloneMatches) {
+                clone.setMatchingClone(otherClone);
+            }
+            }
+        }
+
+        return clones;
     }
 
     public String toString() {
         StringBuilder result = new StringBuilder();
 
         // Fingerprint
-        result.append("Fingerprint: [ ");
-        for (int i : fingerprint) {
-            result.append(i + " ");
-        }
-        result.append("]\n\n");
+        result.append("Fingerprint: [ " + fingerprint.toString() + " ]\n\n");
 
         result.append("Integer mapping:\n");
         // Fingerprint per line

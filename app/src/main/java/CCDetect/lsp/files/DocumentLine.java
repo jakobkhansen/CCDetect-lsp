@@ -2,9 +2,9 @@ package CCDetect.lsp.files;
 
 public class DocumentLine {
 
-    final String uri;
-    final int line;
-    final String text;
+    public final String uri;
+    public final int line;
+    public final String text;
 
     public DocumentLine(String uri, int line, String text) {
         this.uri = uri;
