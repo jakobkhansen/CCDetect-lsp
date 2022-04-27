@@ -15,7 +15,7 @@ public class DocumentModel {
 
     private final String uri;
     private final List<DocumentLine> lines = new ArrayList<>();
-    private List<CodeClone> clones;
+    private List<CodeClone> clones = new ArrayList<>();
 
     public DocumentModel(String uri, String text) {
         this.uri = uri;

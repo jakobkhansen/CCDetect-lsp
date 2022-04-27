@@ -74,6 +74,7 @@ public class LimeEngine {
     }
 
     public List<CodeClone> match() {
+        fingerprint.append("$");
         List<CodeClone> clones = new ArrayList<>();
         SuffixTree tree = new SuffixTree(fingerprint.toString());
 
@@ -92,17 +93,19 @@ public class LimeEngine {
                 DocumentLine firstLine = lines.get(0);
                 DocumentLine lastLine = lines.get(lines.size() - 1);
                 Range range = new Range(
-                    new Position(firstLine.line-1, 0),
-                    new Position(lastLine.line-1, 1000)
+                    new Position(firstLine.line - 1, 0),
+                    new Position(lastLine.line - 1, 1000)
                 );
 
-                clones.add(new CodeClone(firstLine.uri, range));
+                cloneMatches.add(new CodeClone(firstLine.uri, range));
             }
-            for (CodeClone clone : cloneMatches) {
-                for (CodeClone otherClone : cloneMatches) {
-                    CodeClone.setMatch(clone, otherClone);
+            for (int i = 0; i < cloneMatches.size(); i++) {
+                for (int j = i + 1; j < cloneMatches.size(); j++) {
+                    LOGGER.info("Setting " + i + " to match with " + j);
+                    CodeClone.setMatch(cloneMatches.get(i), cloneMatches.get(j));
                 }
             }
+            clones.addAll(cloneMatches);
         }
 
         return clones;

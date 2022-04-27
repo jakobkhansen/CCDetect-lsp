@@ -24,19 +24,13 @@ public class CodeClone {
     public boolean isInRange(Range otherRange) {
         // Check if start below start
         int currentStartLine = range.getStart().getLine();
-        int currentStartChar = range.getStart().getCharacter();
-
         int otherStartLine = otherRange.getStart().getLine();
-        int otherStartChar = otherRange.getStart().getCharacter();
 
         boolean belowStart = currentStartLine <= otherStartLine;
 
         // Check if end is above end
         int currentEndLine = range.getEnd().getLine();
-        int currentEndChar = range.getEnd().getCharacter();
-
         int otherEndLine = otherRange.getEnd().getLine();
-        int otherEndChar = otherRange.getEnd().getCharacter();
 
         boolean aboveEnd = currentEndLine >= otherEndLine;
 
@@ -58,5 +52,11 @@ public class CodeClone {
 
     public void setMatchingClone(CodeClone clone) {
         this.pairMatch = clone;
+    }
+
+    @Override
+    public String toString() {
+        String out = "CodeClone(" + this.uri + range + ")";
+        return out;
     }
 }

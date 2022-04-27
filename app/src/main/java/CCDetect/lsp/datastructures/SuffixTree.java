@@ -200,7 +200,6 @@ public class SuffixTree {
             for (Node child : internal.children) {
                 matchPositions.add(child.position);
             }
-            matchPositions.add(internal.position);
             matches.add(new Match(length, matchPositions));
         }
 
@@ -213,11 +212,9 @@ public class SuffixTree {
         
         System.out.println(tree);
         for (Node internal : tree.getInternalNodes(tree.root, 3)) {
-            System.out.println(internal.position + " " + internal.suffix);
             for (Node child : internal.children) {
                 System.out.println(child.position);
             }
-            System.out.println();
         }
     }
 
