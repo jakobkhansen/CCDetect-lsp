@@ -2,6 +2,9 @@ package CCDetect.lsp.datastructures;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -17,7 +20,7 @@ public class SuffixTree {
         Logger.GLOBAL_LOGGER_NAME
     );
 
-    class Node {
+    public class Node {
 
         public int position;
         public String text;
@@ -32,18 +35,6 @@ public class SuffixTree {
         }
     }
 
-    public class Match {
-
-        public String text;
-        public int length;
-        public List<Integer> positions;
-
-        public Match(String text, List<Integer> positions) {
-            this.text = text;
-            this.length = text.length();
-            this.positions = positions;
-        }
-    }
 
     String input;
     public Node root;
@@ -186,7 +177,7 @@ public class SuffixTree {
         addChildNode(node, remainingList, position);
     }
 
-    private List<Node> getInternalNodes(Node start, String path) {
+    public List<Node> getInternalNodes(Node start, String path) {
         List<Node> nodes = new ArrayList<>();
         nodes.add(start);
         start.path = path + start.text;
@@ -202,47 +193,11 @@ public class SuffixTree {
         return nodes;
     }
 
-    public List<Match> getMatches(int lengthThreshold) {
-        List<Match> matches = new ArrayList<>();
-
-        for (Node start : root.children) {
-            List<Node> internals = getInternalNodes(start, "");
-            for (Node internal : internals) {
-                int length = internal.path.length();
-                if (length >= lengthThreshold) {
-                    List<Integer> matchPositions = new ArrayList<>();
-
-                    List<Node> nodeQueue = new ArrayList<>();
-                    nodeQueue.addAll(internal.children);
-
-                    while (!nodeQueue.isEmpty()) {
-                        Node child = nodeQueue.remove(nodeQueue.size()-1);
-                        if (child.position != -1) {
-                            matchPositions.add(child.position);
-                        } else {
-                            nodeQueue.addAll(child.children);
-                        }
-                    }
-                    matches.add(new Match(internal.path, matchPositions));
-                }
-            }
-        }
-
-        return matches;
-    }
 
     public static void main(String[] args) {
         String input = "ABCDEF#LBCDE#NBCDE#$";
         SuffixTree tree = new SuffixTree(input);
 
-        System.out.println("hello");
-        List<Match> matches = tree.getMatches(4);
-        for (Match match : matches) {
-            System.out.println("Match(" + match.text + ", " + match.length + ")");
-            for (int pos : match.positions) {
-                System.out.println("pos " + pos);
-            }
-        }
     }
 
     public String toString() {

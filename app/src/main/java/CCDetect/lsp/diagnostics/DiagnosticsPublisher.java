@@ -36,25 +36,26 @@ public class DiagnosticsPublisher {
 
     public static Diagnostic convertCloneToDiagnostic(CodeClone clone) {
         Diagnostic diagnostic = new Diagnostic(clone.getRange(), "Clone(s) detected");
+        List<DiagnosticRelatedInformation> diagnosticInformation = new ArrayList<>();
+        LOGGER.info(clone.toString());
 
         for (CodeClone matchingClone : clone.getMatches()) {
+            LOGGER.info(matchingClone.toString());
 
             // Create related code clone location
             Location location = new Location(matchingClone.getUri(), matchingClone.getRange());
             DiagnosticRelatedInformation matchingCloneLocationInfo = new DiagnosticRelatedInformation(location, "Clone detected");
 
-            diagnostic.getRelatedInformation().add(matchingCloneLocationInfo);
+            diagnosticInformation.add(matchingCloneLocationInfo);
         }
+        diagnostic.setRelatedInformation(diagnosticInformation);
 
         return diagnostic;
     }
 
     public static void publishCloneDiagnosticsFromIndex(DocumentIndex index) {
         CompletableFuture.runAsync(() -> {
-            // List<Diagnostic> test = new ArrayList<>();
-            // Range rang = new Range(new Position(0,0), new Position(2, 10));
-            // Diagnostic testDig = new Diagnostic(rang, "Test");
-            // test.add(testDig);
+            LOGGER.info("Publishing diagnostics");
             for (DocumentModel document : index) {
                 CCLanguageServer
                     .getInstance()
@@ -65,6 +66,7 @@ public class DiagnosticsPublisher {
                         )
                     );
             }
+            LOGGER.info("Diagnostics published");
         });
     }
 }

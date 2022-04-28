@@ -2,13 +2,15 @@ package CCDetect.lsp.detection.tokenbased;
 
 import CCDetect.lsp.CodeClone;
 import CCDetect.lsp.datastructures.SuffixTree;
-import CCDetect.lsp.datastructures.SuffixTree.Match;
+import CCDetect.lsp.datastructures.SuffixTree.Node;
 import CCDetect.lsp.files.DocumentLine;
 import CCDetect.lsp.files.DocumentModel;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
@@ -29,6 +31,19 @@ import org.eclipse.lsp4j.Range;
    Plan is to take all lines, fingerprint them (to integer) and put them in a suffix tree. From
 */
 public class LimeEngine {
+
+    public class Match {
+
+        public String text;
+        public int length;
+        public List<Integer> positions;
+
+        public Match(String text, List<Integer> positions) {
+            this.text = text;
+            this.length = text.length();
+            this.positions = positions;
+        }
+    }
 
     private static final Logger LOGGER = Logger.getLogger(
         Logger.GLOBAL_LOGGER_NAME
@@ -78,16 +93,15 @@ public class LimeEngine {
         List<CodeClone> clones = new ArrayList<>();
         SuffixTree tree = new SuffixTree(fingerprint.toString());
 
-        List<Match> matches = tree.getMatches(LINE_MATCH_THRESHOLD);
+        List<Match> matches = getMatches(tree, LINE_MATCH_THRESHOLD);
+        matches = filterOverlappingMatches(matches);
 
         for (Match match : matches) {
             List<CodeClone> cloneMatches = new ArrayList<>();
             for (int pos : match.positions) {
-
                 List<DocumentLine> lines = new ArrayList<>();
                 for (int i = pos; i < pos + match.length; i++) {
                     if (fingerprint.charAt(i) != '#') {
-
                         lines.add(indexToLineMapping.get(i));
                     }
                 }
@@ -102,7 +116,10 @@ public class LimeEngine {
             }
             for (int i = 0; i < cloneMatches.size(); i++) {
                 for (int j = i + 1; j < cloneMatches.size(); j++) {
-                    CodeClone.addMatch(cloneMatches.get(i), cloneMatches.get(j));
+                    CodeClone.addMatch(
+                        cloneMatches.get(i),
+                        cloneMatches.get(j)
+                    );
                 }
             }
             clones.addAll(cloneMatches);
@@ -110,6 +127,86 @@ public class LimeEngine {
 
         LOGGER.info("Num clones: " + clones.size());
         return clones;
+    }
+
+    private List<Match> getMatches(SuffixTree tree, int lengthThreshold) {
+        List<Match> matches = new ArrayList<>();
+
+        for (Node start : tree.root.children) {
+            List<Node> internals = tree.getInternalNodes(start, "");
+            for (Node internal : internals) {
+                int length = internal.path.length();
+
+                if (length >= lengthThreshold) {
+                    HashSet<Integer> matchPositions = new HashSet<>();
+
+                    List<Node> nodeQueue = new ArrayList<>();
+                    nodeQueue.addAll(internal.children);
+
+                    while (!nodeQueue.isEmpty()) {
+                        Node child = nodeQueue.remove(nodeQueue.size() - 1);
+                        if (child.position != -1) {
+                            matchPositions.add(child.position);
+                        } else {
+                            nodeQueue.addAll(child.children);
+                        }
+                    }
+                    matches.add(
+                        new Match(
+                            internal.path,
+                            matchPositions.stream().collect(Collectors.toList())
+                        )
+                    );
+                }
+            }
+        }
+
+        return matches;
+    }
+
+    // Compare matches, if a match location completely overlaps another, remove the smallest
+    public List<Match> filterOverlappingMatches(List<Match> matches) {
+        for (int i = 0; i < matches.size(); i++) {
+            for (int j = i + 1; j < matches.size(); j++) {
+                Match m1 = matches.get(i);
+                Match m2 = matches.get(j);
+
+                removeOverlappingPositions(m1, m2);
+            }
+        }
+
+        return matches;
+    }
+
+    // Compare positions in a match, if one completely overlaps another, remove the smallest
+    public void removeOverlappingPositions(Match m1, Match m2) {
+        for (int i = 0; i < m1.positions.size(); i++) {
+            for (int j = 0; j < m2.positions.size(); j++) {
+                int pos1 = m1.positions.get(i);
+                int pos2 = m2.positions.get(j);
+
+                int pos1End = pos1 + m1.length;
+                int pos2End = pos2 + m2.length;
+
+                LOGGER.info("Filter?");
+                LOGGER.info(pos1 + " " + pos1End);
+                LOGGER.info(pos2 + " " + pos2End);
+
+                if (m1.length >= m2.length) {
+                    if (pos1 <= pos2 && pos2End <= pos1End) {
+                        LOGGER.info("Filtered first");
+                        m2.positions.remove(j);
+                        j--;
+                    }
+                } else {
+                    if (pos2 <= pos1 && pos1End <= pos2End) {
+                        LOGGER.info("Filtered second");
+                        m1.positions.remove(i);
+                        i--;
+                    }
+                }
+            }
+        }
     }
 
     public String toString() {
