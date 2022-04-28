@@ -1,5 +1,8 @@
 package CCDetect.lsp;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.lsp4j.Range;
 
 /**
@@ -9,16 +12,11 @@ public class CodeClone {
 
     private String uri;
     private Range range;
-    private CodeClone pairMatch;
+    private List<CodeClone> matchingClones = new ArrayList<>();
 
     public CodeClone(String uri, Range range) {
         this.uri = uri;
         this.range = range;
-    }
-
-    public static void setMatch(CodeClone clone1, CodeClone clone2) {
-        clone1.setMatchingClone(clone2);
-        clone2.setMatchingClone(clone1);
     }
 
     public boolean isInRange(Range otherRange) {
@@ -38,8 +36,13 @@ public class CodeClone {
         return belowStart && aboveEnd;
     }
 
-    public CodeClone getPairMatch() {
-        return pairMatch;
+
+    public void addMatchingClone(CodeClone clone) {
+        matchingClones.add(clone);
+    }
+
+    public List<CodeClone> getMatches() {
+        return matchingClones;
     }
 
     public Range getRange() {
@@ -50,13 +53,14 @@ public class CodeClone {
         return uri;
     }
 
-    public void setMatchingClone(CodeClone clone) {
-        this.pairMatch = clone;
-    }
-
     @Override
     public String toString() {
         String out = "CodeClone(" + this.uri + range + ")";
         return out;
+    }
+
+    public static void addMatch(CodeClone clone1, CodeClone clone2) {
+        clone1.addMatchingClone(clone2);
+        clone2.addMatchingClone(clone1);
     }
 }

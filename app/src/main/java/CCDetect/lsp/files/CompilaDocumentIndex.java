@@ -70,7 +70,7 @@ public class CompilaDocumentIndex implements DocumentIndex {
                             ) &&
                             com.google.common.io.Files
                                 .getFileExtension(filePath.toString())
-                                .equals("cmp")
+                                .equals("ccdetect")
                     )
                     .collect(Collectors.toList());
         } catch (Exception e) {

@@ -22,10 +22,12 @@ public class CodeCloneJumpProvider {
 
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
-    public static CodeAction createJumpAction(DocumentModel document, Range range) {
+
+    public static List<CodeAction> createJumpActions(DocumentModel document, Range range) {
+        List<CodeAction> actions = new ArrayList<>();
         for (CodeClone clone : document.getClones()) {
-            if (clone.isInRange(range) && clone.getPairMatch() != null) {
-                CodeClone otherClone = clone.getPairMatch();
+            if (clone.isInRange(range)) {
+                for (CodeClone otherClone : clone.getMatches()) {
                 CodeAction action = new CodeAction("Jump to matching clone");
 
                 Command command = new Command("showDocument", "showDocument");
@@ -40,10 +42,12 @@ public class CodeCloneJumpProvider {
                 arguments.add(rangeJson);
                 command.setArguments(arguments);
                 action.setCommand(command);
-                return action;
+
+                actions.add(action);
+                }
             }
         }
 
-        return null;
+        return actions;
     }
 }

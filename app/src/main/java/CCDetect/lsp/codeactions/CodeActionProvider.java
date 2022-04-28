@@ -19,13 +19,13 @@ public class CodeActionProvider {
     ) {
         List<Either<Command, CodeAction>> actions = new ArrayList<>();
 
-        CodeAction jumpAction = CodeCloneJumpProvider.createJumpAction(
+        List<CodeAction> jumpActions = CodeCloneJumpProvider.createJumpActions(
             document,
             range
         );
-
-        if (jumpAction != null) {
-            actions.add(Either.forRight(jumpAction));
+       
+        for (CodeAction action : jumpActions) {
+            actions.add(Either.forRight(action));
         }
 
         return actions;

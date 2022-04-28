@@ -25,7 +25,8 @@ public class MockDetector implements CloneDetector {
         clones = new ArrayList<>();
         CodeClone clone1 = new CodeClone("file:///home/jakob/Documents/CompilaServerTest/test02.cmp", new Range(new Position(2,0), new Position(3,0)));
         CodeClone clone2 = new CodeClone("file:///home/jakob/Documents/CompilaServerTest/test01.cmp", new Range(new Position(6,0), new Position(7,0)));
-        CodeClone.setMatch(clone1, clone2);
+        clone1.addMatchingClone(clone2);
+        clone2.addMatchingClone(clone1);
 
         clones.add(clone1);
         clones.add(clone2);

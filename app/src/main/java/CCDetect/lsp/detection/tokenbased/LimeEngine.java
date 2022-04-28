@@ -39,7 +39,7 @@ public class LimeEngine {
     HashMap<DocumentModel, List<DocumentMethod>> methodsInDocument = new HashMap<>();
 
     // Table from source-code line to an integer, for use in fingerprint
-    HashMap<String, Integer> lineToIntegerMapping = new HashMap<>();
+    HashMap<String, Character> lineToIntegerMapping = new HashMap<>();
 
     // Map from index in fingerprint list back to line
     HashMap<Integer, DocumentLine> indexToLineMapping = new HashMap<>();
@@ -47,7 +47,7 @@ public class LimeEngine {
     // Fingerprint for all files/methods/... (granularity)
     StringBuilder fingerprint = new StringBuilder();
 
-    int lineFingerprintCounter = 1;
+    int lineFingerprintCounter = 65;
 
     public void addMethod(DocumentModel document, DocumentMethod method) {
         List<DocumentMethod> methods = methodsInDocument.getOrDefault(
@@ -61,11 +61,11 @@ public class LimeEngine {
             if (!lineToIntegerMapping.containsKey(line.toString())) {
                 lineToIntegerMapping.put(
                     line.toString(),
-                    lineFingerprintCounter
+                    (char) lineFingerprintCounter
                 );
                 lineFingerprintCounter++;
             }
-            int lineFingerprint = lineToIntegerMapping.get(line.toString());
+            char lineFingerprint = lineToIntegerMapping.get(line.toString());
             int index = fingerprint.length();
             fingerprint.append(lineFingerprint);
             indexToLineMapping.put(index, line);
@@ -83,31 +83,32 @@ public class LimeEngine {
         for (Match match : matches) {
             List<CodeClone> cloneMatches = new ArrayList<>();
             for (int pos : match.positions) {
+
                 List<DocumentLine> lines = new ArrayList<>();
                 for (int i = pos; i < pos + match.length; i++) {
                     if (fingerprint.charAt(i) != '#') {
+
                         lines.add(indexToLineMapping.get(i));
                     }
                 }
-
                 DocumentLine firstLine = lines.get(0);
                 DocumentLine lastLine = lines.get(lines.size() - 1);
                 Range range = new Range(
                     new Position(firstLine.line - 1, 0),
-                    new Position(lastLine.line - 1, 1000)
+                    new Position(lastLine.line - 1, lastLine.text.length())
                 );
 
                 cloneMatches.add(new CodeClone(firstLine.uri, range));
             }
             for (int i = 0; i < cloneMatches.size(); i++) {
                 for (int j = i + 1; j < cloneMatches.size(); j++) {
-                    LOGGER.info("Setting " + i + " to match with " + j);
-                    CodeClone.setMatch(cloneMatches.get(i), cloneMatches.get(j));
+                    CodeClone.addMatch(cloneMatches.get(i), cloneMatches.get(j));
                 }
             }
             clones.addAll(cloneMatches);
         }
 
+        LOGGER.info("Num clones: " + clones.size());
         return clones;
     }
 
