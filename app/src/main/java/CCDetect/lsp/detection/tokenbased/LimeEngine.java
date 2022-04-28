@@ -95,7 +95,7 @@ public class LimeEngine {
                 DocumentLine lastLine = lines.get(lines.size() - 1);
                 Range range = new Range(
                     new Position(firstLine.line - 1, 0),
-                    new Position(lastLine.line - 1, lastLine.text.length())
+                    new Position(lastLine.line - 1, 100)
                 );
 
                 cloneMatches.add(new CodeClone(firstLine.uri, range));

@@ -13,7 +13,9 @@ import java.util.stream.Collectors;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticRelatedInformation;
 import org.eclipse.lsp4j.Location;
+import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
+import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.services.LanguageClient;
 
 /**
@@ -26,13 +28,6 @@ public class DiagnosticsPublisher {
     public static List<Diagnostic> convertClonesToDiagnostic(
         List<CodeClone> clones
     ) {
-        HashMap<String, List<Diagnostic>> diagnosticsPerFile = new HashMap<>();
-        for (CodeClone c : clones) {
-            diagnosticsPerFile
-                .getOrDefault(c.getUri(), new ArrayList<>())
-                .add(convertCloneToDiagnostic(c));
-        }
-        LOGGER.info("" + clones.size());
         return clones
             .stream()
             .map(clone -> convertCloneToDiagnostic(clone))
@@ -41,7 +36,6 @@ public class DiagnosticsPublisher {
 
     public static Diagnostic convertCloneToDiagnostic(CodeClone clone) {
         Diagnostic diagnostic = new Diagnostic(clone.getRange(), "Clone(s) detected");
-        diagnostic.setRelatedInformation(new ArrayList<>());
 
         for (CodeClone matchingClone : clone.getMatches()) {
 
@@ -57,6 +51,10 @@ public class DiagnosticsPublisher {
 
     public static void publishCloneDiagnosticsFromIndex(DocumentIndex index) {
         CompletableFuture.runAsync(() -> {
+            // List<Diagnostic> test = new ArrayList<>();
+            // Range rang = new Range(new Position(0,0), new Position(2, 10));
+            // Diagnostic testDig = new Diagnostic(rang, "Test");
+            // test.add(testDig);
             for (DocumentModel document : index) {
                 CCLanguageServer
                     .getInstance()
