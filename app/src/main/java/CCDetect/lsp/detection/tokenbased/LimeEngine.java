@@ -26,9 +26,6 @@ import org.eclipse.lsp4j.Range;
 
    However, turns out the algorithm actually just fingerprints entire lines
    of code for each function, I need to extract all functions and get all the code then?
-
-   Currently, I'm extracting each line (removing white space and such), not just methods. 
-   Plan is to take all lines, fingerprint them (to integer) and put them in a suffix tree. From
 */
 public class LimeEngine {
 
@@ -103,6 +100,8 @@ public class LimeEngine {
                 for (int i = pos; i < pos + match.length; i++) {
                     if (fingerprint.charAt(i) != '#') {
                         lines.add(indexToLineMapping.get(i));
+                    } else {
+                        break;
                     }
                 }
                 DocumentLine firstLine = lines.get(0);
@@ -111,7 +110,7 @@ public class LimeEngine {
                     new Position(firstLine.line - 1, 0),
                     new Position(lastLine.line - 1, 100)
                 );
-
+        
                 cloneMatches.add(new CodeClone(firstLine.uri, range));
             }
             for (int i = 0; i < cloneMatches.size(); i++) {
@@ -125,6 +124,7 @@ public class LimeEngine {
             clones.addAll(cloneMatches);
         }
 
+        // clones.add(new CodeClone("file:///home/jakob/Documents/CompilaServerTest/test01.ccdetect", new Range(new Position(0,0), new Position(2, 3))));
         LOGGER.info("Num clones: " + clones.size());
         return clones;
     }

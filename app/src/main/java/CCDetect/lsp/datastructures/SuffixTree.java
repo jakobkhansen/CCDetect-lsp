@@ -16,22 +16,16 @@ import java.util.stream.IntStream;
 // Could have generics, will do later, don't speculate on generality
 public class SuffixTree {
 
-    private static final Logger LOGGER = Logger.getLogger(
-        Logger.GLOBAL_LOGGER_NAME
-    );
-
     public class Node {
 
         public int position;
         public String text;
         public List<Node> children = new ArrayList<>();
-        public int debugId;
         public String path = "";
 
-        public Node(String text, int position, int debugId) {
+        public Node(String text, int position) {
             this.text = text;
             this.position = position;
-            this.debugId = debugId;
         }
     }
 
@@ -42,15 +36,14 @@ public class SuffixTree {
 
     public SuffixTree(String input) {
         this.input = input;
-        root = new Node("", -1, debugId++);
+        root = new Node("", -1);
         for (int i = 0; i < input.length(); i++) {
-            LOGGER.info("Adding suffix " + input.substring(i));
             addSuffix(input.substring(i), i);
         }
     }
 
     private void addChildNode(Node parentNode, String suffix, int position) {
-        parentNode.children.add(new Node(suffix, position, debugId++));
+        parentNode.children.add(new Node(suffix, position));
     }
 
     private String getLongestCommonPrefix(String suffix1, String suffix2) {
@@ -72,8 +65,7 @@ public class SuffixTree {
     ) {
         Node childNode = new Node(
             childNewSuffix,
-            parentNode.position,
-            debugId++
+            parentNode.position
         );
 
         // Move all children from parent to child
@@ -95,10 +87,8 @@ public class SuffixTree {
     ) {
         List<Node> nodes = new ArrayList<>();
         for (Node currentNode : startNode.children) {
-            // System.out.println("Looking at node with prefix " + currentNode.suffix);
             String currentText = currentNode.text;
             if (currentText.charAt(0) == pattern.charAt(0)) {
-                // System.out.println("Found partial match");
                 if (partialMatch && pattern.length() <= currentText.length()) {
                     nodes.add(currentNode);
                     return nodes;
@@ -139,9 +129,6 @@ public class SuffixTree {
 
     private void addSuffix(String suffix, int position) {
         List<Node> nodes = nodesInTraversePath(suffix, root, true);
-        for (Node node : nodes) {
-            System.out.println("Node in path: " + node.text);
-        }
         if (nodes.size() == 0) {
             addChildNode(root, suffix, position);
         } else {
@@ -194,12 +181,6 @@ public class SuffixTree {
     }
 
 
-    public static void main(String[] args) {
-        String input = "ABCDEF#LBCDE#NBCDE#$";
-        SuffixTree tree = new SuffixTree(input);
-
-    }
-
     public String toString() {
         StringBuilder out = new StringBuilder();
 
@@ -218,7 +199,6 @@ public class SuffixTree {
             ", with suffix: " +
             current.text +
             ", debug: " +
-            current.debugId +
             "\n"
         );
         out.append("Children:\n");
@@ -230,7 +210,6 @@ public class SuffixTree {
                 ", Suffix: " +
                 child.text +
                 ", debug: " +
-                child.debugId +
                 "\n"
             );
         }
