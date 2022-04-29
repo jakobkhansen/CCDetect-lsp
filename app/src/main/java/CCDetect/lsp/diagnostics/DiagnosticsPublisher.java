@@ -48,7 +48,7 @@ public class DiagnosticsPublisher {
             clone.getRange(),
             "Clone(s) detected"
         );
-        diagnostic.setSeverity(DiagnosticSeverity.Warning);
+        diagnostic.setSeverity(DiagnosticSeverity.Information);
 
         List<DiagnosticRelatedInformation> diagnosticInformation = new ArrayList<>();
 

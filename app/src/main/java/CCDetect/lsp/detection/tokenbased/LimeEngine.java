@@ -40,6 +40,15 @@ public class LimeEngine {
             this.length = text.length();
             this.positions = positions;
         }
+
+        @Override
+        public String toString() {
+            String out = "[ ";
+            for (int pos : positions) {
+                out += pos + " ";
+            }
+            return out + "]"; 
+        }
     }
 
     private static final Logger LOGGER = Logger.getLogger(
@@ -92,6 +101,10 @@ public class LimeEngine {
 
         List<Match> matches = getMatches(tree, LINE_MATCH_THRESHOLD);
         matches = filterOverlappingMatches(matches);
+
+        for (Match match : matches) {
+            LOGGER.info(match.toString());
+        }
 
         for (Match match : matches) {
             List<CodeClone> cloneMatches = new ArrayList<>();
@@ -188,19 +201,14 @@ public class LimeEngine {
                 int pos1End = pos1 + m1.length;
                 int pos2End = pos2 + m2.length;
 
-                LOGGER.info("Filter?");
-                LOGGER.info(pos1 + " " + pos1End);
-                LOGGER.info(pos2 + " " + pos2End);
 
                 if (m1.length >= m2.length) {
                     if (pos1 <= pos2 && pos2End <= pos1End) {
-                        LOGGER.info("Filtered first");
                         m2.positions.remove(j);
                         j--;
                     }
                 } else {
                     if (pos2 <= pos1 && pos1End <= pos2End) {
-                        LOGGER.info("Filtered second");
                         m1.positions.remove(i);
                         i--;
                     }
