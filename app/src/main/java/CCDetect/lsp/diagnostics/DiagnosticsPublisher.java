@@ -24,6 +24,8 @@ import org.eclipse.lsp4j.services.LanguageClient;
  */
 public class DiagnosticsPublisher {
 
+    static DiagnosticSeverity CODECLONE_DIAGNOSTIC_SEVERITY = DiagnosticSeverity.Information;
+
     private static final Logger LOGGER = Logger.getLogger(
         Logger.GLOBAL_LOGGER_NAME
     );
@@ -48,7 +50,7 @@ public class DiagnosticsPublisher {
             clone.getRange(),
             "Clone(s) detected"
         );
-        diagnostic.setSeverity(DiagnosticSeverity.Information);
+        diagnostic.setSeverity(CODECLONE_DIAGNOSTIC_SEVERITY);
 
         List<DiagnosticRelatedInformation> diagnosticInformation = new ArrayList<>();
 
