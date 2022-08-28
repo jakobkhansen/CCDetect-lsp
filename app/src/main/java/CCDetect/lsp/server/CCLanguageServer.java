@@ -39,27 +39,25 @@ public class CCLanguageServer implements LanguageServer, LanguageClientAware {
         // client.showMessage(params);
     }
 
-
     @Override
     public CompletableFuture<InitializeResult> initialize(
-        InitializeParams params
-    ) {
+            InitializeParams params) {
         // Initialize the InitializeResult for this LS.
         final InitializeResult initializeResult = new InitializeResult(
-            new ServerCapabilities()
-        );
+                new ServerCapabilities());
 
         // Set the capabilities of the LS to inform the client.
         initializeResult
-            .getCapabilities()
-            .setTextDocumentSync(TextDocumentSyncKind.Full);
+                .getCapabilities()
+                .setTextDocumentSync(TextDocumentSyncKind.Full);
         CompletionOptions completionOptions = new CompletionOptions();
         initializeResult.getCapabilities().setCodeActionProvider(true);
         initializeResult
-            .getCapabilities()
-            .setCompletionProvider(completionOptions);
+                .getCapabilities()
+                .setCompletionProvider(completionOptions);
         initializeResult.getCapabilities().setTextDocumentSync(TextDocumentSyncKind.Full);
-        initializeResult.getCapabilities().setExecuteCommandProvider(new ExecuteCommandOptions(Arrays.asList(new String[]{"showDocument"})));
+        initializeResult.getCapabilities()
+                .setExecuteCommandProvider(new ExecuteCommandOptions(Arrays.asList(new String[] { "showDocument" })));
 
         // Initialize index and detector
         String rootUri = params.getWorkspaceFolders().get(0).getUri();
@@ -85,8 +83,6 @@ public class CCLanguageServer implements LanguageServer, LanguageClientAware {
     public TextDocumentService getTextDocumentService() {
         return textDocumentService;
     }
-
-    
 
     @Override
     public WorkspaceService getWorkspaceService() {

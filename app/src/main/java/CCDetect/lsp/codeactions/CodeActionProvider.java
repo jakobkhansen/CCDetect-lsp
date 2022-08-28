@@ -14,16 +14,14 @@ import org.eclipse.lsp4j.jsonrpc.messages.Either;
 public class CodeActionProvider {
 
     public static List<Either<Command, CodeAction>> createCodeActions(
-        DocumentModel document,
-        Range range
-    ) {
+            DocumentModel document,
+            Range range) {
         List<Either<Command, CodeAction>> actions = new ArrayList<>();
 
         List<CodeAction> jumpActions = CodeCloneJumpProvider.createJumpActions(
-            document,
-            range
-        );
-       
+                document,
+                range);
+
         for (CodeAction action : jumpActions) {
             actions.add(Either.forRight(action));
         }

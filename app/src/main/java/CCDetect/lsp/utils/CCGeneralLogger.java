@@ -32,7 +32,8 @@ public class CCGeneralLogger {
         logger.setLevel(Level.INFO);
 
         File dir = new File("logs");
-        if (!dir.exists()) dir.mkdirs();
+        if (!dir.exists())
+            dir.mkdirs();
         fileTxt = new FileHandler("logs/logging.txt");
 
         // create a TXT formatter
@@ -40,5 +41,5 @@ public class CCGeneralLogger {
         fileTxt.setFormatter(formatterTxt);
         logger.addHandler(fileTxt);
     }
-    
+
 }

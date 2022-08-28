@@ -20,9 +20,8 @@ public class DocumentModel {
     public DocumentModel(String uri, String text) {
         this.uri = uri;
         try (
-            Reader r = new StringReader(text);
-            BufferedReader reader = new BufferedReader(r);
-        ) {
+                Reader r = new StringReader(text);
+                BufferedReader reader = new BufferedReader(r);) {
             String lineText;
             int lineNumber = 0;
             while ((lineText = reader.readLine()) != null) {
@@ -47,20 +46,19 @@ public class DocumentModel {
         int startLine = range.getStart().getLine();
         int endLine = range.getEnd().getLine();
 
-        return lines.subList(startLine, endLine+1);
+        return lines.subList(startLine, endLine + 1);
     }
 
     public String getLineTextInRange(Range range) {
         int startLine = range.getStart().getLine();
         int endLine = range.getEnd().getLine();
 
-        List<DocumentLine> rangeLines = lines.subList(startLine, endLine+1);
+        List<DocumentLine> rangeLines = lines.subList(startLine, endLine + 1);
         StringBuilder linesString = new StringBuilder();
 
         for (DocumentLine line : rangeLines) {
             linesString.append("\n" + line.toString());
         }
-
 
         return linesString.toString();
     }
@@ -76,7 +74,6 @@ public class DocumentModel {
     public List<CodeClone> getClones() {
         return this.clones;
     }
-
 
     public String toString() {
         StringBuilder out = new StringBuilder();

@@ -15,8 +15,7 @@ import org.eclipse.lsp4j.ShowDocumentParams;
 public class CommandHandler {
 
     private static final Logger LOGGER = Logger.getLogger(
-        Logger.GLOBAL_LOGGER_NAME
-    );
+            Logger.GLOBAL_LOGGER_NAME);
     private final ExecuteCommandParams command;
 
     public CommandHandler(ExecuteCommandParams command) {
@@ -36,12 +35,12 @@ public class CommandHandler {
 
     private void executeShowDocument(ExecuteCommandParams command) {
         List<Object> args = command
-            .getArguments()
-            .stream()
-            .map(element -> {
-                return JSONUtility.toModel(element, Object.class);
-            })
-            .collect(Collectors.toList());
+                .getArguments()
+                .stream()
+                .map(element -> {
+                    return JSONUtility.toModel(element, Object.class);
+                })
+                .collect(Collectors.toList());
 
         String uri = JSONUtility.toModel(args.get(0), String.class);
         Range range = JSONUtility.toModel(args.get(1), Range.class);

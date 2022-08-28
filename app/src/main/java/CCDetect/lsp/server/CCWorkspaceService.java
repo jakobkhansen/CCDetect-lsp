@@ -14,8 +14,7 @@ import org.eclipse.lsp4j.services.WorkspaceService;
 public class CCWorkspaceService implements WorkspaceService {
 
     private static final Logger LOGGER = Logger.getLogger(
-        Logger.GLOBAL_LOGGER_NAME
-    );
+            Logger.GLOBAL_LOGGER_NAME);
 
     @Override
     public void didChangeConfiguration(DidChangeConfigurationParams params) {
@@ -25,8 +24,7 @@ public class CCWorkspaceService implements WorkspaceService {
 
     @Override
     public CompletableFuture<Object> executeCommand(
-        ExecuteCommandParams params
-    ) {
+            ExecuteCommandParams params) {
         LOGGER.info("executeCommand");
         return CompletableFuture.supplyAsync(() -> {
             CommandHandler handler = new CommandHandler(params);

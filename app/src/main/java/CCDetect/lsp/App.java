@@ -19,12 +19,11 @@ public class App {
 
     public static Launcher<LanguageClient> createLauncher(LanguageServer server) {
         Launcher<LanguageClient> launcher = LSPLauncher.createServerLauncher(
-            server,
-            System.in,
-            System.out
-        );
+                server,
+                System.in,
+                System.out);
         LanguageClient client = launcher.getRemoteProxy();
-        ((LanguageClientAware)server).connect(client);
+        ((LanguageClientAware) server).connect(client);
 
         return launcher;
     }

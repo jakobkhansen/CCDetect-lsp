@@ -1,19 +1,5 @@
 package CCDetect.lsp.detection.tokenbased;
 
-import CCDetect.lsp.CodeClone;
-import CCDetect.lsp.detection.CloneDetector;
-import CCDetect.lsp.files.DocumentIndex;
-import CCDetect.lsp.files.DocumentLine;
-import CCDetect.lsp.files.DocumentModel;
-import CCDetect.lsp.utils.RangeConverter;
-import com.github.javaparser.JavaParser;
-import com.github.javaparser.JavaToken;
-import com.github.javaparser.JavaToken.Category;
-import com.github.javaparser.ParseResult;
-import com.github.javaparser.Position;
-import com.github.javaparser.TokenRange;
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.MethodDeclaration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,15 +7,28 @@ import java.util.function.Consumer;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import org.eclipse.lsp4j.Range;
+
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.JavaToken;
+import com.github.javaparser.JavaToken.Category;
+import com.github.javaparser.ParseResult;
+import com.github.javaparser.TokenRange;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.MethodDeclaration;
+
+import CCDetect.lsp.CodeClone;
+import CCDetect.lsp.detection.CloneDetector;
+import CCDetect.lsp.files.DocumentIndex;
+import CCDetect.lsp.files.DocumentLine;
+import CCDetect.lsp.files.DocumentModel;
 
 /**
  * RealTimeHybridDetector
  */
 
 /*
-   Ny plan: Lag en metode som henter alle metoder i AST, muligens normalize, så 
-*/
+ * Ny plan: Lag en metode som henter alle metoder i AST, muligens normalize, så
+ */
 public class HybridJavaDetector implements CloneDetector {
 
     List<CodeClone> clones = new ArrayList<>();
@@ -37,8 +36,7 @@ public class HybridJavaDetector implements CloneDetector {
     LimeEngine matchingEngine = new LimeEngine();
 
     private static final Logger LOGGER = Logger.getLogger(
-        Logger.GLOBAL_LOGGER_NAME
-    );
+            Logger.GLOBAL_LOGGER_NAME);
 
     @Override
     public List<CodeClone> getClones() {
@@ -57,8 +55,7 @@ public class HybridJavaDetector implements CloneDetector {
 
         // Adds methods to engine
         HashMap<DocumentModel, List<DocumentMethod>> methods = extractMethodsFromIndex(
-            index
-        );
+                index);
 
         for (DocumentModel document : methods.keySet()) {
             for (DocumentMethod method : methods.get(document)) {
@@ -71,67 +68,56 @@ public class HybridJavaDetector implements CloneDetector {
     }
 
     private HashMap<DocumentModel, List<DocumentMethod>> extractMethodsFromIndex(
-        DocumentIndex index
-    ) {
+            DocumentIndex index) {
         HashMap<DocumentModel, List<DocumentMethod>> methodsPerDocument = new HashMap<>();
 
         for (DocumentModel document : index) {
             methodsPerDocument.put(
-                document,
-                extractMethodsFromDocument(document)
-            );
+                    document,
+                    extractMethodsFromDocument(document));
         }
 
         return methodsPerDocument;
     }
 
     private List<DocumentMethod> extractMethodsFromDocument(
-        DocumentModel document
-    ) {
+            DocumentModel document) {
         List<DocumentMethod> methods = new ArrayList<>();
 
         CompilationUnit ast = getASTFromDocument(document);
 
         ast
-            .findAll(MethodDeclaration.class)
-            .forEach(
-                new Consumer<MethodDeclaration>() {
-                    @Override
-                    public void accept(MethodDeclaration t) {
-                        t
-                            .getTokenRange()
-                            .ifPresent(
-                                new Consumer<TokenRange>() {
-                                    @Override
-                                    public void accept(TokenRange t) {
-                                        List<JavaToken> tokens = new ArrayList<>();
-                                        StreamSupport
-                                            .stream(t.spliterator(), false)
-                                            .filter(tok -> filterToken(tok))
-                                            .collect(
-                                                Collectors.toCollection(() ->
-                                                    tokens
-                                                )
-                                            );
-                                        List<DocumentLine> lines = getLinesFromTokens(
-                                            document,
-                                            tokens,
-                                            t
-                                                .getBegin()
-                                                .getRange()
-                                                .get()
-                                                .begin.line
-                                        );
-                                        methods.add(new DocumentMethod(lines));
-                                    }
-                                }
-                            );
-                    }
-                }
-            );
+                .findAll(MethodDeclaration.class)
+                .forEach(
+                        new Consumer<MethodDeclaration>() {
+                            @Override
+                            public void accept(MethodDeclaration t) {
+                                t
+                                        .getTokenRange()
+                                        .ifPresent(
+                                                new Consumer<TokenRange>() {
+                                                    @Override
+                                                    public void accept(TokenRange t) {
+                                                        List<JavaToken> tokens = new ArrayList<>();
+                                                        StreamSupport
+                                                                .stream(t.spliterator(), false)
+                                                                .filter(tok -> filterToken(tok))
+                                                                .collect(
+                                                                        Collectors.toCollection(() -> tokens));
+                                                        List<DocumentLine> lines = getLinesFromTokens(
+                                                                document,
+                                                                tokens,
+                                                                t
+                                                                        .getBegin()
+                                                                        .getRange()
+                                                                        .get().begin.line);
+                                                        methods.add(new DocumentMethod(lines));
+                                                    }
+                                                });
+                            }
+                        });
         return methods;
     }
-
 
     // Get the AST of a document
     private CompilationUnit getASTFromDocument(DocumentModel document) {
@@ -150,19 +136,18 @@ public class HybridJavaDetector implements CloneDetector {
         CompilationUnit res = getASTFromDocument(document);
 
         res
-            .findRootNode()
-            .getTokenRange()
-            .ifPresent(
-                new Consumer<TokenRange>() {
-                    @Override
-                    public void accept(TokenRange t) {
-                        StreamSupport
-                            .stream(t.spliterator(), false)
-                            .filter(tok -> filterToken(tok))
-                            .collect(Collectors.toCollection(() -> tokens));
-                    }
-                }
-            );
+                .findRootNode()
+                .getTokenRange()
+                .ifPresent(
+                        new Consumer<TokenRange>() {
+                            @Override
+                            public void accept(TokenRange t) {
+                                StreamSupport
+                                        .stream(t.spliterator(), false)
+                                        .filter(tok -> filterToken(tok))
+                                        .collect(Collectors.toCollection(() -> tokens));
+                            }
+                        });
 
         return tokens;
     }
@@ -172,22 +157,19 @@ public class HybridJavaDetector implements CloneDetector {
     }
 
     private List<DocumentLine> getLinesFromTokens(
-        DocumentModel document,
-        List<JavaToken> tokens,
-        int lineOffset
-    ) {
+            DocumentModel document,
+            List<JavaToken> tokens,
+            int lineOffset) {
         List<DocumentLine> lines = new ArrayList<>();
 
         StringBuilder currentLine = new StringBuilder();
         for (JavaToken token : tokens) {
             if (token.getCategory() == Category.EOL) {
                 lines.add(
-                    new DocumentLine(
-                        document.getUri(),
-                        lineOffset,
-                        currentLine.toString()
-                    )
-                );
+                        new DocumentLine(
+                                document.getUri(),
+                                lineOffset,
+                                currentLine.toString()));
                 currentLine = new StringBuilder();
                 lineOffset++;
             } else {

@@ -24,15 +24,12 @@ import CCDetect.lsp.CodeClone;
 public class CompilaDocumentIndex implements DocumentIndex {
 
     private static final Logger LOGGER = Logger.getLogger(
-        Logger.GLOBAL_LOGGER_NAME
-    );
+            Logger.GLOBAL_LOGGER_NAME);
     private static final Logger FILE_LOGGER = Logger.getLogger(
-        "CCFileStateLogger"
-    );
+            "CCFileStateLogger");
 
     Map<String, DocumentModel> documents = Collections.synchronizedMap(
-        new HashMap<>()
-    );
+            new HashMap<>());
     String rootUri;
 
     public CompilaDocumentIndex(String rootUri) {
@@ -46,9 +43,8 @@ public class CompilaDocumentIndex implements DocumentIndex {
             String documentContent = getDocumentContent(p);
             if (documentContent != null) {
                 documents.put(
-                    p.toUri().toString(),
-                    new DocumentModel(p.toUri().toString(), documentContent)
-                );
+                        p.toUri().toString(),
+                        new DocumentModel(p.toUri().toString(), documentContent));
             }
         }
     }
@@ -58,20 +54,15 @@ public class CompilaDocumentIndex implements DocumentIndex {
 
         try {
             URI uri = new URI(rootUri);
-            filePaths =
-                Files
+            filePaths = Files
                     .find(
-                        Paths.get(uri),
-                        Integer.MAX_VALUE,
-                        (filePath, fileAttr) ->
-                            (
-                                fileAttr.isRegularFile() ||
-                                fileAttr.isDirectory()
-                            ) &&
-                            com.google.common.io.Files
-                                .getFileExtension(filePath.toString())
-                                .equals("ccdetect")
-                    )
+                            Paths.get(uri),
+                            Integer.MAX_VALUE,
+                            (filePath, fileAttr) -> (fileAttr.isRegularFile() ||
+                                    fileAttr.isDirectory()) &&
+                                    com.google.common.io.Files
+                                            .getFileExtension(filePath.toString())
+                                            .equals("ccdetect"))
                     .collect(Collectors.toList());
         } catch (Exception e) {
             e.printStackTrace();
@@ -82,15 +73,13 @@ public class CompilaDocumentIndex implements DocumentIndex {
 
     private String getDocumentContent(Path file) {
         try (
-            BufferedReader reader = Files.newBufferedReader(
-                file,
-                Charset.forName("UTF-8")
-            )
-        ) {
+                BufferedReader reader = Files.newBufferedReader(
+                        file,
+                        Charset.forName("UTF-8"))) {
             String content = reader.lines().collect(Collectors.joining("\n"));
             return content;
         } catch (IOException ex) {
-            ex.printStackTrace(); //handle an exception here
+            ex.printStackTrace(); // handle an exception here
         }
 
         return null;

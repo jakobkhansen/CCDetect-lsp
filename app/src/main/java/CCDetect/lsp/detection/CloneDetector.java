@@ -10,6 +10,7 @@ import CCDetect.lsp.files.DocumentIndex;
  */
 public interface CloneDetector {
     List<CodeClone> getClones();
+
     void onIndexChange(DocumentIndex index);
-    
+
 }

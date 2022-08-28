@@ -48,21 +48,21 @@ public class CCLoggerFormatter extends Formatter {
     // formatter is created
     public String getHead(Handler h) {
         return "<!DOCTYPE html>\n<head>\n<style>\n"
-            + "table { width: 100% }\n"
-            + "th { font:bold 10pt Tahoma; }\n"
-            + "td { font:normal 10pt Tahoma; }\n"
-            + "h1 {font:normal 11pt Tahoma;}\n"
-            + "</style>\n"
-            + "</head>\n"
-            + "<body>\n"
-            + "<h1>" + (new Date()) + "</h1>\n"
-            + "<table border=\"0\" cellpadding=\"5\" cellspacing=\"3\">\n"
-            + "<tr align=\"left\">\n"
-            + "\t<th style=\"width:10%\">Loglevel</th>\n"
-            + "\t<th style=\"width:15%\">Time</th>\n"
-            + "\t<th style=\"width:75%\">Log Message</th>\n"
-            + "</tr>\n";
-      }
+                + "table { width: 100% }\n"
+                + "th { font:bold 10pt Tahoma; }\n"
+                + "td { font:normal 10pt Tahoma; }\n"
+                + "h1 {font:normal 11pt Tahoma;}\n"
+                + "</style>\n"
+                + "</head>\n"
+                + "<body>\n"
+                + "<h1>" + (new Date()) + "</h1>\n"
+                + "<table border=\"0\" cellpadding=\"5\" cellspacing=\"3\">\n"
+                + "<tr align=\"left\">\n"
+                + "\t<th style=\"width:10%\">Loglevel</th>\n"
+                + "\t<th style=\"width:15%\">Time</th>\n"
+                + "\t<th style=\"width:75%\">Log Message</th>\n"
+                + "</tr>\n";
+    }
 
     // this method is called just after the handler using this
     // formatter is closed
@@ -70,5 +70,4 @@ public class CCLoggerFormatter extends Formatter {
         return "</table>\n</body>\n</html>";
     }
 
-    
 }

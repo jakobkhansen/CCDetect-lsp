@@ -12,14 +12,10 @@ import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionItemKind;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.CompletionParams;
-import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
-import org.eclipse.lsp4j.Position;
-import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
@@ -27,9 +23,7 @@ import org.eclipse.lsp4j.services.TextDocumentService;
 
 import CCDetect.lsp.CodeClone;
 import CCDetect.lsp.codeactions.CodeActionProvider;
-import CCDetect.lsp.codeactions.CodeCloneJumpProvider;
 import CCDetect.lsp.detection.CloneDetector;
-import CCDetect.lsp.detection.MockDetector;
 import CCDetect.lsp.detection.tokenbased.HybridJavaDetector;
 import CCDetect.lsp.diagnostics.DiagnosticsPublisher;
 import CCDetect.lsp.files.CompilaDocumentIndex;
@@ -67,10 +61,10 @@ public class CCTextDocumentService implements TextDocumentService {
             try {
                 // Sample Completion item for sayHello
                 CompletionItem completionItem = new CompletionItem();
-                // Define the text to be inserted in to the file if the completion item is selected.
+                // Define the text to be inserted in to the file if the completion item is
+                // selected.
                 completionItem.setInsertText(
-                    "sayHello() {\n    print(\"hello\")\n}"
-                );
+                        "sayHello() {\n    print(\"hello\")\n}");
                 // Set the label that shows when the completion drop down appears in the Editor.
                 completionItem.setLabel("sayHello()");
                 // Set the completion kind. This is a snippet.
@@ -80,23 +74,21 @@ public class CCTextDocumentService implements TextDocumentService {
                 // This will set the details for the snippet code which will help user to
                 // understand what this completion item is.
                 completionItem.setDetail(
-                    "sayHello()\n this will say hello to the people"
-                );
+                        "sayHello()\n this will say hello to the people");
 
                 // Add the sample completion item to the list.
                 completionItems.add(completionItem);
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
 
             // Return the list of completion items.
             return Either.forLeft(completionItems);
         });
     }
 
-
     @Override
     public CompletableFuture<List<Either<Command, CodeAction>>> codeAction(
-        CodeActionParams params
-    ) {
+            CodeActionParams params) {
         return CompletableFuture.supplyAsync(() -> {
             DocumentModel document = index.getDocument(params.getTextDocument().getUri());
             Range range = params.getRange();
@@ -117,10 +109,11 @@ public class CCTextDocumentService implements TextDocumentService {
     @Override
     public void didChange(DidChangeTextDocumentParams params) {
 
-        TextDocumentContentChangeEvent lastChange = params.getContentChanges().get(params.getContentChanges().size()-1);
+        TextDocumentContentChangeEvent lastChange = params.getContentChanges()
+                .get(params.getContentChanges().size() - 1);
         DocumentModel model = new DocumentModel(params.getTextDocument().getUri(), lastChange.getText());
         index.updateDocument(params.getTextDocument().getUri(), model);
-        
+
         updateClones();
         updateDiagnostics();
     }

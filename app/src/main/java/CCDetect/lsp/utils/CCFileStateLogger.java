@@ -2,9 +2,7 @@ package CCDetect.lsp.utils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
@@ -21,11 +19,11 @@ public class CCFileStateLogger {
 
         Logger logger = Logger.getLogger("CCFileStateLogger");
 
-
         logger.setLevel(Level.INFO);
 
         File dir = new File("logs");
-        if (!dir.exists()) dir.mkdirs();
+        if (!dir.exists())
+            dir.mkdirs();
         fileTxt = new FileHandler("logs/file.txt");
 
         // create a TXT formatter
@@ -33,5 +31,5 @@ public class CCFileStateLogger {
         fileTxt.setFormatter(formatterTxt);
         logger.addHandler(fileTxt);
     }
-    
+
 }

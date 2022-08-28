@@ -36,7 +36,6 @@ public class CodeClone {
         return belowStart && aboveEnd;
     }
 
-
     public void addMatchingClone(CodeClone clone) {
         matchingClones.add(clone);
     }

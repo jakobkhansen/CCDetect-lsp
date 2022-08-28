@@ -1,14 +1,7 @@
 package CCDetect.lsp.datastructures;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * SuffixTree
@@ -28,7 +21,6 @@ public class SuffixTree {
             this.position = position;
         }
     }
-
 
     String input;
     public Node root;
@@ -59,20 +51,17 @@ public class SuffixTree {
     }
 
     private void splitNode(
-        Node parentNode,
-        String parentNewSuffix,
-        String childNewSuffix
-    ) {
+            Node parentNode,
+            String parentNewSuffix,
+            String childNewSuffix) {
         Node childNode = new Node(
-            childNewSuffix,
-            parentNode.position
-        );
+                childNewSuffix,
+                parentNode.position);
 
         // Move all children from parent to child
         while (!parentNode.children.isEmpty()) {
             childNode.children.add(
-                parentNode.children.remove(parentNode.children.size() - 1)
-            );
+                    parentNode.children.remove(parentNode.children.size() - 1));
         }
 
         parentNode.children.add(childNode);
@@ -81,10 +70,9 @@ public class SuffixTree {
     }
 
     private List<Node> nodesInTraversePath(
-        String pattern,
-        Node startNode,
-        boolean partialMatch
-    ) {
+            String pattern,
+            Node startNode,
+            boolean partialMatch) {
         List<Node> nodes = new ArrayList<>();
         for (Node currentNode : startNode.children) {
             String currentText = currentNode.text;
@@ -95,9 +83,8 @@ public class SuffixTree {
                 }
 
                 int compareLength = Math.min(
-                    currentText.length(),
-                    pattern.length()
-                );
+                        currentText.length(),
+                        pattern.length());
                 for (int j = 1; j < compareLength; j++) {
                     if (pattern.charAt(j) != currentText.charAt(j)) {
                         if (partialMatch) {
@@ -111,10 +98,9 @@ public class SuffixTree {
 
                 if (pattern.length() > compareLength) {
                     List<Node> recurNodes = nodesInTraversePath(
-                        pattern.substring(compareLength),
-                        currentNode,
-                        partialMatch
-                    );
+                            pattern.substring(compareLength),
+                            currentNode,
+                            partialMatch);
 
                     if (recurNodes.size() > 0) {
                         nodes.addAll(recurNodes);
@@ -136,9 +122,9 @@ public class SuffixTree {
             String newText = suffix;
             if (nodes.size() > 0) {
                 String existingSuffix = nodes
-                    .stream()
-                    .map(a -> a.text)
-                    .reduce("", String::concat);
+                        .stream()
+                        .map(a -> a.text)
+                        .reduce("", String::concat);
 
                 newText = newText.substring(existingSuffix.length());
             }
@@ -153,9 +139,8 @@ public class SuffixTree {
 
         if (commonPrefix.length() != currentPrefix.length()) {
             String parentPrefix = currentPrefix.substring(
-                0,
-                commonPrefix.length()
-            );
+                    0,
+                    commonPrefix.length());
             String childPrefix = currentPrefix.substring(commonPrefix.length());
             splitNode(node, parentPrefix, childPrefix);
         }
@@ -180,7 +165,6 @@ public class SuffixTree {
         return nodes;
     }
 
-
     public String toString() {
         StringBuilder out = new StringBuilder();
 
@@ -194,24 +178,22 @@ public class SuffixTree {
     public String preorderToString(Node current) {
         StringBuilder out = new StringBuilder();
         out.append(
-            "Node at position " +
-            current.position +
-            ", with suffix: " +
-            current.text +
-            ", debug: " +
-            "\n"
-        );
+                "Node at position " +
+                        current.position +
+                        ", with suffix: " +
+                        current.text +
+                        ", debug: " +
+                        "\n");
         out.append("Children:\n");
 
         for (Node child : current.children) {
             out.append(
-                "Position: " +
-                current.position +
-                ", Suffix: " +
-                child.text +
-                ", debug: " +
-                "\n"
-            );
+                    "Position: " +
+                            current.position +
+                            ", Suffix: " +
+                            child.text +
+                            ", debug: " +
+                            "\n");
         }
 
         out.append("\n");

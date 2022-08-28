@@ -1,32 +1,35 @@
 package CCDetect.lsp.detection.tokenbased;
 
-import CCDetect.lsp.CodeClone;
-import CCDetect.lsp.datastructures.SuffixTree;
-import CCDetect.lsp.datastructures.SuffixTree.Node;
-import CCDetect.lsp.files.DocumentLine;
-import CCDetect.lsp.files.DocumentModel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
+
+import CCDetect.lsp.CodeClone;
+import CCDetect.lsp.datastructures.SuffixTree;
+import CCDetect.lsp.datastructures.SuffixTree.Node;
+import CCDetect.lsp.files.DocumentLine;
+import CCDetect.lsp.files.DocumentModel;
 
 /**
  * LimeEngine
  */
 
 /*
-   Current plan:
-   Have a list of integers which maps to tokens
-   Build suffix tree from this
-   Need a table from index in integer list back to token I guess
-
-   However, turns out the algorithm actually just fingerprints entire lines
-   of code for each function, I need to extract all functions and get all the code then?
-*/
+ * Current plan:
+ * Have a list of integers which maps to tokens
+ * Build suffix tree from this
+ * Need a table from index in integer list back to token I guess
+ * 
+ * However, turns out the algorithm actually just fingerprints entire lines
+ * of code for each function, I need to extract all functions and get all the
+ * code then?
+ */
 public class LimeEngine {
 
     public class Match {
@@ -47,13 +50,12 @@ public class LimeEngine {
             for (int pos : positions) {
                 out += pos + " ";
             }
-            return out + "]"; 
+            return out + "]";
         }
     }
 
     private static final Logger LOGGER = Logger.getLogger(
-        Logger.GLOBAL_LOGGER_NAME
-    );
+            Logger.GLOBAL_LOGGER_NAME);
 
     int LINE_MATCH_THRESHOLD = 4;
     // Table of all methods per file
@@ -72,18 +74,16 @@ public class LimeEngine {
 
     public void addMethod(DocumentModel document, DocumentMethod method) {
         List<DocumentMethod> methods = methodsInDocument.getOrDefault(
-            document,
-            new ArrayList<>()
-        );
+                document,
+                new ArrayList<>());
         methods.add(method);
         methodsInDocument.put(document, methods);
 
         for (DocumentLine line : method.getLines()) {
             if (!lineToIntegerMapping.containsKey(line.toString())) {
                 lineToIntegerMapping.put(
-                    line.toString(),
-                    (char) lineFingerprintCounter
-                );
+                        line.toString(),
+                        (char) lineFingerprintCounter);
                 lineFingerprintCounter++;
             }
             char lineFingerprint = lineToIntegerMapping.get(line.toString());
@@ -120,24 +120,24 @@ public class LimeEngine {
                 DocumentLine firstLine = lines.get(0);
                 DocumentLine lastLine = lines.get(lines.size() - 1);
                 Range range = new Range(
-                    new Position(firstLine.line - 1, 0),
-                    new Position(lastLine.line - 1, 100)
-                );
-        
+                        new Position(firstLine.line - 1, 0),
+                        new Position(lastLine.line - 1, 100));
+
                 cloneMatches.add(new CodeClone(firstLine.uri, range));
             }
             for (int i = 0; i < cloneMatches.size(); i++) {
                 for (int j = i + 1; j < cloneMatches.size(); j++) {
                     CodeClone.addMatch(
-                        cloneMatches.get(i),
-                        cloneMatches.get(j)
-                    );
+                            cloneMatches.get(i),
+                            cloneMatches.get(j));
                 }
             }
             clones.addAll(cloneMatches);
         }
 
-        // clones.add(new CodeClone("file:///home/jakob/Documents/CompilaServerTest/test01.ccdetect", new Range(new Position(0,0), new Position(2, 3))));
+        // clones.add(new
+        // CodeClone("file:///home/jakob/Documents/CompilaServerTest/test01.ccdetect",
+        // new Range(new Position(0,0), new Position(2, 3))));
         LOGGER.info("Num clones: " + clones.size());
         return clones;
     }
@@ -165,11 +165,9 @@ public class LimeEngine {
                         }
                     }
                     matches.add(
-                        new Match(
-                            internal.path,
-                            matchPositions.stream().collect(Collectors.toList())
-                        )
-                    );
+                            new Match(
+                                    internal.path,
+                                    matchPositions.stream().collect(Collectors.toList())));
                 }
             }
         }
@@ -177,7 +175,8 @@ public class LimeEngine {
         return matches;
     }
 
-    // Compare matches, if a match location completely overlaps another, remove the smallest
+    // Compare matches, if a match location completely overlaps another, remove the
+    // smallest
     public List<Match> filterOverlappingMatches(List<Match> matches) {
         for (int i = 0; i < matches.size(); i++) {
             for (int j = i + 1; j < matches.size(); j++) {
@@ -191,7 +190,8 @@ public class LimeEngine {
         return matches;
     }
 
-    // Compare positions in a match, if one completely overlaps another, remove the smallest
+    // Compare positions in a match, if one completely overlaps another, remove the
+    // smallest
     public void removeOverlappingPositions(Match m1, Match m2) {
         for (int i = 0; i < m1.positions.size(); i++) {
             for (int j = 0; j < m2.positions.size(); j++) {
@@ -200,7 +200,6 @@ public class LimeEngine {
 
                 int pos1End = pos1 + m1.length;
                 int pos2End = pos2 + m2.length;
-
 
                 if (m1.length >= m2.length) {
                     if (pos1 <= pos2 && pos2End <= pos1End) {
