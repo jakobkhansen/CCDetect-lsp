@@ -29,6 +29,8 @@ import CCDetect.lsp.diagnostics.DiagnosticsPublisher;
 import CCDetect.lsp.files.CompilaDocumentIndex;
 import CCDetect.lsp.files.DocumentIndex;
 import CCDetect.lsp.files.DocumentModel;
+import CCDetect.lsp.treesitter.Treesitter;
+import ai.serenade.treesitter.Parser;
 
 /**
  * CCTextDocumentService
@@ -39,6 +41,7 @@ public class CCTextDocumentService implements TextDocumentService {
     private final static Logger FILE_LOGGER = Logger.getLogger("CCFileStateLogger");
     private DocumentIndex index;
     private CloneDetector detector;
+    private static Parser parser = Treesitter.getParser();
 
     public void initialize(String rootUri) {
         createIndex(rootUri);
@@ -99,7 +102,9 @@ public class CCTextDocumentService implements TextDocumentService {
 
     @Override
     public void didOpen(DidOpenTextDocumentParams params) {
+        LOGGER.info("didOpen");
         DocumentModel model = new DocumentModel(params.getTextDocument().getUri(), params.getTextDocument().getText());
+
         index.updateDocument(params.getTextDocument().getUri(), model);
 
         updateClones();

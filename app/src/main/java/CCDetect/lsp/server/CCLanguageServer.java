@@ -8,6 +8,8 @@ import org.eclipse.lsp4j.CompletionOptions;
 import org.eclipse.lsp4j.ExecuteCommandOptions;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
+import org.eclipse.lsp4j.MessageParams;
+import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.services.LanguageClient;
@@ -35,8 +37,8 @@ public class CCLanguageServer implements LanguageServer, LanguageClientAware {
     }
 
     public void testShowMessage() {
-        // MessageParams params = new MessageParams(MessageType.Info, "Hello World");
-        // client.showMessage(params);
+        MessageParams params = new MessageParams(MessageType.Info, "Hello World");
+        client.showMessage(params);
     }
 
     @Override
@@ -92,7 +94,6 @@ public class CCLanguageServer implements LanguageServer, LanguageClientAware {
     @Override
     public void connect(LanguageClient client) {
         this.client = client;
-        Treesitter.hello();
     }
 
     public static CCLanguageServer getInstance() {

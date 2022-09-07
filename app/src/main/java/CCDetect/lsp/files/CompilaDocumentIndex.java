@@ -17,6 +17,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import CCDetect.lsp.CodeClone;
+import CCDetect.lsp.treesitter.Treesitter;
+import ai.serenade.treesitter.Parser;
 
 /**
  * DocumentIndex
@@ -31,9 +33,11 @@ public class CompilaDocumentIndex implements DocumentIndex {
     Map<String, DocumentModel> documents = Collections.synchronizedMap(
             new HashMap<>());
     String rootUri;
+    Parser parser;
 
     public CompilaDocumentIndex(String rootUri) {
         this.rootUri = rootUri;
+        this.parser = Treesitter.getParser();
     }
 
     @Override
@@ -42,9 +46,7 @@ public class CompilaDocumentIndex implements DocumentIndex {
         for (Path p : filePaths) {
             String documentContent = getDocumentContent(p);
             if (documentContent != null) {
-                documents.put(
-                        p.toUri().toString(),
-                        new DocumentModel(p.toUri().toString(), documentContent));
+                updateDocument(p.toUri().toString(), new DocumentModel(p.toUri().toString(), documentContent));
             }
         }
     }
@@ -87,6 +89,13 @@ public class CompilaDocumentIndex implements DocumentIndex {
 
     @Override
     public void updateDocument(String uri, DocumentModel updatedDocument) {
+
+        try {
+            LOGGER.info(parser.parseString(updatedDocument.toString()).getRootNode().getNodeString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         documents.put(uri, updatedDocument);
     }
 

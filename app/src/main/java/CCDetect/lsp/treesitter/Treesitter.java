@@ -13,14 +13,15 @@ import ai.serenade.treesitter.Parser;
 import ai.serenade.treesitter.Tree;
 
 /**
- * Treesitter
+ * Treesitter parser singleton
  */
 public class Treesitter {
-
     private static final Logger LOGGER = Logger.getLogger(
             Logger.GLOBAL_LOGGER_NAME);
 
     private static final String LIB = "libparser.so";
+
+    private static Parser parser;
 
     static {
         try {
@@ -38,23 +39,15 @@ public class Treesitter {
 
             System.load(fileOut.getAbsolutePath());
             outStream.close();
+
+            parser = new Parser();
+            parser.setLanguage(Languages.java());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void hello() {
-        try {
-            Parser parser = new Parser();
-            parser.setLanguage(Languages.java());
-
-            Tree tree = parser.parseString("class Hello() {}");
-
-            LOGGER.info(tree.getRootNode().getNodeString());
-
-            parser.close();
-        } catch (Exception e) {
-            LOGGER.info(e.getMessage());
-        }
+    public static Parser getParser() {
+        return parser;
     }
 }
