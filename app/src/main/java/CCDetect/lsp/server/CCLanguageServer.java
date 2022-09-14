@@ -18,8 +18,6 @@ import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
 
-import CCDetect.lsp.treesitter.Treesitter;
-
 public class CCLanguageServer implements LanguageServer, LanguageClientAware {
 
     private static CCLanguageServer instance;

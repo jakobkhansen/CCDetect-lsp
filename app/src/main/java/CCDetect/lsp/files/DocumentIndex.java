@@ -13,6 +13,10 @@ public interface DocumentIndex extends Iterable<DocumentModel> {
 
     void updateDocument(String uri, DocumentModel updatedDocument);
 
+    // Used when you want to keep original DocumentModel instance
+    default void updateDocument(String uri, String updatedContent) {
+    };
+
     DocumentModel getDocument(String uri);
 
     void updateClones(List<CodeClone> clones);
