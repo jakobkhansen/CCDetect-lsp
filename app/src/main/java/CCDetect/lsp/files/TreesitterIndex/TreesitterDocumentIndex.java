@@ -40,6 +40,7 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
 
     @Override
     public void indexProject() {
+        double t1 = System.nanoTime();
         List<Path> filePaths = getFilePathsInProject();
         for (Path p : filePaths) {
             String documentContent = getDocumentContent(p);
@@ -48,6 +49,9 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
                 updateDocument(p.toUri().toString(), model);
             }
         }
+        double t2 = System.nanoTime();
+        double runtimeInMs = (t2 - t1) / 1000000.0;
+        LOGGER.info("Time to parse project: " + runtimeInMs);
     }
 
     private List<Path> getFilePathsInProject() {
@@ -116,8 +120,13 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
 
     @Override
     public void updateDocument(String uri, Range range, String updatedContent) {
+
+        double t1 = System.nanoTime();
         TreesitterDocumentModel document = documents.get(uri);
         document.updateDocument(range, updatedContent);
+        double t2 = System.nanoTime();
+        double runtimeInMs = (t2 - t1) / 1000000.0;
+        LOGGER.info("Time to incremental reparse: " + runtimeInMs);
     }
 
     @Override
