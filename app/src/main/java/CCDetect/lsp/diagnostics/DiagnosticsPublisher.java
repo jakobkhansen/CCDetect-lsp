@@ -66,7 +66,7 @@ public class DiagnosticsPublisher {
         return diagnostic;
     }
 
-    public static void publishCloneDiagnosticsFromIndex(DocumentIndex index) {
+    public static void publishCloneDiagnosticsFromIndex(DocumentIndex<DocumentModel> index) {
         CompletableFuture.runAsync(() -> {
 
             LOGGER.info("Publishing diagnostics");

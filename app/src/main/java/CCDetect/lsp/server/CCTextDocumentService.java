@@ -64,20 +64,28 @@ public class CCTextDocumentService implements TextDocumentService {
     public void didOpen(DidOpenTextDocumentParams params) {
         LOGGER.info("didOpen");
 
-        TreesitterDocumentModel model = new TreesitterDocumentModel(params.getTextDocument().getUri(),
+        DocumentModel model = new TreesitterDocumentModel(params.getTextDocument().getUri(),
                 params.getTextDocument().getText());
 
         index.updateDocument(params.getTextDocument().getUri(), model);
-
     }
 
     @Override
     public void didChange(DidChangeTextDocumentParams params) {
+        LOGGER.info("didChange");
+        String uri = params.getTextDocument().getUri();
 
-        TextDocumentContentChangeEvent lastChange = params.getContentChanges()
-                .get(params.getContentChanges().size() - 1);
-        DocumentModel model = new DocumentModel(params.getTextDocument().getUri(), lastChange.getText());
-        index.updateDocument(params.getTextDocument().getUri(), model);
+        if (!index.containsDocument(uri)) {
+            LOGGER.info("Unknown document");
+            return;
+        }
+
+        List<TextDocumentContentChangeEvent> changes = params.getContentChanges();
+
+        for (TextDocumentContentChangeEvent change : changes) {
+            LOGGER.info("Change: " + change.getText());
+            index.updateDocument(uri, change.getRange(), change.getText());
+        }
 
         updateClones();
         updateDiagnostics();

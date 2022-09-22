@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import org.eclipse.lsp4j.Range;
+
 import CCDetect.lsp.CodeClone;
 import CCDetect.lsp.files.DocumentIndex;
 import CCDetect.lsp.files.DocumentModel;
@@ -23,12 +25,12 @@ import CCDetect.lsp.files.DocumentModel;
 /**
  * DocumentIndex
  */
-public class TreesitterDocumentIndex implements DocumentIndex {
+public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocumentModel> {
 
     private static final Logger LOGGER = Logger.getLogger(
             Logger.GLOBAL_LOGGER_NAME);
 
-    Map<String, DocumentModel> documents = Collections.synchronizedMap(
+    Map<String, TreesitterDocumentModel> documents = Collections.synchronizedMap(
             new HashMap<>());
     String rootUri;
 
@@ -42,7 +44,8 @@ public class TreesitterDocumentIndex implements DocumentIndex {
         for (Path p : filePaths) {
             String documentContent = getDocumentContent(p);
             if (documentContent != null) {
-                updateDocument(p.toUri().toString(), new DocumentModel(p.toUri().toString(), documentContent));
+                TreesitterDocumentModel model = new TreesitterDocumentModel(p.toUri().toString(), documentContent);
+                updateDocument(p.toUri().toString(), model);
             }
         }
     }
@@ -84,7 +87,7 @@ public class TreesitterDocumentIndex implements DocumentIndex {
     }
 
     @Override
-    public void updateDocument(String uri, DocumentModel updatedDocument) {
+    public void updateDocument(String uri, TreesitterDocumentModel updatedDocument) {
 
         documents.put(uri, updatedDocument);
     }
@@ -107,12 +110,19 @@ public class TreesitterDocumentIndex implements DocumentIndex {
     }
 
     @Override
-    public Iterator<DocumentModel> iterator() {
+    public Iterator<TreesitterDocumentModel> iterator() {
         return documents.values().iterator();
     }
 
     @Override
-    public void updateDocument(String uri, String updatedContent) {
+    public void updateDocument(String uri, Range range, String updatedContent) {
+        TreesitterDocumentModel document = documents.get(uri);
+        document.updateDocument(range, updatedContent);
+    }
+
+    @Override
+    public boolean containsDocument(String uri) {
+        return documents.containsKey(uri);
     }
 
 }

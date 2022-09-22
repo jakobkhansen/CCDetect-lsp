@@ -23,12 +23,10 @@ import ai.serenade.treesitter.Parser;
 /**
  * DocumentIndex
  */
-public class CompilaDocumentIndex implements DocumentIndex {
+public class CompilaDocumentIndex implements DocumentIndex<DocumentModel> {
 
     private static final Logger LOGGER = Logger.getLogger(
             Logger.GLOBAL_LOGGER_NAME);
-    private static final Logger FILE_LOGGER = Logger.getLogger(
-            "CCFileStateLogger");
 
     Map<String, DocumentModel> documents = Collections.synchronizedMap(
             new HashMap<>());
@@ -119,6 +117,12 @@ public class CompilaDocumentIndex implements DocumentIndex {
     @Override
     public Iterator<DocumentModel> iterator() {
         return documents.values().iterator();
+    }
+
+    @Override
+    public boolean containsDocument(String uri) {
+        // TODO Auto-generated method stub
+        return documents.containsKey(uri);
     }
 
 }

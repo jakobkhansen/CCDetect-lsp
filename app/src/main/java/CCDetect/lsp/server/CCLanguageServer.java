@@ -49,13 +49,12 @@ public class CCLanguageServer implements LanguageServer, LanguageClientAware {
         // Set the capabilities of the LS to inform the client.
         initializeResult
                 .getCapabilities()
-                .setTextDocumentSync(TextDocumentSyncKind.Full);
+                .setTextDocumentSync(TextDocumentSyncKind.Incremental);
         CompletionOptions completionOptions = new CompletionOptions();
         initializeResult.getCapabilities().setCodeActionProvider(true);
         initializeResult
                 .getCapabilities()
                 .setCompletionProvider(completionOptions);
-        initializeResult.getCapabilities().setTextDocumentSync(TextDocumentSyncKind.Full);
         initializeResult.getCapabilities()
                 .setExecuteCommandProvider(new ExecuteCommandOptions(Arrays.asList(new String[] { "showDocument" })));
 
