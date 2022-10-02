@@ -9,12 +9,15 @@ import java.nio.file.StandardCopyOption;
 import java.util.logging.Logger;
 
 import ai.serenade.treesitter.Languages;
+import ai.serenade.treesitter.Node;
 import ai.serenade.treesitter.Parser;
+import ai.serenade.treesitter.TSQuery;
+import ai.serenade.treesitter.TSQueryCursor;
 
 /**
- * Treesitter parser singleton
+ * Treesitter parser singleton and interface for treesitter operations
  */
-public class Treesitter {
+public class TreeSitterLibrary {
 
     private static final Logger LOGGER = Logger.getLogger(
             Logger.GLOBAL_LOGGER_NAME);
@@ -26,7 +29,7 @@ public class Treesitter {
     static {
         LOGGER.info("Building parser");
         try {
-            InputStream in = Treesitter.class.getResourceAsStream("/libparser.so");
+            InputStream in = TreeSitterLibrary.class.getResourceAsStream("/libparser.so");
 
             File fileOut = new File(
                     System.getProperty("java.io.tmpdir") + "/" + LIB);
@@ -50,5 +53,14 @@ public class Treesitter {
 
     public static Parser getParser() {
         return parser;
+    }
+
+    public static TSQueryCursor queryPattern(Node node, String pattern) {
+        TSQuery query = new TSQuery(Languages.java(), pattern);
+        TSQueryCursor cursor = new TSQueryCursor();
+
+        cursor.execQuery(query, node);
+
+        return cursor;
     }
 }

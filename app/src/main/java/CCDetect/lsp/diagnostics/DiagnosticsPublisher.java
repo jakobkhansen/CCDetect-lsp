@@ -15,6 +15,7 @@ import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import CCDetect.lsp.CodeClone;
 import CCDetect.lsp.files.DocumentIndex;
 import CCDetect.lsp.files.DocumentModel;
+import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentModel;
 import CCDetect.lsp.server.CCLanguageServer;
 
 /**
@@ -66,7 +67,7 @@ public class DiagnosticsPublisher {
         return diagnostic;
     }
 
-    public static void publishCloneDiagnosticsFromIndex(DocumentIndex<DocumentModel> index) {
+    public static void publishCloneDiagnosticsFromIndex(DocumentIndex<TreesitterDocumentModel> index) {
         CompletableFuture.runAsync(() -> {
 
             LOGGER.info("Publishing diagnostics");

@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import CCDetect.lsp.CodeClone;
-import CCDetect.lsp.treesitter.Treesitter;
+import CCDetect.lsp.treesitter.TreeSitterLibrary;
 import ai.serenade.treesitter.Parser;
 
 /**
@@ -35,7 +35,7 @@ public class CompilaDocumentIndex implements DocumentIndex<DocumentModel> {
 
     public CompilaDocumentIndex(String rootUri) {
         this.rootUri = rootUri;
-        this.parser = Treesitter.getParser();
+        this.parser = TreeSitterLibrary.getParser();
     }
 
     @Override

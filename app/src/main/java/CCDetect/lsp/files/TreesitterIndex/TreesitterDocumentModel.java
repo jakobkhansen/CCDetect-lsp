@@ -20,14 +20,13 @@ public class TreesitterDocumentModel extends DocumentModel {
         super(uri, text);
         this.text = text;
         ast = new TreesitterDocumentAST(text);
-        LOGGER.info("ast for " + uri);
-        LOGGER.info(ast.getTree().getRootNode().getNodeString());
     }
 
     public TreesitterDocumentAST getAST() {
         return ast;
     }
 
+    // TODO refactor this and ensure correct
     public void updateDocument(Range range, String updatedContent) {
         Position startPos = range.getStart();
         Position endPos = range.getEnd();
