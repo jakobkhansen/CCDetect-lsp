@@ -48,6 +48,7 @@ public class CCTextDocumentService implements TextDocumentService {
 
     public void createDetector() {
         detector = new TreesitterDetector();
+        detector.onIndexChange(index);
     }
 
     @Override

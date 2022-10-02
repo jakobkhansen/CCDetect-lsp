@@ -27,7 +27,7 @@ public class TreeSitterLibrary {
     private static Parser parser;
 
     static {
-        LOGGER.info("Building parser");
+        LOGGER.info("Loading treesitter");
         try {
             InputStream in = TreeSitterLibrary.class.getResourceAsStream("/libparser.so");
 
@@ -44,14 +44,27 @@ public class TreeSitterLibrary {
             System.load(fileOut.getAbsolutePath());
             outStream.close();
 
-            parser = new Parser();
-            parser.setLanguage(Languages.java());
+            LOGGER.info("Treesitter loaded");
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+
         }
     }
 
+    public static void ensureLoaded() {
+    }
+
+    private static void createParser() {
+
+        parser = new Parser();
+        parser.setLanguage(Languages.java());
+    }
+
     public static Parser getParser() {
+        if (parser == null) {
+            createParser();
+        }
         return parser;
     }
 
