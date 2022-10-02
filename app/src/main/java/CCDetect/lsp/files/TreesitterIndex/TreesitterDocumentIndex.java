@@ -1,4 +1,4 @@
-package CCDetect.lsp.files;
+package CCDetect.lsp.files.TreesitterIndex;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,37 +16,42 @@ import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import org.eclipse.lsp4j.Range;
+
 import CCDetect.lsp.CodeClone;
-import CCDetect.lsp.treesitter.Treesitter;
-import ai.serenade.treesitter.Parser;
+import CCDetect.lsp.files.DocumentIndex;
+import CCDetect.lsp.files.DocumentModel;
 
 /**
  * DocumentIndex
  */
-public class CompilaDocumentIndex implements DocumentIndex<DocumentModel> {
+public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocumentModel> {
 
     private static final Logger LOGGER = Logger.getLogger(
             Logger.GLOBAL_LOGGER_NAME);
 
-    Map<String, DocumentModel> documents = Collections.synchronizedMap(
+    Map<String, TreesitterDocumentModel> documents = Collections.synchronizedMap(
             new HashMap<>());
     String rootUri;
-    Parser parser;
 
-    public CompilaDocumentIndex(String rootUri) {
+    public TreesitterDocumentIndex(String rootUri) {
         this.rootUri = rootUri;
-        this.parser = Treesitter.getParser();
     }
 
     @Override
     public void indexProject() {
+        double t1 = System.nanoTime();
         List<Path> filePaths = getFilePathsInProject();
         for (Path p : filePaths) {
             String documentContent = getDocumentContent(p);
             if (documentContent != null) {
-                updateDocument(p.toUri().toString(), new DocumentModel(p.toUri().toString(), documentContent));
+                TreesitterDocumentModel model = new TreesitterDocumentModel(p.toUri().toString(), documentContent);
+                updateDocument(p.toUri().toString(), model);
             }
         }
+        double t2 = System.nanoTime();
+        double runtimeInMs = (t2 - t1) / 1000000.0;
+        LOGGER.info("Time to parse project: " + runtimeInMs);
     }
 
     private List<Path> getFilePathsInProject() {
@@ -86,13 +91,7 @@ public class CompilaDocumentIndex implements DocumentIndex<DocumentModel> {
     }
 
     @Override
-    public void updateDocument(String uri, DocumentModel updatedDocument) {
-
-        try {
-            LOGGER.info(parser.parseString(updatedDocument.toString()).getRootNode().getNodeString());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void updateDocument(String uri, TreesitterDocumentModel updatedDocument) {
 
         documents.put(uri, updatedDocument);
     }
@@ -115,13 +114,23 @@ public class CompilaDocumentIndex implements DocumentIndex<DocumentModel> {
     }
 
     @Override
-    public Iterator<DocumentModel> iterator() {
+    public Iterator<TreesitterDocumentModel> iterator() {
         return documents.values().iterator();
     }
 
     @Override
+    public void updateDocument(String uri, Range range, String updatedContent) {
+
+        double t1 = System.nanoTime();
+        TreesitterDocumentModel document = documents.get(uri);
+        document.updateDocument(range, updatedContent);
+        double t2 = System.nanoTime();
+        double runtimeInMs = (t2 - t1) / 1000000.0;
+        LOGGER.info("Time to incremental reparse: " + runtimeInMs);
+    }
+
+    @Override
     public boolean containsDocument(String uri) {
-        // TODO Auto-generated method stub
         return documents.containsKey(uri);
     }
 

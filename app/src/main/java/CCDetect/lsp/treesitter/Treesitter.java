@@ -10,12 +10,12 @@ import java.util.logging.Logger;
 
 import ai.serenade.treesitter.Languages;
 import ai.serenade.treesitter.Parser;
-import ai.serenade.treesitter.Tree;
 
 /**
  * Treesitter parser singleton
  */
 public class Treesitter {
+
     private static final Logger LOGGER = Logger.getLogger(
             Logger.GLOBAL_LOGGER_NAME);
 
@@ -24,6 +24,7 @@ public class Treesitter {
     private static Parser parser;
 
     static {
+        LOGGER.info("Building parser");
         try {
             InputStream in = Treesitter.class.getResourceAsStream("/libparser.so");
 

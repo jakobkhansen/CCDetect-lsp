@@ -1,6 +1,5 @@
 package CCDetect.lsp.server;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
@@ -8,10 +7,6 @@ import java.util.logging.Logger;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.Command;
-import org.eclipse.lsp4j.CompletionItem;
-import org.eclipse.lsp4j.CompletionItemKind;
-import org.eclipse.lsp4j.CompletionList;
-import org.eclipse.lsp4j.CompletionParams;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
@@ -24,13 +19,11 @@ import org.eclipse.lsp4j.services.TextDocumentService;
 import CCDetect.lsp.CodeClone;
 import CCDetect.lsp.codeactions.CodeActionProvider;
 import CCDetect.lsp.detection.CloneDetector;
-import CCDetect.lsp.detection.tokenbased.HybridJavaDetector;
 import CCDetect.lsp.diagnostics.DiagnosticsPublisher;
-import CCDetect.lsp.files.CompilaDocumentIndex;
 import CCDetect.lsp.files.DocumentIndex;
 import CCDetect.lsp.files.DocumentModel;
-import CCDetect.lsp.treesitter.Treesitter;
-import ai.serenade.treesitter.Parser;
+import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentIndex;
+import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentModel;
 
 /**
  * CCTextDocumentService
@@ -41,7 +34,6 @@ public class CCTextDocumentService implements TextDocumentService {
     private final static Logger FILE_LOGGER = Logger.getLogger("CCFileStateLogger");
     private DocumentIndex index;
     private CloneDetector detector;
-    private static Parser parser = Treesitter.getParser();
 
     public void initialize(String rootUri) {
         createIndex(rootUri);
@@ -49,44 +41,12 @@ public class CCTextDocumentService implements TextDocumentService {
     }
 
     public void createIndex(String rootUri) {
-        index = new CompilaDocumentIndex(rootUri);
+        index = new TreesitterDocumentIndex(rootUri);
         index.indexProject();
     }
 
     public void createDetector() {
-        detector = new HybridJavaDetector();
-    }
-
-    @Override
-    public CompletableFuture<Either<List<CompletionItem>, CompletionList>> completion(CompletionParams position) {
-        return CompletableFuture.supplyAsync(() -> {
-            List<CompletionItem> completionItems = new ArrayList<>();
-            try {
-                // Sample Completion item for sayHello
-                CompletionItem completionItem = new CompletionItem();
-                // Define the text to be inserted in to the file if the completion item is
-                // selected.
-                completionItem.setInsertText(
-                        "sayHello() {\n    print(\"hello\")\n}");
-                // Set the label that shows when the completion drop down appears in the Editor.
-                completionItem.setLabel("sayHello()");
-                // Set the completion kind. This is a snippet.
-                // That means it replace character which trigger the completion and
-                // replace it with what defined in inserted text.
-                completionItem.setKind(CompletionItemKind.Snippet);
-                // This will set the details for the snippet code which will help user to
-                // understand what this completion item is.
-                completionItem.setDetail(
-                        "sayHello()\n this will say hello to the people");
-
-                // Add the sample completion item to the list.
-                completionItems.add(completionItem);
-            } catch (Exception e) {
-            }
-
-            // Return the list of completion items.
-            return Either.forLeft(completionItems);
-        });
+        // detector = new HybridJavaDetector();
     }
 
     @Override
@@ -103,21 +63,29 @@ public class CCTextDocumentService implements TextDocumentService {
     @Override
     public void didOpen(DidOpenTextDocumentParams params) {
         LOGGER.info("didOpen");
-        DocumentModel model = new DocumentModel(params.getTextDocument().getUri(), params.getTextDocument().getText());
+
+        DocumentModel model = new TreesitterDocumentModel(params.getTextDocument().getUri(),
+                params.getTextDocument().getText());
 
         index.updateDocument(params.getTextDocument().getUri(), model);
-
-        updateClones();
-        updateDiagnostics();
     }
 
     @Override
     public void didChange(DidChangeTextDocumentParams params) {
+        LOGGER.info("didChange");
+        String uri = params.getTextDocument().getUri();
 
-        TextDocumentContentChangeEvent lastChange = params.getContentChanges()
-                .get(params.getContentChanges().size() - 1);
-        DocumentModel model = new DocumentModel(params.getTextDocument().getUri(), lastChange.getText());
-        index.updateDocument(params.getTextDocument().getUri(), model);
+        if (!index.containsDocument(uri)) {
+            LOGGER.info("Unknown document");
+            return;
+        }
+
+        List<TextDocumentContentChangeEvent> changes = params.getContentChanges();
+
+        for (TextDocumentContentChangeEvent change : changes) {
+            LOGGER.info("Change: " + change.getText());
+            index.updateDocument(uri, change.getRange(), change.getText());
+        }
 
         updateClones();
         updateDiagnostics();

@@ -14,11 +14,13 @@ import CCDetect.lsp.CodeClone;
 public class DocumentModel {
 
     private final String uri;
+    private String text;
     private final List<DocumentLine> lines = new ArrayList<>();
     private List<CodeClone> clones = new ArrayList<>();
 
     public DocumentModel(String uri, String text) {
         this.uri = uri;
+        this.text = text;
         try (
                 Reader r = new StringReader(text);
                 BufferedReader reader = new BufferedReader(r);) {

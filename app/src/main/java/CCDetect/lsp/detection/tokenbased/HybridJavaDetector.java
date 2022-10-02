@@ -46,7 +46,7 @@ public class HybridJavaDetector implements CloneDetector {
 
     // Runs every time index changes
     @Override
-    public void onIndexChange(DocumentIndex index) {
+    public void onIndexChange(DocumentIndex<DocumentModel> index) {
         matchingEngine = new LimeEngine();
         LOGGER.info("onIndexChange");
 
@@ -68,7 +68,7 @@ public class HybridJavaDetector implements CloneDetector {
     }
 
     private HashMap<DocumentModel, List<DocumentMethod>> extractMethodsFromIndex(
-            DocumentIndex index) {
+            DocumentIndex<DocumentModel> index) {
         HashMap<DocumentModel, List<DocumentMethod>> methodsPerDocument = new HashMap<>();
 
         for (DocumentModel document : index) {

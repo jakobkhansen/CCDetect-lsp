@@ -4,6 +4,7 @@ import java.util.List;
 
 import CCDetect.lsp.CodeClone;
 import CCDetect.lsp.files.DocumentIndex;
+import CCDetect.lsp.files.DocumentModel;
 
 /**
  * CloneDetector
@@ -11,6 +12,6 @@ import CCDetect.lsp.files.DocumentIndex;
 public interface CloneDetector {
     List<CodeClone> getClones();
 
-    void onIndexChange(DocumentIndex index);
+    void onIndexChange(DocumentIndex<DocumentModel> index);
 
 }
