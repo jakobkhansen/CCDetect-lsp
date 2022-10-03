@@ -33,16 +33,23 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
 
             LOGGER.info("File: " + document.getUri());
             Node root = document.getAST().getTree().getRootNode();
-            String pattern = "(method_declaration) @method";
+            String pattern = "(function_definition) @method";
 
             TSQueryCursor methodsQueryCursor = TreeSitterLibrary.queryPattern(root,
                     pattern);
+
+            if (methodsQueryCursor == null) {
+                LOGGER.info("Invalid pattern");
+                return;
+            }
+
+            LOGGER.info(methodsQueryCursor.nextMatch() + "");
 
             for (TSQueryMatch match = methodsQueryCursor.nextMatch(); match != null; match = methodsQueryCursor
                     .nextMatch()) {
                 LOGGER.info(match.getCaptures()[0].getNode().getNodeString());
             }
-            LOGGER.info("");
+            LOGGER.info("test");
         }
     }
 }

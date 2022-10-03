@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.logging.Logger;
 
+import CCDetect.lsp.server.Configuration;
 import ai.serenade.treesitter.Languages;
 import ai.serenade.treesitter.Node;
 import ai.serenade.treesitter.Parser;
@@ -58,7 +59,7 @@ public class TreeSitterLibrary {
     private static void createParser() {
 
         parser = new Parser();
-        parser.setLanguage(Languages.java());
+        parser.setLanguage(getLanguage());
     }
 
     public static Parser getParser() {
@@ -69,11 +70,18 @@ public class TreeSitterLibrary {
     }
 
     public static TSQueryCursor queryPattern(Node node, String pattern) {
-        TSQuery query = new TSQuery(Languages.java(), pattern);
+        TSQuery query = new TSQuery(getLanguage(), pattern);
         TSQueryCursor cursor = new TSQueryCursor();
 
         cursor.execQuery(query, node);
 
         return cursor;
+    }
+
+    private static long getLanguage() {
+        Configuration config = Configuration.getInstance();
+        String language = config.getLanguage();
+
+        return TreeSitterLanguageResolver.resolve(language);
     }
 }
