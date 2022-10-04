@@ -15,11 +15,11 @@ public class TreeSitterLanguageResolver {
                 return Languages.c();
             case "cpp":
                 return Languages.cpp();
-            case "javascript":
+            case "js":
                 return Languages.javascript();
-            case "typescript":
+            case "ts":
                 return Languages.typescript();
-            case "python":
+            case "py":
                 return Languages.python();
             // TODO add more I guess
 

@@ -7,6 +7,7 @@ import CCDetect.lsp.CodeClone;
 import CCDetect.lsp.detection.CloneDetector;
 import CCDetect.lsp.files.DocumentIndex;
 import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentModel;
+import CCDetect.lsp.server.Configuration;
 import CCDetect.lsp.treesitter.TreeSitterLibrary;
 import ai.serenade.treesitter.Node;
 import ai.serenade.treesitter.TSQueryCapture;
@@ -29,14 +30,15 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
 
     @Override
     public void onIndexChange(DocumentIndex<TreesitterDocumentModel> index) {
+        Configuration config = Configuration.getInstance();
         for (TreesitterDocumentModel document : index) {
 
             LOGGER.info("File: " + document.getUri());
             Node root = document.getAST().getTree().getRootNode();
-            String pattern = "(function_definition) @method";
+            String query = config.getFragmentQuery();
 
             TSQueryCursor methodsQueryCursor = TreeSitterLibrary.queryPattern(root,
-                    pattern);
+                    query);
 
             if (methodsQueryCursor == null) {
                 LOGGER.info("Invalid pattern");
