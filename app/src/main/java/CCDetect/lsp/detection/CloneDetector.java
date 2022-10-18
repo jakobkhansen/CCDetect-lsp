@@ -9,9 +9,9 @@ import CCDetect.lsp.files.DocumentModel;
 /**
  * CloneDetector
  */
-public interface CloneDetector {
+public interface CloneDetector<T extends DocumentModel> {
     List<CodeClone> getClones();
 
-    void onIndexChange(DocumentIndex<DocumentModel> index);
+    void onIndexChange(DocumentIndex<T> index);
 
 }

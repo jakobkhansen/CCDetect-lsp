@@ -2,7 +2,7 @@ package CCDetect.lsp.files.TreesitterIndex;
 
 import java.util.logging.Logger;
 
-import CCDetect.lsp.treesitter.Treesitter;
+import CCDetect.lsp.treesitter.TreeSitterLibrary;
 import CCDetect.lsp.utils.Printer;
 import ai.serenade.treesitter.Parser;
 import ai.serenade.treesitter.TSInputEdit;
@@ -15,7 +15,7 @@ public class TreesitterDocumentAST {
     private Tree tree;
 
     public TreesitterDocumentAST(String documentContent) {
-        parser = Treesitter.getParser();
+        parser = TreeSitterLibrary.getParser();
         try {
             tree = parser.parseString(documentContent);
         } catch (Exception e) {
@@ -24,14 +24,12 @@ public class TreesitterDocumentAST {
     }
 
     public void incrementalUpdate(String newDocumentContent, TSInputEdit edit) {
-        LOGGER.info(Printer.print(edit));
         tree.edit(edit);
         try {
             tree = parser.parseString(tree, newDocumentContent);
         } catch (Exception e) {
             LOGGER.info("Exception while parsing");
         }
-        LOGGER.info(tree.getRootNode().getNodeString());
     }
 
     public Tree getTree() {

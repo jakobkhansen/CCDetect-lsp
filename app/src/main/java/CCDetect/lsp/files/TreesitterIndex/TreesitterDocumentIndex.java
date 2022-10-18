@@ -21,6 +21,8 @@ import org.eclipse.lsp4j.Range;
 import CCDetect.lsp.CodeClone;
 import CCDetect.lsp.files.DocumentIndex;
 import CCDetect.lsp.files.DocumentModel;
+import CCDetect.lsp.server.Configuration;
+import CCDetect.lsp.utils.Timer;
 
 /**
  * DocumentIndex
@@ -40,7 +42,8 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
 
     @Override
     public void indexProject() {
-        double t1 = System.nanoTime();
+        Timer timer = new Timer();
+        timer.start();
         List<Path> filePaths = getFilePathsInProject();
         for (Path p : filePaths) {
             String documentContent = getDocumentContent(p);
@@ -49,13 +52,13 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
                 updateDocument(p.toUri().toString(), model);
             }
         }
-        double t2 = System.nanoTime();
-        double runtimeInMs = (t2 - t1) / 1000000.0;
-        LOGGER.info("Time to parse project: " + runtimeInMs);
+        timer.stop();
+        timer.log("Time to parse project");
     }
 
     private List<Path> getFilePathsInProject() {
         List<Path> filePaths = new ArrayList<>();
+        Configuration config = Configuration.getInstance();
 
         try {
             URI uri = new URI(rootUri);
@@ -67,7 +70,7 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
                                     fileAttr.isDirectory()) &&
                                     com.google.common.io.Files
                                             .getFileExtension(filePath.toString())
-                                            .equals("ccdetect"))
+                                            .equals(config.getLanguage()))
                     .collect(Collectors.toList());
         } catch (Exception e) {
             e.printStackTrace();
@@ -82,6 +85,7 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
                         file,
                         Charset.forName("UTF-8"))) {
             String content = reader.lines().collect(Collectors.joining("\n"));
+            reader.close();
             return content;
         } catch (IOException ex) {
             ex.printStackTrace(); // handle an exception here

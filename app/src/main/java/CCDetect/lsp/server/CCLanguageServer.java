@@ -58,6 +58,10 @@ public class CCLanguageServer implements LanguageServer, LanguageClientAware {
         initializeResult.getCapabilities()
                 .setExecuteCommandProvider(new ExecuteCommandOptions(Arrays.asList(new String[] { "showDocument" })));
 
+        // Initialize config
+        String jsonConfig = params.getInitializationOptions().toString();
+        Configuration.createInstanceFromJson(jsonConfig);
+
         // Initialize index and detector
         String rootUri = params.getWorkspaceFolders().get(0).getUri();
         textDocumentService.initialize(rootUri);

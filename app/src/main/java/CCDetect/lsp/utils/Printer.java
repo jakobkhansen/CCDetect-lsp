@@ -40,4 +40,12 @@ public class Printer {
 
         return out;
     }
+
+    public static String print(String[] strings) {
+        String out = "String[ ";
+        for (String s : strings) {
+            out += s + " ";
+        }
+        return out + "]";
+    }
 }

@@ -29,7 +29,7 @@ import CCDetect.lsp.files.DocumentModel;
 /*
  * Ny plan: Lag en metode som henter alle metoder i AST, muligens normalize, så
  */
-public class HybridJavaDetector implements CloneDetector {
+public class HybridJavaDetector implements CloneDetector<DocumentModel> {
 
     List<CodeClone> clones = new ArrayList<>();
     JavaParser parser = new JavaParser();

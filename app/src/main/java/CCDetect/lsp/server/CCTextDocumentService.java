@@ -19,6 +19,7 @@ import org.eclipse.lsp4j.services.TextDocumentService;
 import CCDetect.lsp.CodeClone;
 import CCDetect.lsp.codeactions.CodeActionProvider;
 import CCDetect.lsp.detection.CloneDetector;
+import CCDetect.lsp.detection.treesitterbased.TreesitterDetector;
 import CCDetect.lsp.diagnostics.DiagnosticsPublisher;
 import CCDetect.lsp.files.DocumentIndex;
 import CCDetect.lsp.files.DocumentModel;
@@ -32,8 +33,8 @@ public class CCTextDocumentService implements TextDocumentService {
     // URI -> TextDocumentItem
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     private final static Logger FILE_LOGGER = Logger.getLogger("CCFileStateLogger");
-    private DocumentIndex index;
-    private CloneDetector detector;
+    private DocumentIndex<TreesitterDocumentModel> index;
+    private CloneDetector<TreesitterDocumentModel> detector;
 
     public void initialize(String rootUri) {
         createIndex(rootUri);
@@ -46,7 +47,8 @@ public class CCTextDocumentService implements TextDocumentService {
     }
 
     public void createDetector() {
-        // detector = new HybridJavaDetector();
+        detector = new TreesitterDetector();
+        detector.onIndexChange(index);
     }
 
     @Override
@@ -64,7 +66,7 @@ public class CCTextDocumentService implements TextDocumentService {
     public void didOpen(DidOpenTextDocumentParams params) {
         LOGGER.info("didOpen");
 
-        DocumentModel model = new TreesitterDocumentModel(params.getTextDocument().getUri(),
+        TreesitterDocumentModel model = new TreesitterDocumentModel(params.getTextDocument().getUri(),
                 params.getTextDocument().getText());
 
         index.updateDocument(params.getTextDocument().getUri(), model);
