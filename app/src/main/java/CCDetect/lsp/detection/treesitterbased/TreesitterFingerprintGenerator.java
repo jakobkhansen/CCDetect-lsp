@@ -6,13 +6,15 @@ import java.util.logging.Logger;
 
 import ai.serenade.treesitter.Node;
 
-public class TreesitterFingerprint {
+public class TreesitterFingerprintGenerator {
     private static final Logger LOGGER = Logger.getLogger(
             Logger.GLOBAL_LOGGER_NAME);
 
     Map<String, Character> tokenToCharMap = new HashMap<>();
     char tokenCount = '$' + 1;
 
+    // Generate the fingerprint of a single node, same token types will get same
+    // char
     public String getFingerprint(Node node) {
         StringBuilder out = new StringBuilder();
         TokenFetchVisitor visitor = new TokenFetchVisitor();

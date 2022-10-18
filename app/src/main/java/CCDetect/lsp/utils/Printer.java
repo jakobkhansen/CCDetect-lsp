@@ -3,8 +3,10 @@ package CCDetect.lsp.utils;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
+import CCDetect.lsp.detection.treesitterbased.Fingerprint;
 import ai.serenade.treesitter.TSInputEdit;
 import ai.serenade.treesitter.TSPoint;
+import ai.serenade.treesitter.TSRange;
 
 public class Printer {
     public static String print(Range range) {
@@ -23,7 +25,7 @@ public class Printer {
     }
 
     public static String print(TSInputEdit edit) {
-        String out = "TSInputEdit(\n";
+        String out = "TSInputEdit(";
         out += "\nstart_byte: " + edit.startByte;
         out += "\nold_end_byte: " + edit.oldEndByte;
         out += "\nnew_end_byte: " + edit.newEndByte;
@@ -31,7 +33,7 @@ public class Printer {
         out += "\nold_end_point" + print(edit.old_end_point);
         out += "\nnew_end_point" + print(edit.new_end_point);
 
-        return out;
+        return out + ")";
     }
 
     public static String print(TSPoint point) {
@@ -41,6 +43,16 @@ public class Printer {
         return out;
     }
 
+    public static String print(TSRange range) {
+        String out = "TSRange(";
+        out += "\nstart_byte: " + range.getStartByte();
+        out += "\nend_byte: " + range.getEndByte();
+        out += "\nstart_point" + print(range.getStartPoint());
+        out += "\nend_point" + print(range.getEndPoint());
+
+        return out + ")";
+    }
+
     public static String print(String[] strings) {
         String out = "String[ ";
         for (String s : strings) {
@@ -48,4 +60,15 @@ public class Printer {
         }
         return out + "]";
     }
+
+    public static String print(Fingerprint fingerprint) {
+        String out = "Fingerprint(\n";
+
+        out += fingerprint.getUri() + "\n";
+        out += fingerprint.getFingerprint() + "\n";
+        out += print(fingerprint.getMethodRange()) + "\n";
+
+        return out;
+    }
+
 }

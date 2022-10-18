@@ -10,6 +10,7 @@ import CCDetect.lsp.files.DocumentIndex;
 import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentModel;
 import CCDetect.lsp.server.Configuration;
 import CCDetect.lsp.treesitter.TreeSitterLibrary;
+import CCDetect.lsp.utils.Printer;
 import CCDetect.lsp.utils.Timer;
 import ai.serenade.treesitter.Node;
 import ai.serenade.treesitter.TSQueryCursor;
@@ -23,7 +24,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
     private static final Logger LOGGER = Logger.getLogger(
             Logger.GLOBAL_LOGGER_NAME);
     List<CodeClone> clones = new ArrayList<>();
-    TreesitterFingerprint fingerprint = new TreesitterFingerprint();
+    TreesitterFingerprintGenerator fingerprintGenerator = new TreesitterFingerprintGenerator();
 
     @Override
     public List<CodeClone> getClones() {
@@ -32,16 +33,14 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
 
     @Override
     public void onIndexChange(DocumentIndex<TreesitterDocumentModel> index) {
+        FingerprintIndex fingerprintIndex = new FingerprintIndex();
         Configuration config = Configuration.getInstance();
-        LOGGER.info("hello world");
         Timer timer = new Timer();
         timer.start();
         for (TreesitterDocumentModel document : index) {
 
-            LOGGER.info("File: " + document.getUri());
             Node root = document.getAST().getTree().getRootNode();
             String query = config.getFragmentQuery();
-            LOGGER.info(query);
 
             TSQueryCursor methodsQueryCursor = TreeSitterLibrary.queryPattern(root,
                     query);
@@ -55,12 +54,15 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                     .nextMatch()) {
                 Node matchNode = match.getCaptures()[0].getNode();
 
-                LOGGER.info(fingerprint.getFingerprint(matchNode));
+                String fingerprintString = fingerprintGenerator.getFingerprint(matchNode);
+                Fingerprint fingerprint = new Fingerprint(fingerprintString, document.getUri(), matchNode.toRange());
 
+                LOGGER.info(Printer.print(fingerprint));
+                fingerprintIndex.add(fingerprint);
             }
         }
         timer.stop();
         timer.log("Time to fetch tokens");
-        LOGGER.info("Token count: " + (int) fingerprint.tokenCount);
+        LOGGER.info("Token count: " + (int) fingerprintGenerator.tokenCount);
     }
 }
