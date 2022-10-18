@@ -9,7 +9,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.logging.Logger;
 
 import CCDetect.lsp.server.Configuration;
-import ai.serenade.treesitter.Languages;
 import ai.serenade.treesitter.Node;
 import ai.serenade.treesitter.Parser;
 import ai.serenade.treesitter.TSQuery;

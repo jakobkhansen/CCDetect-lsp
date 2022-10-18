@@ -22,6 +22,7 @@ import CCDetect.lsp.CodeClone;
 import CCDetect.lsp.files.DocumentIndex;
 import CCDetect.lsp.files.DocumentModel;
 import CCDetect.lsp.server.Configuration;
+import CCDetect.lsp.utils.Timer;
 
 /**
  * DocumentIndex
@@ -41,23 +42,18 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
 
     @Override
     public void indexProject() {
-        double t1 = System.nanoTime();
+        Timer timer = new Timer();
+        timer.start();
         List<Path> filePaths = getFilePathsInProject();
-        int documents = 0;
         for (Path p : filePaths) {
             String documentContent = getDocumentContent(p);
-            documents++;
-            LOGGER.info("Parsed: " + documents);
-            LOGGER.info("Memory used: " + Runtime.getRuntime().totalMemory());
-            LOGGER.info("Free Memory: " + Runtime.getRuntime().freeMemory());
             if (documentContent != null) {
                 TreesitterDocumentModel model = new TreesitterDocumentModel(p.toUri().toString(), documentContent);
                 updateDocument(p.toUri().toString(), model);
             }
         }
-        double t2 = System.nanoTime();
-        double runtimeInMs = (t2 - t1) / 1000000.0;
-        LOGGER.info("Time to parse project: " + runtimeInMs);
+        timer.stop();
+        timer.log("Time to parse project");
     }
 
     private List<Path> getFilePathsInProject() {

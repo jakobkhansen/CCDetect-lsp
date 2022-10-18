@@ -59,10 +59,8 @@ public class CCLanguageServer implements LanguageServer, LanguageClientAware {
                 .setExecuteCommandProvider(new ExecuteCommandOptions(Arrays.asList(new String[] { "showDocument" })));
 
         // Initialize config
-        LOGGER.info(params.getInitializationOptions().toString());
         String jsonConfig = params.getInitializationOptions().toString();
         Configuration.createInstanceFromJson(jsonConfig);
-        LOGGER.info(Configuration.getInstance().getLanguage());
 
         // Initialize index and detector
         String rootUri = params.getWorkspaceFolders().get(0).getUri();
