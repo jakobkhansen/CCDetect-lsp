@@ -1,9 +1,12 @@
 package CCDetect.lsp.utils;
 
+import java.util.Map;
+
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
 import CCDetect.lsp.detection.treesitterbased.Fingerprint;
+import CCDetect.lsp.detection.treesitterbased.TreesitterFingerprintGenerator;
 import ai.serenade.treesitter.TSInputEdit;
 import ai.serenade.treesitter.TSPoint;
 import ai.serenade.treesitter.TSRange;
@@ -61,6 +64,17 @@ public class Printer {
         return out + "]";
     }
 
+    public static <K, V> String print(Map<K, V> map) {
+        StringBuilder out = new StringBuilder("Map(");
+        for (K key : map.keySet()) {
+            V value = map.get(key);
+            out.append("\n" + key.toString() + ": " + value.toString());
+        }
+
+        out.append("\n");
+        return out.toString();
+    }
+
     public static String print(Fingerprint fingerprint) {
         String out = "Fingerprint(\n";
 
@@ -71,4 +85,9 @@ public class Printer {
         return out;
     }
 
+    public static String print(TreesitterFingerprintGenerator fingerprintGenerator) {
+        String out = "FingerprintGeneratorMap(\n";
+        out += print(fingerprintGenerator.getTokenToCharMap());
+        return out + ")";
+    }
 }

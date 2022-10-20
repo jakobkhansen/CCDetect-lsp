@@ -19,7 +19,17 @@ public class TreesitterDocumentModel extends DocumentModel {
     public TreesitterDocumentModel(String uri, String text) {
         super(uri, text);
         this.text = text;
+    }
+
+    public void buildTree() {
         ast = new TreesitterDocumentAST(text);
+    }
+
+    public void freeTree() {
+        if (ast != null) {
+            ast.free();
+        }
+        ast = null;
     }
 
     public TreesitterDocumentAST getAST() {
@@ -60,6 +70,11 @@ public class TreesitterDocumentModel extends DocumentModel {
         String prefix = text.substring(0, start);
         String suffix = text.substring(end, text.length());
         text = prefix + updatedContent + suffix;
+
+        if (ast == null) {
+            buildTree();
+            return;
+        }
 
         int numLinesInEdit = text.split("\n").length;
         int numCharsInLastLineOfEdit = text.split("\n")[text.split("\n").length - 1].length();

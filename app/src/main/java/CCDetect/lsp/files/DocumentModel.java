@@ -36,6 +36,10 @@ public class DocumentModel {
         }
     }
 
+    public String getText() {
+        return text;
+    }
+
     public List<DocumentLine> getLines() {
         return lines;
     }
