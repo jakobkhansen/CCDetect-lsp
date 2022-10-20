@@ -23,6 +23,12 @@ public class TreesitterDocumentAST {
         }
     }
 
+    public void free() {
+        if (tree != null) {
+            tree.close();
+        }
+    }
+
     public void incrementalUpdate(String newDocumentContent, TSInputEdit edit) {
         tree.edit(edit);
         try {
