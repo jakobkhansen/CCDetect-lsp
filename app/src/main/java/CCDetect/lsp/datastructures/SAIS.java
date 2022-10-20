@@ -234,9 +234,27 @@ public class SAIS {
         return lcp;
     }
 
+    // Int array is expected to end with a 0 and have no 0's otherwise
     public ExtendedSuffixArray buildExtendedSuffixArray(int[] text) {
+        int max = 0;
+        for (int i : text) {
+            max = Integer.max(i, max);
+        }
+        int[] suffOriginal = buildSuffixArray(text, max + 1);
 
-        return null;
+        // Suffix array algorithm for some reason returns 1 element more than input,
+        // probably assumes it appends another $ or something
+        // TODO refactor so we don't need to do this crap
+        int[] suff = new int[suffOriginal.length - 1];
+        for (int z = 1; z < suffOriginal.length; z++) {
+            suff[z - 1] = suffOriginal[z];
+        }
+
+        int[] inverse = buildInverseSuffixArray(suff);
+
+        int[] lcp = buildLCPArray(text, suff, inverse);
+
+        return new ExtendedSuffixArray(suff, inverse, lcp);
     }
 
     private static final boolean s_type = true;

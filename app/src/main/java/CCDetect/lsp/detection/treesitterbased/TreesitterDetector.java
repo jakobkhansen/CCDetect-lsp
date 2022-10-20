@@ -4,7 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.google.common.primitives.Ints;
+
 import CCDetect.lsp.CodeClone;
+import CCDetect.lsp.datastructures.ExtendedSuffixArray;
+import CCDetect.lsp.datastructures.SAIS;
 import CCDetect.lsp.detection.CloneDetector;
 import CCDetect.lsp.files.DocumentIndex;
 import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentModel;
@@ -37,15 +41,20 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         LOGGER.info("Token count: " + (int) fingerprintGenerator.tokenCount);
         LOGGER.info(Printer.print(fingerprintGenerator));
         // Testing
-        StringBuilder fullFingerprint = new StringBuilder();
+        ArrayList<Integer> fullFingerprint = new ArrayList<>();
         for (Fingerprint f : fingerprintIndex.fingerprints) {
             for (int i : f.getFingerprint()) {
-                fullFingerprint.append(i);
-                fullFingerprint.append(',');
+                fullFingerprint.add(i);
             }
         }
-        LOGGER.info("fullFingerprint size: " + fullFingerprint.length());
-        LOGGER.info(fullFingerprint.toString());
+        // 0 terminal
+        fullFingerprint.add(0);
+        LOGGER.info("fullFingerprint size: " + fullFingerprint.size());
+        int[] fingerprint = Ints.toArray(fullFingerprint);
+
+        ExtendedSuffixArray suff = new SAIS().buildExtendedSuffixArray(fingerprint);
+        LOGGER.info("Suffix: " + Printer.print(suff.getSuffix()));
+        LOGGER.info("LCP: " + Printer.print(suff.getLcp()));
 
     }
 

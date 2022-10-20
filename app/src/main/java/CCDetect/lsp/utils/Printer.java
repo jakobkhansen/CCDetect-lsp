@@ -64,6 +64,14 @@ public class Printer {
         return out + "]";
     }
 
+    public static String print(int[] ints) {
+        String out = "int[ ";
+        for (int s : ints) {
+            out += s + " ";
+        }
+        return out + "]";
+    }
+
     public static <K, V> String print(Map<K, V> map) {
         StringBuilder out = new StringBuilder("Map(");
         for (K key : map.keySet()) {
