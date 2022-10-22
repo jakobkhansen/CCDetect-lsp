@@ -38,7 +38,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
     @Override
     public void onIndexChange(DocumentIndex<TreesitterDocumentModel> index) {
         FingerprintIndex fingerprintIndex = buildFingerprintIndex(index);
-        LOGGER.info("Token count: " + (int) fingerprintGenerator.tokenCount);
+        LOGGER.info("Token count: " + (int) fingerprintGenerator.tokenCounter);
         LOGGER.info(Printer.print(fingerprintGenerator));
         // Testing
         ArrayList<Integer> fullFingerprint = new ArrayList<>();
@@ -55,6 +55,16 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         ExtendedSuffixArray suff = new SAIS().buildExtendedSuffixArray(fingerprint);
         LOGGER.info("Suffix: " + Printer.print(suff.getSuffix()));
         LOGGER.info("LCP: " + Printer.print(suff.getLcp()));
+
+        // TODO How to eliminate clones within clones?
+        int cloneCount = 0;
+        for (int i = 0; i < suff.getLcp().length; i++) {
+            if (suff.getLcp()[i] >= 50) {
+                LOGGER.info("Clone at " + i);
+                cloneCount++;
+            }
+        }
+        LOGGER.info("Num clones: " + cloneCount);
 
     }
 

@@ -65,11 +65,12 @@ public class Printer {
     }
 
     public static String print(int[] ints) {
-        String out = "int[ ";
+        StringBuilder out = new StringBuilder("int[ ");
         for (int s : ints) {
-            out += s + " ";
+            out.append(s + " ");
         }
-        return out + "]";
+        out.append("]");
+        return out.toString();
     }
 
     public static <K, V> String print(Map<K, V> map) {

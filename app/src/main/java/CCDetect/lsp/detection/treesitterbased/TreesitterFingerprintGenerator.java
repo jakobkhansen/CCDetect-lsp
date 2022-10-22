@@ -16,7 +16,7 @@ public class TreesitterFingerprintGenerator {
             Logger.GLOBAL_LOGGER_NAME);
 
     Map<String, Integer> tokenToCharMap = new HashMap<>();
-    int tokenCount = 1;
+    int tokenCounter = 2;
 
     // Generate the fingerprint of a single node, same token types will get same
     // char
@@ -31,12 +31,15 @@ public class TreesitterFingerprintGenerator {
             out.add(tokenToValue(token));
         }
 
+        // Method delimiter
+        out.add(1);
+
         return Ints.toArray(out);
     }
 
     private int tokenToValue(String token) {
         if (!tokenToCharMap.containsKey(token)) {
-            tokenToCharMap.put(token, tokenCount++);
+            tokenToCharMap.put(token, tokenCounter++);
         }
         return tokenToCharMap.get(token);
     }
