@@ -29,6 +29,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             Logger.GLOBAL_LOGGER_NAME);
     List<CodeClone> clones = new ArrayList<>();
     TreesitterFingerprintGenerator fingerprintGenerator = new TreesitterFingerprintGenerator();
+    int CLONE_THRESHOLD = 50;
 
     @Override
     public List<CodeClone> getClones() {
@@ -53,14 +54,20 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         int[] fingerprint = Ints.toArray(fullFingerprint);
 
         ExtendedSuffixArray suff = new SAIS().buildExtendedSuffixArray(fingerprint);
+        int[] SA = suff.getSuffix();
+        int[] ISA = suff.getInverseSuffix();
+        int[] LCP = suff.getLcp();
         LOGGER.info("Suffix: " + Printer.print(suff.getSuffix()));
         LOGGER.info("LCP: " + Printer.print(suff.getLcp()));
 
         // TODO How to eliminate clones within clones?
         int cloneCount = 0;
-        for (int i = 0; i < suff.getLcp().length; i++) {
-            if (suff.getLcp()[i] >= 50) {
-                LOGGER.info("Clone at " + i);
+        for (int i = 0; i < SA.length; i++) {
+
+            if (LCP[ISA[i]] >= CLONE_THRESHOLD) {
+                while (LCP[ISA[i]] > LCP[ISA[i + 1]] && LCP[ISA[i]] >= CLONE_THRESHOLD) {
+                    i++;
+                }
                 cloneCount++;
             }
         }
