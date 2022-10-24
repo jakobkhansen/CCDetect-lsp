@@ -4,11 +4,19 @@ import ai.serenade.treesitter.TSRange;
 
 public class Fingerprint {
     int[] fingerprint;
+    TSRange[] ranges;
     String uri;
     TSRange methodRange;
 
     public Fingerprint(int[] fingerprint, String uri, TSRange methodRange) {
         this.fingerprint = fingerprint;
+        this.uri = uri;
+        this.methodRange = methodRange;
+    }
+
+    public Fingerprint(int[] fingerprint, TSRange[] ranges, String uri, TSRange methodRange) {
+        this.fingerprint = fingerprint;
+        this.ranges = ranges;
         this.uri = uri;
         this.methodRange = methodRange;
     }
@@ -33,4 +41,9 @@ public class Fingerprint {
     public TSRange getMethodRange() {
         return methodRange;
     }
+
+    public TSRange[] getRanges() {
+        return ranges;
+    }
+
 }

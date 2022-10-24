@@ -15,6 +15,7 @@ public class TreesitterDocumentAST {
     private Tree tree;
 
     public TreesitterDocumentAST(String documentContent) {
+        LOGGER.info(documentContent);
         parser = TreeSitterLibrary.getParser();
         try {
             tree = parser.parseString(documentContent);

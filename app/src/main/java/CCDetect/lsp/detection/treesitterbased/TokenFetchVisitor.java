@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import CCDetect.lsp.utils.Printer;
 import ai.serenade.treesitter.Node;
 import ai.serenade.treesitter.TSRange;
 
 public class TokenFetchVisitor implements NodeVisitor {
 
-    List<String> types = new ArrayList<>();
     List<TSRange> ranges = new ArrayList<>();
     private static final Logger LOGGER = Logger.getLogger(
             Logger.GLOBAL_LOGGER_NAME);
@@ -26,18 +26,15 @@ public class TokenFetchVisitor implements NodeVisitor {
         if (node.getChildCount() > 0) {
             return;
         }
+        LOGGER.info("node getType() " + node.getType());
+        LOGGER.info("node range " + Printer.print(node.toRange()));
 
-        types.add(node.getType());
-        ranges.add(new TSRange(node.getStartPoint(), node.getEndPoint(), node.getStartByte(), node.getEndByte()));
-    }
-
-    public String[] getTokens() {
-        String[] out = new String[types.size()];
-        return types.toArray(out);
+        ranges.add(node.toRange());
     }
 
     public TSRange[] getRanges() {
-        TSRange[] out = new TSRange[types.size()];
+        TSRange[] out = new TSRange[ranges.size() + 1];
+        out[out.length - 1] = null;
         return ranges.toArray(out);
     }
 }

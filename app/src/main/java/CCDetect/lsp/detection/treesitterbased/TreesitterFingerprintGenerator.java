@@ -20,13 +20,16 @@ public class TreesitterFingerprintGenerator {
 
     // Generate the fingerprint of a single node, same token types will get same
     // char
-    public int[] getFingerprint(String text, Node node) {
+    public Fingerprint getFingerprint(String text, String uri, Node node) {
         List<Integer> out = new ArrayList<>();
         TokenFetchVisitor visitor = new TokenFetchVisitor();
         NodeTraversal.traverse(node, visitor);
 
         TSRange[] ranges = visitor.getRanges();
         for (TSRange range : ranges) {
+            if (range == null) {
+                continue;
+            }
             String token = text.substring(range.getStartByte(), range.getEndByte());
             out.add(tokenToValue(token));
         }
@@ -34,7 +37,7 @@ public class TreesitterFingerprintGenerator {
         // Method delimiter
         out.add(1);
 
-        return Ints.toArray(out);
+        return new Fingerprint(Ints.toArray(out), ranges, uri, node.toRange());
     }
 
     private int tokenToValue(String token) {
