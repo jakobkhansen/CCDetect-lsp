@@ -42,6 +42,8 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         LOGGER.info("Token count: " + (int) fingerprintGenerator.tokenCounter);
         LOGGER.info(Printer.print(fingerprintGenerator));
         // Testing
+
+        // Build fingerprint
         ArrayList<Integer> fullFingerprint = new ArrayList<>();
         for (Fingerprint f : fingerprintIndex.fingerprints) {
             for (int i : f.getFingerprint()) {
@@ -50,9 +52,11 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         }
         // 0 terminal
         fullFingerprint.add(0);
+
         LOGGER.info("fullFingerprint size: " + fullFingerprint.size());
         int[] fingerprint = Ints.toArray(fullFingerprint);
 
+        // Build suffix, inverse, lcp
         ExtendedSuffixArray suff = new SAIS().buildExtendedSuffixArray(fingerprint);
         int[] SA = suff.getSuffix();
         int[] ISA = suff.getInverseSuffix();
@@ -60,11 +64,17 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         LOGGER.info("Suffix: " + Printer.print(suff.getSuffix()));
         LOGGER.info("LCP: " + Printer.print(suff.getLcp()));
 
-        // TODO How to eliminate clones within clones?
+        extractClonesFromSA(SA, ISA, LCP);
+
+    }
+
+    private void extractClonesFromSA(int[] SA, int[] ISA, int[] LCP) {
+        // Fetch clones, ignore contained clones
         int cloneCount = 0;
         for (int i = 0; i < SA.length; i++) {
 
             if (LCP[ISA[i]] >= CLONE_THRESHOLD) {
+                // Ignore contained clones
                 while (LCP[ISA[i]] > LCP[ISA[i + 1]] && LCP[ISA[i]] >= CLONE_THRESHOLD) {
                     i++;
                 }
@@ -72,7 +82,6 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             }
         }
         LOGGER.info("Num clones: " + cloneCount);
-
     }
 
     private FingerprintIndex buildFingerprintIndex(DocumentIndex<TreesitterDocumentModel> index) {
