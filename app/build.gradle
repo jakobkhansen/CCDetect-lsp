@@ -47,3 +47,7 @@ application {
     // Define the main class for the application.
     mainClass = 'CCDetect.lsp.App'
 }
+
+test {
+    testLogging.showStandardStreams = true
+}

@@ -15,7 +15,7 @@ public class SAIS {
     private static final Logger LOGGER = Logger.getLogger(
             Logger.GLOBAL_LOGGER_NAME);
 
-    private int[] buildSuffixArray(final int[] text, final int alphabetSize) {
+    public int[] buildSuffixArray(final int[] text, final int alphabetSize) {
         final BitSet suffixTypes = getSuffixTypes(text);
         final int[] bucketSizes = getBucketSizes(text, alphabetSize);
         final int n = text.length;
