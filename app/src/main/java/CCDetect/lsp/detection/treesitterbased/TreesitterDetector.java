@@ -29,6 +29,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             Logger.GLOBAL_LOGGER_NAME);
     List<CodeClone> clones = new ArrayList<>();
     TreesitterFingerprintGenerator fingerprintGenerator = new TreesitterFingerprintGenerator();
+    int CLONE_THRESHOLD = 50;
 
     @Override
     public List<CodeClone> getClones() {
@@ -38,9 +39,11 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
     @Override
     public void onIndexChange(DocumentIndex<TreesitterDocumentModel> index) {
         FingerprintIndex fingerprintIndex = buildFingerprintIndex(index);
-        LOGGER.info("Token count: " + (int) fingerprintGenerator.tokenCount);
+        LOGGER.info("Token count: " + (int) fingerprintGenerator.tokenCounter);
         LOGGER.info(Printer.print(fingerprintGenerator));
         // Testing
+
+        // Build fingerprint
         ArrayList<Integer> fullFingerprint = new ArrayList<>();
         for (Fingerprint f : fingerprintIndex.fingerprints) {
             for (int i : f.getFingerprint()) {
@@ -49,13 +52,36 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         }
         // 0 terminal
         fullFingerprint.add(0);
+
         LOGGER.info("fullFingerprint size: " + fullFingerprint.size());
         int[] fingerprint = Ints.toArray(fullFingerprint);
 
+        // Build suffix, inverse, lcp
         ExtendedSuffixArray suff = new SAIS().buildExtendedSuffixArray(fingerprint);
+        int[] SA = suff.getSuffix();
+        int[] ISA = suff.getInverseSuffix();
+        int[] LCP = suff.getLcp();
         LOGGER.info("Suffix: " + Printer.print(suff.getSuffix()));
         LOGGER.info("LCP: " + Printer.print(suff.getLcp()));
 
+        extractClonesFromSA(SA, ISA, LCP);
+
+    }
+
+    private void extractClonesFromSA(int[] SA, int[] ISA, int[] LCP) {
+        // Fetch clones, ignore contained clones
+        int cloneCount = 0;
+        for (int i = 0; i < SA.length; i++) {
+
+            if (LCP[ISA[i]] >= CLONE_THRESHOLD) {
+                // Ignore contained clones
+                while (LCP[ISA[i]] > LCP[ISA[i + 1]] && LCP[ISA[i]] >= CLONE_THRESHOLD) {
+                    i++;
+                }
+                cloneCount++;
+            }
+        }
+        LOGGER.info("Num clones: " + cloneCount);
     }
 
     private FingerprintIndex buildFingerprintIndex(DocumentIndex<TreesitterDocumentModel> index) {

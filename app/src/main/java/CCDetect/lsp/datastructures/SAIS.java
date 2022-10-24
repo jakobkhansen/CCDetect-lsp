@@ -8,10 +8,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Scanner;
+import java.util.logging.Logger;
 
 public class SAIS {
 
-    private int[] buildSuffixArray(final int[] text, final int alphabetSize) {
+    private static final Logger LOGGER = Logger.getLogger(
+            Logger.GLOBAL_LOGGER_NAME);
+
+    public int[] buildSuffixArray(final int[] text, final int alphabetSize) {
         final BitSet suffixTypes = getSuffixTypes(text);
         final int[] bucketSizes = getBucketSizes(text, alphabetSize);
         final int n = text.length;
@@ -223,7 +227,7 @@ public class SAIS {
         for (int i = 0; i < n - 1; i++) {
             int r = R[i];
             int prevSuffix = L[r - 1];
-            while (T[i + l] == T[prevSuffix + l]) {
+            while (T[i + l] == T[prevSuffix + l] && T[i + l] != 1) {
                 l++;
             }
             lcp[r] = l;
@@ -240,19 +244,23 @@ public class SAIS {
         for (int i : text) {
             max = Integer.max(i, max);
         }
+        LOGGER.info("Building suff");
         int[] suffOriginal = buildSuffixArray(text, max + 1);
 
         // Suffix array algorithm for some reason returns 1 element more than input,
         // probably assumes it appends another $ or something
         // TODO refactor so we don't need to do this crap
         int[] suff = new int[suffOriginal.length - 1];
+        LOGGER.info("Got suffix");
         for (int z = 1; z < suffOriginal.length; z++) {
             suff[z - 1] = suffOriginal[z];
         }
 
         int[] inverse = buildInverseSuffixArray(suff);
+        LOGGER.info("Got inverse");
 
         int[] lcp = buildLCPArray(text, suff, inverse);
+        LOGGER.info("Got LCP");
 
         return new ExtendedSuffixArray(suff, inverse, lcp);
     }
