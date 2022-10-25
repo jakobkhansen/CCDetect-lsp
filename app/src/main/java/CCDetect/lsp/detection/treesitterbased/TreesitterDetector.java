@@ -15,6 +15,7 @@ import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentModel;
 import CCDetect.lsp.server.Configuration;
 import CCDetect.lsp.treesitter.TreeSitterLibrary;
 import CCDetect.lsp.utils.Printer;
+import CCDetect.lsp.utils.RangeConverter;
 import CCDetect.lsp.utils.Timer;
 import ai.serenade.treesitter.Node;
 import ai.serenade.treesitter.TSQueryCursor;
@@ -33,14 +34,17 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
     FingerprintIndex fingerprintIndex;
     TokenSourceMap sourceMap = new TokenSourceMap();
     int CLONE_THRESHOLD = 50;
+    int[] SA, ISA, LCP;
 
     @Override
     public List<CodeClone> getClones() {
+        LOGGER.info("num clones: " + clones.size());
         return clones;
     }
 
     @Override
     public void onIndexChange(DocumentIndex<TreesitterDocumentModel> index) {
+        clones = new ArrayList<>();
         fingerprintIndex = buildFingerprintIndex(index);
 
         // Build fingerprint
@@ -48,8 +52,6 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         for (Fingerprint f : fingerprintIndex.fingerprints) {
             TSRange[] ranges = f.getRanges();
             int[] fingerprint = f.getFingerprint();
-            LOGGER.info("range size: " + ranges.length);
-            LOGGER.info("fingerprint size: " + fingerprint.length);
             for (int i = 0; i < fingerprint.length; i++) {
                 int tokenValue = fingerprint[i];
                 fullFingerprint.add(tokenValue);
@@ -60,45 +62,41 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         fullFingerprint.add(0);
         sourceMap.put(null, null);
 
-        LOGGER.info("fullFingerprint size: " + fullFingerprint.size());
-        LOGGER.info("sourceMap size: " + sourceMap.size());
+        LOGGER.info("Hashes: " + Printer.print(fingerprintGenerator.getTokenToCharMap()));
         int[] fingerprint = Ints.toArray(fullFingerprint);
 
         // Build suffix, inverse, lcp
         ExtendedSuffixArray suff = new SAIS().buildExtendedSuffixArray(fingerprint);
-        int[] SA = suff.getSuffix();
-        int[] ISA = suff.getInverseSuffix();
-        int[] LCP = suff.getLcp();
+        SA = suff.getSuffix();
+        ISA = suff.getInverseSuffix();
+        LCP = suff.getLcp();
+        int[] indices = new int[fingerprint.length];
+        for (int i = 0; i < indices.length; i++) {
+            indices[i] = i;
+        }
+        LOGGER.info("Indices:     " + Printer.print(indices));
         LOGGER.info("Fingerprint: " + Printer.print(fingerprint));
-        LOGGER.info("Suffix: " + Printer.print(suff.getSuffix()));
-        LOGGER.info("LCP: " + Printer.print(suff.getLcp()));
+        LOGGER.info("Suffix:      " + Printer.print(suff.getSuffix()));
+        LOGGER.info("Inverse:     " + Printer.print(suff.getInverseSuffix()));
+        LOGGER.info("LCP:         " + Printer.print(suff.getLcp()));
 
-        int[] cloneIndices = extractClonesFromSA(SA, ISA, LCP);
+        int[] cloneIndices = extractCloneIndicesFromSA();
 
-        TokenSourcePair[] clones = new TokenSourcePair[cloneIndices.length];
         for (int i = 0; i < cloneIndices.length; i++) {
-            int cloneIndex = cloneIndices[i];
-            int cloneSize = LCP[ISA[cloneIndex]];
+            int firstIndex = cloneIndices[i];
+            int secondIndex = SA[ISA[cloneIndices[i]] - 1];
 
-            if (fingerprint[cloneIndex + cloneSize] == 1) {
-                cloneSize--;
-            }
+            int cloneSize = LCP[ISA[firstIndex]];
 
-            TokenSource left = sourceMap.getSource(cloneIndex);
-            TokenSource right = sourceMap.getSource(cloneIndex + cloneSize);
-            LOGGER.info(Printer.print(left.getRange()));
-            LOGGER.info(Printer.print(right.getRange()));
-
-            clones[i] = new TokenSourcePair(left, right);
-            LOGGER.info("clone: " + clones[i].getUri());
-            LOGGER.info(Printer.print(clones[i].getRangeBetween()));
+            TokenSourcePair first = getTokenSourcePairFromIndex(firstIndex, fingerprint, cloneSize);
+            TokenSourcePair second = getTokenSourcePairFromIndex(secondIndex, fingerprint, cloneSize);
+            buildCodeClonesFromSourcePairs(first, second);
         }
     }
 
-    private int[] extractClonesFromSA(int[] SA, int[] ISA, int[] LCP) {
+    private int[] extractCloneIndicesFromSA() {
         // Fetch clones, ignore contained clones
         ArrayList<Integer> clones = new ArrayList<>();
-        int cloneCount = 0;
         for (int i = 0; i < SA.length; i++) {
 
             if (LCP[ISA[i]] >= CLONE_THRESHOLD) {
@@ -109,8 +107,31 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                 }
             }
         }
-        LOGGER.info("Num clones: " + cloneCount);
         return Ints.toArray(clones);
+    }
+
+    private TokenSourcePair getTokenSourcePairFromIndex(int index, int[] fingerprint, int cloneSize) {
+
+        // TODO can we fix LCP array to not care about delimiter values (1)
+        if (fingerprint[index + cloneSize] == 1) {
+            cloneSize--;
+        }
+
+        TokenSource left = sourceMap.getSource(index);
+        TokenSource right = sourceMap.getSource(index + cloneSize);
+
+        return new TokenSourcePair(left, right);
+
+    }
+
+    private void buildCodeClonesFromSourcePairs(TokenSourcePair first, TokenSourcePair second) {
+        RangeConverter converter = new RangeConverter();
+        CodeClone clone = new CodeClone(first.getUri(), converter.convertFromRight(first.getRangeBetween()));
+        CodeClone match = new CodeClone(second.getUri(), converter.convertFromRight(second.getRangeBetween()));
+        CodeClone.addMatch(clone, match);
+
+        clones.add(clone);
+        clones.add(match);
     }
 
     private FingerprintIndex buildFingerprintIndex(DocumentIndex<TreesitterDocumentModel> index) {
@@ -120,7 +141,6 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         Timer timer = new Timer();
         timer.start();
         for (TreesitterDocumentModel document : index) {
-            LOGGER.info("Fetching tokens for " + document.getUri());
             document.buildTree();
 
             Node root = document.getAST().getTree().getRootNode();

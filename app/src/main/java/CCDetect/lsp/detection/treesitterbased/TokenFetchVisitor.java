@@ -26,9 +26,8 @@ public class TokenFetchVisitor implements NodeVisitor {
         if (node.getChildCount() > 0) {
             return;
         }
-        LOGGER.info("node getType() " + node.getType());
-        LOGGER.info("node range " + Printer.print(node.toRange()));
 
+        LOGGER.info("Added");
         ranges.add(node.toRange());
     }
 

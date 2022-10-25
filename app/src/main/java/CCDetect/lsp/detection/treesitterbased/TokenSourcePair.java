@@ -1,5 +1,7 @@
 package CCDetect.lsp.detection.treesitterbased;
 
+import java.util.logging.Logger;
+
 import ai.serenade.treesitter.TSPoint;
 import ai.serenade.treesitter.TSRange;
 
@@ -8,6 +10,8 @@ import ai.serenade.treesitter.TSRange;
  */
 public class TokenSourcePair {
 
+    private static final Logger LOGGER = Logger.getLogger(
+            Logger.GLOBAL_LOGGER_NAME);
     TokenSource left;
     TokenSource right;
 

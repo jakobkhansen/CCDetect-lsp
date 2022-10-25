@@ -2,6 +2,8 @@ package CCDetect.lsp.utils;
 
 import java.util.Map;
 
+import com.google.common.base.Strings;
+
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
@@ -71,7 +73,7 @@ public class Printer {
     public static String print(int[] ints) {
         StringBuilder out = new StringBuilder("int[ ");
         for (int s : ints) {
-            out.append(s + " ");
+            out.append(Strings.padEnd("" + s, 3, ' ') + " ");
         }
         out.append("]");
         return out.toString();
