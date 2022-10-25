@@ -70,6 +70,8 @@ public class CCTextDocumentService implements TextDocumentService {
                 params.getTextDocument().getText());
 
         index.updateDocument(params.getTextDocument().getUri(), model);
+        updateClones();
+        updateDiagnostics();
     }
 
     @Override
@@ -101,6 +103,8 @@ public class CCTextDocumentService implements TextDocumentService {
     @Override
     public void didSave(DidSaveTextDocumentParams params) {
         LOGGER.info("didSave");
+        updateClones();
+        updateDiagnostics();
     }
 
     public void updateClones() {

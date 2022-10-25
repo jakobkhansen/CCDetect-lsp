@@ -15,10 +15,12 @@ import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentModel;
 import CCDetect.lsp.server.Configuration;
 import CCDetect.lsp.treesitter.TreeSitterLibrary;
 import CCDetect.lsp.utils.Printer;
+import CCDetect.lsp.utils.RangeConverter;
 import CCDetect.lsp.utils.Timer;
 import ai.serenade.treesitter.Node;
 import ai.serenade.treesitter.TSQueryCursor;
 import ai.serenade.treesitter.TSQueryMatch;
+import ai.serenade.treesitter.TSRange;
 
 /**
  * TreesitterDetector
@@ -29,59 +31,107 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             Logger.GLOBAL_LOGGER_NAME);
     List<CodeClone> clones = new ArrayList<>();
     TreesitterFingerprintGenerator fingerprintGenerator = new TreesitterFingerprintGenerator();
+    FingerprintIndex fingerprintIndex;
+    TokenSourceMap sourceMap = new TokenSourceMap();
     int CLONE_THRESHOLD = 50;
+    int[] SA, ISA, LCP;
 
     @Override
     public List<CodeClone> getClones() {
+        LOGGER.info("num clones: " + clones.size());
         return clones;
     }
 
     @Override
     public void onIndexChange(DocumentIndex<TreesitterDocumentModel> index) {
-        FingerprintIndex fingerprintIndex = buildFingerprintIndex(index);
-        LOGGER.info("Token count: " + (int) fingerprintGenerator.tokenCounter);
-        LOGGER.info(Printer.print(fingerprintGenerator));
-        // Testing
+        clones = new ArrayList<>();
+        fingerprintIndex = buildFingerprintIndex(index);
 
         // Build fingerprint
         ArrayList<Integer> fullFingerprint = new ArrayList<>();
         for (Fingerprint f : fingerprintIndex.fingerprints) {
-            for (int i : f.getFingerprint()) {
-                fullFingerprint.add(i);
+            TSRange[] ranges = f.getRanges();
+            int[] fingerprint = f.getFingerprint();
+            for (int i = 0; i < fingerprint.length; i++) {
+                int tokenValue = fingerprint[i];
+                fullFingerprint.add(tokenValue);
+                sourceMap.put(f.getUri(), ranges[i]);
             }
         }
         // 0 terminal
         fullFingerprint.add(0);
+        sourceMap.put(null, null);
 
-        LOGGER.info("fullFingerprint size: " + fullFingerprint.size());
+        LOGGER.info("Hashes: " + Printer.print(fingerprintGenerator.getTokenToCharMap()));
         int[] fingerprint = Ints.toArray(fullFingerprint);
 
         // Build suffix, inverse, lcp
         ExtendedSuffixArray suff = new SAIS().buildExtendedSuffixArray(fingerprint);
-        int[] SA = suff.getSuffix();
-        int[] ISA = suff.getInverseSuffix();
-        int[] LCP = suff.getLcp();
-        LOGGER.info("Suffix: " + Printer.print(suff.getSuffix()));
-        LOGGER.info("LCP: " + Printer.print(suff.getLcp()));
+        SA = suff.getSuffix();
+        ISA = suff.getInverseSuffix();
+        LCP = suff.getLcp();
+        int[] indices = new int[fingerprint.length];
+        for (int i = 0; i < indices.length; i++) {
+            indices[i] = i;
+        }
+        LOGGER.info("Indices:     " + Printer.print(indices));
+        LOGGER.info("Fingerprint: " + Printer.print(fingerprint));
+        LOGGER.info("Suffix:      " + Printer.print(suff.getSuffix()));
+        LOGGER.info("Inverse:     " + Printer.print(suff.getInverseSuffix()));
+        LOGGER.info("LCP:         " + Printer.print(suff.getLcp()));
 
-        extractClonesFromSA(SA, ISA, LCP);
+        int[] cloneIndices = extractCloneIndicesFromSA();
 
+        for (int i = 0; i < cloneIndices.length; i++) {
+            int firstIndex = cloneIndices[i];
+            int secondIndex = SA[ISA[cloneIndices[i]] - 1];
+
+            int cloneSize = LCP[ISA[firstIndex]];
+
+            TokenSourcePair first = getTokenSourcePairFromIndex(firstIndex, fingerprint, cloneSize);
+            TokenSourcePair second = getTokenSourcePairFromIndex(secondIndex, fingerprint, cloneSize);
+            buildCodeClonesFromSourcePairs(first, second);
+        }
     }
 
-    private void extractClonesFromSA(int[] SA, int[] ISA, int[] LCP) {
+    private int[] extractCloneIndicesFromSA() {
         // Fetch clones, ignore contained clones
-        int cloneCount = 0;
+        ArrayList<Integer> clones = new ArrayList<>();
         for (int i = 0; i < SA.length; i++) {
 
             if (LCP[ISA[i]] >= CLONE_THRESHOLD) {
                 // Ignore contained clones
+                clones.add(i);
                 while (LCP[ISA[i]] > LCP[ISA[i + 1]] && LCP[ISA[i]] >= CLONE_THRESHOLD) {
                     i++;
                 }
-                cloneCount++;
             }
         }
-        LOGGER.info("Num clones: " + cloneCount);
+        return Ints.toArray(clones);
+    }
+
+    private TokenSourcePair getTokenSourcePairFromIndex(int index, int[] fingerprint, int cloneSize) {
+
+        // TODO can we fix LCP array to not care about delimiter values (1)
+        if (fingerprint[index + cloneSize] == 1) {
+            cloneSize--;
+        }
+
+        TokenSource left = sourceMap.getSource(index);
+        TokenSource right = sourceMap.getSource(index + cloneSize);
+
+        return new TokenSourcePair(left, right);
+
+    }
+
+    private void buildCodeClonesFromSourcePairs(TokenSourcePair first, TokenSourcePair second) {
+        RangeConverter converter = new RangeConverter();
+        CodeClone clone = new CodeClone(first.getUri(), converter.convertFromRight(first.getRangeBetween()));
+        CodeClone match = new CodeClone(second.getUri(), converter.convertFromRight(second.getRangeBetween()));
+        CodeClone.addMatch(clone, match);
+
+        clones.add(clone);
+        clones.add(match);
     }
 
     private FingerprintIndex buildFingerprintIndex(DocumentIndex<TreesitterDocumentModel> index) {
@@ -108,8 +158,8 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                     .nextMatch()) {
                 Node matchNode = match.getCaptures()[0].getNode();
 
-                int[] fingerprintString = fingerprintGenerator.getFingerprint(document.getText(), matchNode);
-                Fingerprint fingerprint = new Fingerprint(fingerprintString, document.getUri(), matchNode.toRange());
+                Fingerprint fingerprint = fingerprintGenerator.getFingerprint(document.getText(),
+                        document.getUri(), matchNode);
 
                 fingerprintIndex.add(fingerprint);
             }

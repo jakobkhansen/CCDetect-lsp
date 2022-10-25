@@ -2,10 +2,13 @@ package CCDetect.lsp.utils;
 
 import java.util.Map;
 
+import com.google.common.base.Strings;
+
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
 import CCDetect.lsp.detection.treesitterbased.Fingerprint;
+import CCDetect.lsp.detection.treesitterbased.TokenSource;
 import CCDetect.lsp.detection.treesitterbased.TreesitterFingerprintGenerator;
 import ai.serenade.treesitter.TSInputEdit;
 import ai.serenade.treesitter.TSPoint;
@@ -32,9 +35,9 @@ public class Printer {
         out += "\nstart_byte: " + edit.startByte;
         out += "\nold_end_byte: " + edit.oldEndByte;
         out += "\nnew_end_byte: " + edit.newEndByte;
-        out += "\nstart_point" + print(edit.start_point);
-        out += "\nold_end_point" + print(edit.old_end_point);
-        out += "\nnew_end_point" + print(edit.new_end_point);
+        out += "\nstart_point: " + print(edit.start_point);
+        out += "\nold_end_point: " + print(edit.old_end_point);
+        out += "\nnew_end_point: " + print(edit.new_end_point);
 
         return out + ")";
     }
@@ -47,11 +50,14 @@ public class Printer {
     }
 
     public static String print(TSRange range) {
+        if (range == null) {
+            return "TSRange(null)";
+        }
         String out = "TSRange(";
         out += "\nstart_byte: " + range.getStartByte();
         out += "\nend_byte: " + range.getEndByte();
-        out += "\nstart_point" + print(range.getStartPoint());
-        out += "\nend_point" + print(range.getEndPoint());
+        out += "\nstart_point: " + print(range.getStartPoint());
+        out += "\nend_point: " + print(range.getEndPoint());
 
         return out + ")";
     }
@@ -67,7 +73,7 @@ public class Printer {
     public static String print(int[] ints) {
         StringBuilder out = new StringBuilder("int[ ");
         for (int s : ints) {
-            out.append(s + " ");
+            out.append(Strings.padEnd("" + s, 3, ' ') + " ");
         }
         out.append("]");
         return out.toString();
@@ -98,5 +104,13 @@ public class Printer {
         String out = "FingerprintGeneratorMap(\n";
         out += print(fingerprintGenerator.getTokenToCharMap());
         return out + ")";
+    }
+
+    public static String print(TokenSource tokenSource) {
+        StringBuilder out = new StringBuilder("TokenSource(\n");
+        out.append("uri: " + tokenSource.getUri() + "\n");
+        out.append(print(tokenSource.getRange()) + "\n");
+
+        return out.toString();
     }
 }
