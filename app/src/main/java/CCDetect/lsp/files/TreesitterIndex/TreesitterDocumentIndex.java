@@ -106,18 +106,6 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
     }
 
     @Override
-    public void updateClones(List<CodeClone> clones) {
-        for (DocumentModel doc : documents.values()) {
-            doc.setClones(new ArrayList<>());
-        }
-
-        for (CodeClone clone : clones) {
-            documents.get(clone.getUri()).addClone(clone);
-        }
-
-    }
-
-    @Override
     public Iterator<TreesitterDocumentModel> iterator() {
         return documents.values().iterator();
     }

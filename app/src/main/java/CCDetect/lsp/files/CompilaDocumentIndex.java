@@ -103,18 +103,6 @@ public class CompilaDocumentIndex implements DocumentIndex<DocumentModel> {
     }
 
     @Override
-    public void updateClones(List<CodeClone> clones) {
-        for (DocumentModel doc : documents.values()) {
-            doc.setClones(new ArrayList<>());
-        }
-
-        for (CodeClone clone : clones) {
-            documents.get(clone.getUri()).addClone(clone);
-        }
-
-    }
-
-    @Override
     public Iterator<DocumentModel> iterator() {
         return documents.values().iterator();
     }

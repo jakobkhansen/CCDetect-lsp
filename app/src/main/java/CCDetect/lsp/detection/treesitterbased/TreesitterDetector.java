@@ -38,6 +38,9 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
 
     @Override
     public List<CodeClone> getClones() {
+        for (CodeClone clone : clones) {
+            LOGGER.info(clone.toString());
+        }
         return clones;
     }
 
