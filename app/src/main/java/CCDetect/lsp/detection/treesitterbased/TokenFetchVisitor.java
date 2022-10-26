@@ -19,7 +19,8 @@ public class TokenFetchVisitor implements NodeVisitor {
 
     @Override
     public void visit(Node node) {
-        if (filter.shouldFilter(node)) {
+        if (filter.shouldFilter(node) || node.isExtra()) {
+            LOGGER.info("Filtered " + node.getType());
             return;
         }
 
@@ -27,7 +28,6 @@ public class TokenFetchVisitor implements NodeVisitor {
             return;
         }
 
-        LOGGER.info("Added");
         ranges.add(node.toRange());
     }
 

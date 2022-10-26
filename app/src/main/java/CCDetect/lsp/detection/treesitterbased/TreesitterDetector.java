@@ -38,7 +38,9 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
 
     @Override
     public List<CodeClone> getClones() {
-        LOGGER.info("num clones: " + clones.size());
+        for (CodeClone clone : clones) {
+            LOGGER.info(clone.toString());
+        }
         return clones;
     }
 
@@ -81,12 +83,13 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         LOGGER.info("LCP:         " + Printer.print(suff.getLcp()));
 
         int[] cloneIndices = extractCloneIndicesFromSA();
+        LOGGER.info("Clone indices: " + Printer.print(cloneIndices));
 
         for (int i = 0; i < cloneIndices.length; i++) {
             int firstIndex = cloneIndices[i];
             int secondIndex = SA[ISA[cloneIndices[i]] - 1];
 
-            int cloneSize = LCP[ISA[firstIndex]];
+            int cloneSize = LCP[ISA[firstIndex]] - 1;
 
             TokenSourcePair first = getTokenSourcePairFromIndex(firstIndex, fingerprint, cloneSize);
             TokenSourcePair second = getTokenSourcePairFromIndex(secondIndex, fingerprint, cloneSize);
@@ -111,11 +114,6 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
     }
 
     private TokenSourcePair getTokenSourcePairFromIndex(int index, int[] fingerprint, int cloneSize) {
-
-        // TODO can we fix LCP array to not care about delimiter values (1)
-        if (fingerprint[index + cloneSize] == 1) {
-            cloneSize--;
-        }
 
         TokenSource left = sourceMap.getSource(index);
         TokenSource right = sourceMap.getSource(index + cloneSize);

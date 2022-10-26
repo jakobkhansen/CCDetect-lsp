@@ -73,7 +73,7 @@ public class Printer {
     public static String print(int[] ints) {
         StringBuilder out = new StringBuilder("int[ ");
         for (int s : ints) {
-            out.append(Strings.padEnd("" + s, 3, ' ') + " ");
+            out.append(Strings.padEnd("" + s, 6, ' ') + " ");
         }
         out.append("]");
         return out.toString();

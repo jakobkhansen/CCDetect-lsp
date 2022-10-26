@@ -42,6 +42,7 @@ public class CCLanguageServer implements LanguageServer, LanguageClientAware {
     @Override
     public CompletableFuture<InitializeResult> initialize(
             InitializeParams params) {
+        LOGGER.info("Server initializing");
         // Initialize the InitializeResult for this LS.
         final InitializeResult initializeResult = new InitializeResult(
                 new ServerCapabilities());
@@ -59,6 +60,7 @@ public class CCLanguageServer implements LanguageServer, LanguageClientAware {
                 .setExecuteCommandProvider(new ExecuteCommandOptions(Arrays.asList(new String[] { "showDocument" })));
 
         // Initialize config
+        LOGGER.info("" + params.getInitializationOptions());
         String jsonConfig = params.getInitializationOptions().toString();
         Configuration.createInstanceFromJson(jsonConfig);
 

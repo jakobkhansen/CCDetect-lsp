@@ -1,5 +1,6 @@
 package CCDetect.lsp.files;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.lsp4j.Range;
@@ -23,6 +24,16 @@ public interface DocumentIndex<T extends DocumentModel> extends Iterable<T> {
 
     boolean containsDocument(String uri);
 
-    void updateClones(List<CodeClone> clones);
+    default void updateClones(List<CodeClone> clones) {
+
+        for (DocumentModel doc : this) {
+            doc.setClones(new ArrayList<>());
+        }
+
+        for (CodeClone clone : clones) {
+            this.getDocument(clone.getUri()).addClone(clone);
+        }
+
+    };
 
 }
