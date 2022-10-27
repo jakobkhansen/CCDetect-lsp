@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 
 import com.google.common.primitives.Ints;
 
+import CCDetect.lsp.utils.Printer;
 import ai.serenade.treesitter.Node;
 import ai.serenade.treesitter.TSRange;
 
@@ -31,7 +32,9 @@ public class TreesitterFingerprintGenerator {
                 continue;
             }
             String token = text.substring(range.getStartByte(), range.getEndByte());
+            LOGGER.info("range for token " + token + ":\n" + Printer.print(range));
             out.add(tokenToValue(token));
+            LOGGER.info("Token hash: " + tokenToValue(token));
         }
 
         // Method delimiter

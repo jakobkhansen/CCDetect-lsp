@@ -15,12 +15,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.eclipse.lsp4j.Range;
 
 import CCDetect.lsp.CodeClone;
 import CCDetect.lsp.files.DocumentIndex;
 import CCDetect.lsp.files.DocumentModel;
+import CCDetect.lsp.files.fileiterators.FiletypeIterator;
+import CCDetect.lsp.files.fileiterators.GitProjectIterator;
+import CCDetect.lsp.files.fileiterators.ProjectFileIterator;
 import CCDetect.lsp.server.Configuration;
 import CCDetect.lsp.utils.Timer;
 
@@ -57,26 +62,10 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
     }
 
     private List<Path> getFilePathsInProject() {
-        List<Path> filePaths = new ArrayList<>();
         Configuration config = Configuration.getInstance();
+        ProjectFileIterator iterator = new GitProjectIterator(rootUri, config.getLanguage());
 
-        try {
-            URI uri = new URI(rootUri);
-            filePaths = Files
-                    .find(
-                            Paths.get(uri),
-                            Integer.MAX_VALUE,
-                            (filePath, fileAttr) -> (fileAttr.isRegularFile() ||
-                                    fileAttr.isDirectory()) &&
-                                    com.google.common.io.Files
-                                            .getFileExtension(filePath.toString())
-                                            .equals(config.getLanguage()))
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return filePaths;
+        return StreamSupport.stream(iterator.spliterator(), false).collect(Collectors.toList());
     }
 
     private String getDocumentContent(Path file) {

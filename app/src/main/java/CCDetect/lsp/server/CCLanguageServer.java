@@ -65,7 +65,7 @@ public class CCLanguageServer implements LanguageServer, LanguageClientAware {
         Configuration.createInstanceFromJson(jsonConfig);
 
         // Initialize index and detector
-        String rootUri = params.getWorkspaceFolders().get(0).getUri();
+        String rootUri = params.getWorkspaceFolders().get(0).getName();
         textDocumentService.initialize(rootUri);
 
         LOGGER.info("Server initialized");
