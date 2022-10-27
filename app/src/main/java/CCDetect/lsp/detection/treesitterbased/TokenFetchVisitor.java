@@ -19,6 +19,8 @@ public class TokenFetchVisitor implements NodeVisitor {
 
     @Override
     public void visit(Node node) {
+        LOGGER.info("NODE: " + node.getNodeString());
+        LOGGER.info("Range: " + Printer.print(node.toRange()));
         if (filter.shouldFilter(node) || node.isExtra()) {
             LOGGER.info("Filtered " + node.getType());
             return;
@@ -33,7 +35,6 @@ public class TokenFetchVisitor implements NodeVisitor {
 
     public TSRange[] getRanges() {
         TSRange[] out = new TSRange[ranges.size() + 1];
-        out[out.length - 1] = null;
         return ranges.toArray(out);
     }
 }
