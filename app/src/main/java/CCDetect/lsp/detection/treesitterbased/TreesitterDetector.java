@@ -50,9 +50,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         clones = new ArrayList<>();
         sourceMap = new TokenSourceMap();
 
-        LOGGER.info("BUILDING F");
         buildFingerprints(index);
-        LOGGER.info("BUILT F");
         // Build fingerprint
         ArrayList<Integer> fullFingerprint = new ArrayList<>();
         for (TreesitterDocumentModel doc : index) {
@@ -183,7 +181,6 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                     continue;
                 }
 
-                LOGGER.info("BUILDING FINGERPRINT: " + document.getText());
                 Fingerprint fingerprint = fingerprintGenerator.getFingerprint(document.getText(),
                         document.getUri(), matchNode);
                 document.addFingerprint(fingerprint);
