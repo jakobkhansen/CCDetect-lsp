@@ -16,13 +16,11 @@ public class TreesitterDocumentModel extends DocumentModel {
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private TreesitterDocumentAST ast;
-    private String text;
     private ArrayList<Fingerprint> fingerprints = new ArrayList<>();
     private boolean hasChanged = true;
 
     public TreesitterDocumentModel(String uri, String text) {
         super(uri, text);
-        this.text = text;
     }
 
     public void buildTree() {
@@ -34,10 +32,6 @@ public class TreesitterDocumentModel extends DocumentModel {
             ast.free();
         }
         ast = null;
-    }
-
-    public void freeText() {
-        this.text = null;
     }
 
     public TreesitterDocumentAST getAST() {
@@ -66,6 +60,7 @@ public class TreesitterDocumentModel extends DocumentModel {
 
     // TODO refactor this and ensure correct
     public void updateDocument(Range range, String updatedContent) {
+
         Position startPos = range.getStart();
         Position endPos = range.getEnd();
 
@@ -95,9 +90,12 @@ public class TreesitterDocumentModel extends DocumentModel {
                 currChar = 0;
             }
         }
+
         String prefix = text.substring(0, start);
         String suffix = text.substring(end, text.length());
-        text = prefix + updatedContent + suffix;
+        setText(prefix + updatedContent + suffix);
+        setChanged(true);
+        LOGGER.info("SETTING TEXT: " + getText());
 
         if (ast == null) {
             buildTree();
@@ -114,6 +112,6 @@ public class TreesitterDocumentModel extends DocumentModel {
         TSInputEdit edit = new TSInputEdit(start, end, start + updatedContent.length(), startPoint, oldEndPoint,
                 newEndPoint);
         ast.incrementalUpdate(text, edit);
-        setChanged(true);
+
     }
 }

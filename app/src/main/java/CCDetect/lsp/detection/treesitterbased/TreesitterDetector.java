@@ -32,9 +32,9 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
 
     private static final Logger LOGGER = Logger.getLogger(
             Logger.GLOBAL_LOGGER_NAME);
-    List<CodeClone> clones = new ArrayList<>();
+    List<CodeClone> clones;
     TreesitterFingerprintGenerator fingerprintGenerator = new TreesitterFingerprintGenerator();
-    TokenSourceMap sourceMap = new TokenSourceMap();
+    TokenSourceMap sourceMap;
     int[] SA, ISA, LCP;
 
     @Override
@@ -48,8 +48,11 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         Timer timerIndexChange = new Timer();
         timerIndexChange.start();
         clones = new ArrayList<>();
+        sourceMap = new TokenSourceMap();
 
+        LOGGER.info("BUILDING F");
         buildFingerprints(index);
+        LOGGER.info("BUILT F");
         // Build fingerprint
         ArrayList<Integer> fullFingerprint = new ArrayList<>();
         for (TreesitterDocumentModel doc : index) {
@@ -83,14 +86,14 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         for (int i = 0; i < indices.length; i++) {
             indices[i] = i;
         }
-        // LOGGER.info("Indices: " + Printer.print(indices));
-        // LOGGER.info("Fingerprint: " + Printer.print(fingerprint));
-        // LOGGER.info("Suffix: " + Printer.print(suff.getSuffix()));
-        // LOGGER.info("Inverse: " + Printer.print(suff.getInverseSuffix()));
-        // LOGGER.info("LCP: " + Printer.print(suff.getLcp()));
+        LOGGER.info("Indices:     " + Printer.print(indices));
+        LOGGER.info("Fingerprint: " + Printer.print(fingerprint));
+        LOGGER.info("Suffix:      " + Printer.print(suff.getSuffix()));
+        LOGGER.info("Inverse:     " + Printer.print(suff.getInverseSuffix()));
+        LOGGER.info("LCP:         " + Printer.print(suff.getLcp()));
 
         int[] cloneIndices = extractCloneIndicesFromSA();
-        // LOGGER.info("Clone indices: " + Printer.print(cloneIndices));
+        LOGGER.info("Clone indices: " + Printer.print(cloneIndices));
 
         RangeConverter converter = new RangeConverter();
         Map<Integer, CodeClone> cloneMap = new HashMap<>();
@@ -180,12 +183,13 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                     continue;
                 }
 
+                LOGGER.info("BUILDING FINGERPRINT: " + document.getText());
                 Fingerprint fingerprint = fingerprintGenerator.getFingerprint(document.getText(),
                         document.getUri(), matchNode);
                 document.addFingerprint(fingerprint);
-                document.setChanged(false);
 
             }
+            document.setChanged(false);
             document.freeTree();
         }
         timer.stop();

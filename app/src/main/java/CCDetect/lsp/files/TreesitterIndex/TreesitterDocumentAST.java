@@ -3,7 +3,6 @@ package CCDetect.lsp.files.TreesitterIndex;
 import java.util.logging.Logger;
 
 import CCDetect.lsp.treesitter.TreeSitterLibrary;
-import CCDetect.lsp.utils.Printer;
 import ai.serenade.treesitter.Parser;
 import ai.serenade.treesitter.TSInputEdit;
 import ai.serenade.treesitter.Tree;

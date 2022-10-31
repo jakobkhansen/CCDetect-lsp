@@ -15,7 +15,7 @@ import CCDetect.lsp.CodeClone;
 public class DocumentModel {
 
     private final String uri;
-    private String text;
+    protected String text;
     private final List<DocumentLine> lines = new ArrayList<>();
     private List<CodeClone> clones = new ArrayList<>();
 
@@ -24,7 +24,7 @@ public class DocumentModel {
 
     public DocumentModel(String uri, String text) {
         this.uri = uri;
-        this.text = text;
+        setText(text);
         try (
                 Reader r = new StringReader(text);
                 BufferedReader reader = new BufferedReader(r);) {
@@ -42,6 +42,14 @@ public class DocumentModel {
 
     public String getText() {
         return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public void freeText() {
+        setText(null);
     }
 
     public List<DocumentLine> getLines() {
