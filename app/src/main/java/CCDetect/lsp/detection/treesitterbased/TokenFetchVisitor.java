@@ -19,14 +19,11 @@ public class TokenFetchVisitor implements NodeVisitor {
 
     @Override
     public void visit(Node node) {
-        LOGGER.info("NODE: " + node.getNodeString());
-        LOGGER.info("Range: " + Printer.print(node.toRange()));
-        if (filter.shouldFilter(node) || node.isExtra()) {
-            LOGGER.info("Filtered " + node.getType());
+        if (filter.shouldIgnore(node) || node.isExtra()) {
             return;
         }
 
-        if (node.getChildCount() > 0) {
+        if (node.getChildCount() > 0 && !filter.isExtra(node)) {
             return;
         }
 

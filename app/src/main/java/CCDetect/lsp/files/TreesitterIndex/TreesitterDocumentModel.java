@@ -32,6 +32,10 @@ public class TreesitterDocumentModel extends DocumentModel {
         ast = null;
     }
 
+    public void freeText() {
+        this.text = null;
+    }
+
     public TreesitterDocumentAST getAST() {
         return ast;
     }

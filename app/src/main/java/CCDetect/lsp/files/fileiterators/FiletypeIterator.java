@@ -7,10 +7,13 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class FiletypeIterator implements ProjectFileIterator {
 
+    private static final Logger LOGGER = Logger.getLogger(
+            Logger.GLOBAL_LOGGER_NAME);
     String rootUri;
     String filetype;
 
@@ -35,7 +38,7 @@ public class FiletypeIterator implements ProjectFileIterator {
                                             .equals(filetype))
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.info(e.getMessage());
         }
 
         return filePaths;

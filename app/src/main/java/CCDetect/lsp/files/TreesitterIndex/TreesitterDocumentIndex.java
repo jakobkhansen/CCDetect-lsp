@@ -76,8 +76,8 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
             String content = reader.lines().collect(Collectors.joining("\n"));
             reader.close();
             return content;
-        } catch (IOException ex) {
-            ex.printStackTrace(); // handle an exception here
+        } catch (Exception e) {
+            LOGGER.info(e.getMessage());
         }
 
         return null;

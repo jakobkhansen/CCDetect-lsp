@@ -6,6 +6,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.lsp4j.Range;
 
@@ -17,6 +18,9 @@ public class DocumentModel {
     private String text;
     private final List<DocumentLine> lines = new ArrayList<>();
     private List<CodeClone> clones = new ArrayList<>();
+
+    private static final Logger LOGGER = Logger.getLogger(
+            Logger.GLOBAL_LOGGER_NAME);
 
     public DocumentModel(String uri, String text) {
         this.uri = uri;
@@ -32,7 +36,7 @@ public class DocumentModel {
                 lineNumber++;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.info(e.getMessage());
         }
     }
 

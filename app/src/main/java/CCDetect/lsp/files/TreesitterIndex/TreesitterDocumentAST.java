@@ -19,7 +19,7 @@ public class TreesitterDocumentAST {
         try {
             tree = parser.parseString(documentContent);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.info(e.getMessage());
         }
     }
 

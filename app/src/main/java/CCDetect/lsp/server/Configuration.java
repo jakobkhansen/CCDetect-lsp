@@ -16,6 +16,8 @@ public class Configuration {
     private String language;
     private String fragment_query;
     private String[] ignore_nodes;
+    private String[] extra_nodes;
+    private int clone_token_threshold;
 
     public String getLanguage() {
         return language;
@@ -27,6 +29,14 @@ public class Configuration {
 
     public String[] getIgnoreNodes() {
         return ignore_nodes;
+    }
+
+    public String[] getExtraNodes() {
+        return extra_nodes;
+    }
+
+    public int getCloneTokenThreshold() {
+        return clone_token_threshold;
     }
 
     public static void createInstanceFromJson(String json) {
