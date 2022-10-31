@@ -274,7 +274,6 @@ public class SAIS {
         try {
             scan = new Scanner(System.in);
         } catch (Exception e) {
-            e.printStackTrace();
         }
         SAIS sais = new SAIS();
 

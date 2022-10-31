@@ -25,11 +25,6 @@ public class Fingerprint {
         return fingerprint[index];
     }
 
-    public TSRange getRangeOfToken(int index) {
-        // TODO
-        return null;
-    }
-
     public int[] getFingerprint() {
         return fingerprint;
     }

@@ -76,8 +76,8 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
             String content = reader.lines().collect(Collectors.joining("\n"));
             reader.close();
             return content;
-        } catch (IOException ex) {
-            ex.printStackTrace(); // handle an exception here
+        } catch (Exception e) {
+            LOGGER.info(e.getMessage());
         }
 
         return null;
@@ -105,6 +105,7 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
         double t1 = System.nanoTime();
         TreesitterDocumentModel document = documents.get(uri);
         document.updateDocument(range, updatedContent);
+        document.setChanged(true);
         double t2 = System.nanoTime();
         double runtimeInMs = (t2 - t1) / 1000000.0;
         LOGGER.info("Time to incremental reparse: " + runtimeInMs);

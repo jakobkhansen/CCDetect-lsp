@@ -3,7 +3,6 @@ package CCDetect.lsp.files.TreesitterIndex;
 import java.util.logging.Logger;
 
 import CCDetect.lsp.treesitter.TreeSitterLibrary;
-import CCDetect.lsp.utils.Printer;
 import ai.serenade.treesitter.Parser;
 import ai.serenade.treesitter.TSInputEdit;
 import ai.serenade.treesitter.Tree;
@@ -19,7 +18,7 @@ public class TreesitterDocumentAST {
         try {
             tree = parser.parseString(documentContent);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.info(e.getMessage());
         }
     }
 

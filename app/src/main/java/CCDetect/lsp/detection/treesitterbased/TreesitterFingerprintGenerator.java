@@ -18,6 +18,7 @@ public class TreesitterFingerprintGenerator {
 
     Map<String, Integer> tokenToCharMap = new HashMap<>();
     int tokenCounter = 2;
+    int tokensSeen = 0;
 
     // Generate the fingerprint of a single node, same token types will get same
     // char
@@ -32,9 +33,12 @@ public class TreesitterFingerprintGenerator {
                 continue;
             }
             String token = text.substring(range.getStartByte(), range.getEndByte());
-            LOGGER.info("range for token " + token + ":\n" + Printer.print(range));
+            LOGGER.info("TOKEN: " + token + ": " + tokenToValue(token));
             out.add(tokenToValue(token));
-            LOGGER.info("Token hash: " + tokenToValue(token));
+            tokensSeen++;
+            if (tokensSeen % 100 == 0) {
+                LOGGER.info("Processed " + tokensSeen + " tokens");
+            }
         }
 
         // Method delimiter

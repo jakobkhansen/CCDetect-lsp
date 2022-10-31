@@ -39,6 +39,8 @@ public class CCTextDocumentService implements TextDocumentService {
     public void initialize(String rootUri) {
         createIndex(rootUri);
         createDetector();
+        findClones();
+        updateDiagnostics();
     }
 
     public void createIndex(String rootUri) {
@@ -48,12 +50,12 @@ public class CCTextDocumentService implements TextDocumentService {
 
     public void createDetector() {
         detector = new TreesitterDetector();
-        detector.onIndexChange(index);
     }
 
     @Override
     public CompletableFuture<List<Either<Command, CodeAction>>> codeAction(
             CodeActionParams params) {
+        LOGGER.info("codeActions published");
         return CompletableFuture.supplyAsync(() -> {
             DocumentModel document = index.getDocument(params.getTextDocument().getUri());
             Range range = params.getRange();
@@ -91,7 +93,7 @@ public class CCTextDocumentService implements TextDocumentService {
             index.updateDocument(uri, change.getRange(), change.getText());
         }
 
-        updateClones();
+        findClones();
         updateDiagnostics();
     }
 
@@ -103,12 +105,15 @@ public class CCTextDocumentService implements TextDocumentService {
     @Override
     public void didSave(DidSaveTextDocumentParams params) {
         LOGGER.info("didSave");
-        updateClones();
-        updateDiagnostics();
+    }
+
+    public void findClones() {
+        detector.onIndexChange(index);
+        List<CodeClone> currentClones = detector.getClones();
+        index.updateClones(currentClones);
     }
 
     public void updateClones() {
-        detector.onIndexChange(index);
         List<CodeClone> currentClones = detector.getClones();
         index.updateClones(currentClones);
     }

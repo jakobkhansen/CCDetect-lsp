@@ -65,7 +65,7 @@ public class CompilaDocumentIndex implements DocumentIndex<DocumentModel> {
                                             .equals("ccdetect"))
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.info(e.getMessage());
         }
 
         return filePaths;
@@ -78,8 +78,8 @@ public class CompilaDocumentIndex implements DocumentIndex<DocumentModel> {
                         Charset.forName("UTF-8"))) {
             String content = reader.lines().collect(Collectors.joining("\n"));
             return content;
-        } catch (IOException ex) {
-            ex.printStackTrace(); // handle an exception here
+        } catch (IOException e) {
+            LOGGER.info(e.getMessage());
         }
 
         return null;
@@ -87,12 +87,6 @@ public class CompilaDocumentIndex implements DocumentIndex<DocumentModel> {
 
     @Override
     public void updateDocument(String uri, DocumentModel updatedDocument) {
-
-        try {
-            LOGGER.info(parser.parseString(updatedDocument.toString()).getRootNode().getNodeString());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         documents.put(uri, updatedDocument);
     }

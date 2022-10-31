@@ -9,6 +9,7 @@ import org.eclipse.lsp4j.Range;
 
 import CCDetect.lsp.detection.treesitterbased.Fingerprint;
 import CCDetect.lsp.detection.treesitterbased.TokenSource;
+import CCDetect.lsp.detection.treesitterbased.TokenSourceMap;
 import CCDetect.lsp.detection.treesitterbased.TreesitterFingerprintGenerator;
 import ai.serenade.treesitter.TSInputEdit;
 import ai.serenade.treesitter.TSPoint;
@@ -63,11 +64,12 @@ public class Printer {
     }
 
     public static String print(String[] strings) {
-        String out = "String[ ";
+        StringBuilder out = new StringBuilder("int[ ");
         for (String s : strings) {
-            out += s + " ";
+            out.append(Strings.padEnd("" + s, 6, ' ') + " ");
         }
-        return out + "]";
+        out.append("]");
+        return out.toString();
     }
 
     public static String print(int[] ints) {
@@ -110,6 +112,15 @@ public class Printer {
         StringBuilder out = new StringBuilder("TokenSource(\n");
         out.append("uri: " + tokenSource.getUri() + "\n");
         out.append(print(tokenSource.getRange()) + "\n");
+
+        return out.toString();
+    }
+
+    public static String print(TokenSourceMap sourceMap) {
+        StringBuilder out = new StringBuilder("TokenSourceMap(\n");
+        for (int i = 0; i < sourceMap.size(); i++) {
+            out.append(i + ": " + Printer.print(sourceMap.getSource(i)));
+        }
 
         return out.toString();
     }

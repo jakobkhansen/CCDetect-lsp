@@ -4,6 +4,7 @@
 package CCDetect.lsp;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.launch.LSPLauncher;
@@ -16,6 +17,9 @@ import CCDetect.lsp.utils.CCFileStateLogger;
 import CCDetect.lsp.utils.CCGeneralLogger;
 
 public class App {
+
+    private static final Logger LOGGER = Logger.getLogger(
+            Logger.GLOBAL_LOGGER_NAME);
 
     public static Launcher<LanguageClient> createLauncher(LanguageServer server) {
         Launcher<LanguageClient> launcher = LSPLauncher.createServerLauncher(
@@ -33,7 +37,7 @@ public class App {
             CCGeneralLogger.setup();
             CCFileStateLogger.setup();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.info(e.getMessage());
         }
     }
 
