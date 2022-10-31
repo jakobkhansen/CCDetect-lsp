@@ -1,10 +1,12 @@
 package CCDetect.lsp.files.TreesitterIndex;
 
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
+import CCDetect.lsp.detection.treesitterbased.Fingerprint;
 import CCDetect.lsp.files.DocumentModel;
 import ai.serenade.treesitter.TSInputEdit;
 import ai.serenade.treesitter.TSPoint;
@@ -15,6 +17,8 @@ public class TreesitterDocumentModel extends DocumentModel {
 
     private TreesitterDocumentAST ast;
     private String text;
+    private ArrayList<Fingerprint> fingerprints = new ArrayList<>();
+    private boolean hasChanged = true;
 
     public TreesitterDocumentModel(String uri, String text) {
         super(uri, text);
@@ -38,6 +42,26 @@ public class TreesitterDocumentModel extends DocumentModel {
 
     public TreesitterDocumentAST getAST() {
         return ast;
+    }
+
+    public ArrayList<Fingerprint> getFingerprint() {
+        return fingerprints;
+    }
+
+    public void addFingerprint(Fingerprint fingerprint) {
+        this.fingerprints.add(fingerprint);
+    }
+
+    public void resetFingerprint() {
+        this.fingerprints = new ArrayList<>();
+    }
+
+    public boolean hasChanged() {
+        return hasChanged;
+    }
+
+    public void setChanged(boolean value) {
+        hasChanged = value;
     }
 
     // TODO refactor this and ensure correct
@@ -90,5 +114,6 @@ public class TreesitterDocumentModel extends DocumentModel {
         TSInputEdit edit = new TSInputEdit(start, end, start + updatedContent.length(), startPoint, oldEndPoint,
                 newEndPoint);
         ast.incrementalUpdate(text, edit);
+        setChanged(true);
     }
 }

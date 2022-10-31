@@ -34,33 +34,34 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             Logger.GLOBAL_LOGGER_NAME);
     List<CodeClone> clones = new ArrayList<>();
     TreesitterFingerprintGenerator fingerprintGenerator = new TreesitterFingerprintGenerator();
-    FingerprintIndex fingerprintIndex;
     TokenSourceMap sourceMap = new TokenSourceMap();
     int[] SA, ISA, LCP;
 
     @Override
     public List<CodeClone> getClones() {
-        // for (CodeClone clone : clones) {
-        // LOGGER.info("clone: " + clone.toString());
-        // }
         return clones;
     }
 
     @Override
     public void onIndexChange(DocumentIndex<TreesitterDocumentModel> index) {
         LOGGER.info("onIndexChange TreesitterDetector");
+        Timer timerIndexChange = new Timer();
+        timerIndexChange.start();
         clones = new ArrayList<>();
-        fingerprintIndex = buildFingerprintIndex(index);
 
+        buildFingerprints(index);
         // Build fingerprint
         ArrayList<Integer> fullFingerprint = new ArrayList<>();
-        for (Fingerprint f : fingerprintIndex.fingerprints) {
-            TSRange[] ranges = f.getRanges();
-            int[] fingerprint = f.getFingerprint();
-            for (int i = 0; i < fingerprint.length; i++) {
-                int tokenValue = fingerprint[i];
-                fullFingerprint.add(tokenValue);
-                sourceMap.put(f.getUri(), ranges[i]);
+        for (TreesitterDocumentModel doc : index) {
+            for (Fingerprint f : doc.getFingerprint()) {
+
+                TSRange[] ranges = f.getRanges();
+                int[] fingerprint = f.getFingerprint();
+                for (int i = 0; i < fingerprint.length; i++) {
+                    int tokenValue = fingerprint[i];
+                    fullFingerprint.add(tokenValue);
+                    sourceMap.put(f.getUri(), ranges[i]);
+                }
             }
         }
         // 0 terminal
@@ -89,7 +90,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         // LOGGER.info("LCP: " + Printer.print(suff.getLcp()));
 
         int[] cloneIndices = extractCloneIndicesFromSA();
-        LOGGER.info("Clone indices: " + Printer.print(cloneIndices));
+        // LOGGER.info("Clone indices: " + Printer.print(cloneIndices));
 
         RangeConverter converter = new RangeConverter();
         Map<Integer, CodeClone> cloneMap = new HashMap<>();
@@ -101,10 +102,6 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
 
             TokenSourcePair first = getTokenSourcePairFromIndex(firstIndex, cloneSize);
             TokenSourcePair second = getTokenSourcePairFromIndex(secondIndex, cloneSize);
-
-            if (first.getRangeBetween() == null || second.getRangeBetween() == null) {
-                continue;
-            }
 
             CodeClone firstClone = cloneMap.getOrDefault(firstIndex,
                     new CodeClone(first.getUri(), converter.convertFromRight(first.getRangeBetween())));
@@ -119,6 +116,8 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         for (CodeClone clone : cloneMap.values()) {
             clones.add(clone);
         }
+        timerIndexChange.stop();
+        timerIndexChange.log("indexDidChange time");
     }
 
     private int[] extractCloneIndicesFromSA() {
@@ -126,8 +125,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         int cloneThreshold = config.getCloneTokenThreshold();
         // Fetch clones, ignore contained clones
         ArrayList<Integer> clones = new ArrayList<>();
-        LOGGER.info("Threshold: " + cloneThreshold);
-        for (int i = 1; i < SA.length; i++) {
+        for (int i = 0; i < SA.length; i++) {
 
             if (LCP[ISA[i]] >= cloneThreshold) {
                 // Ignore contained clones
@@ -152,13 +150,16 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
 
     }
 
-    private FingerprintIndex buildFingerprintIndex(DocumentIndex<TreesitterDocumentModel> index) {
-        FingerprintIndex fingerprintIndex = new FingerprintIndex();
+    private void buildFingerprints(DocumentIndex<TreesitterDocumentModel> index) {
         Configuration config = Configuration.getInstance();
         Timer timer = new Timer();
         timer.start();
         for (TreesitterDocumentModel document : index) {
+            if (!document.hasChanged()) {
+                continue;
+            }
             document.buildTree();
+            document.resetFingerprint();
 
             Node root = document.getAST().getTree().getRootNode();
             String query = config.getFragmentQuery();
@@ -168,7 +169,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
 
             if (methodsQueryCursor == null) {
                 LOGGER.info("Invalid pattern");
-                return fingerprintIndex;
+                return;
             }
 
             for (TSQueryMatch match = methodsQueryCursor.nextMatch(); match != null; match = methodsQueryCursor
@@ -181,15 +182,15 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
 
                 Fingerprint fingerprint = fingerprintGenerator.getFingerprint(document.getText(),
                         document.getUri(), matchNode);
+                document.addFingerprint(fingerprint);
+                document.setChanged(false);
 
-                fingerprintIndex.add(fingerprint);
             }
             document.freeTree();
         }
         timer.stop();
         timer.log("Time to fetch tokens");
 
-        return fingerprintIndex;
     }
 
     private boolean filterRecursiveChildren(Node node) {

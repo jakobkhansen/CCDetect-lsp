@@ -54,7 +54,7 @@ public class CodeClone {
 
     @Override
     public String toString() {
-        String out = "CodeClone(" + this.uri + range + ")";
+        String out = "CodeClone(" + this.uri + range + "\nMatches: " + this.matchingClones.size() + ")";
         return out;
     }
 
