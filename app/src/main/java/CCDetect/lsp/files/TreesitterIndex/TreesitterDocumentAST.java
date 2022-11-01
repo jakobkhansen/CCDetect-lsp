@@ -18,7 +18,7 @@ public class TreesitterDocumentAST {
         try {
             tree = parser.parseString(documentContent);
         } catch (Exception e) {
-            LOGGER.info(e.getMessage());
+            LOGGER.info(e.toString());
         }
     }
 

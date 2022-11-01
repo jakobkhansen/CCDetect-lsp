@@ -46,7 +46,7 @@ public class GitProjectIterator implements ProjectFileIterator {
                 filePaths.add(Paths.get(rootUri, pathString));
             }
         } catch (Exception e) {
-            LOGGER.info(e.getMessage());
+            LOGGER.info(e.toString());
         }
         LOGGER.info(filePaths.size() + "");
         return filePaths;

@@ -1,5 +1,7 @@
 package CCDetect.lsp.server;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
@@ -57,7 +59,10 @@ public class CCTextDocumentService implements TextDocumentService {
             CodeActionParams params) {
         LOGGER.info("codeActions published");
         return CompletableFuture.supplyAsync(() -> {
-            DocumentModel document = index.getDocument(params.getTextDocument().getUri());
+
+            String uri = params.getTextDocument().getUri();
+
+            DocumentModel document = index.getDocument(uri);
             Range range = params.getRange();
 
             return CodeActionProvider.createCodeActions(document, range);
@@ -67,11 +72,15 @@ public class CCTextDocumentService implements TextDocumentService {
     @Override
     public void didOpen(DidOpenTextDocumentParams params) {
         LOGGER.info("didOpen");
+        String uri = params.getTextDocument().getUri();
+        String uriFormatted = uri.substring(7);
 
-        TreesitterDocumentModel model = new TreesitterDocumentModel(params.getTextDocument().getUri(),
-                params.getTextDocument().getText());
+        Path path = Paths.get(uriFormatted);
 
-        index.updateDocument(params.getTextDocument().getUri(), model);
+        TreesitterDocumentModel model = new TreesitterDocumentModel(path, null);
+        model.setOpen(true);
+
+        index.updateDocument(uri, model);
         updateClones();
         updateDiagnostics();
     }
@@ -79,6 +88,7 @@ public class CCTextDocumentService implements TextDocumentService {
     @Override
     public void didChange(DidChangeTextDocumentParams params) {
         LOGGER.info("didChange");
+
         String uri = params.getTextDocument().getUri();
 
         if (!index.containsDocument(uri)) {
@@ -99,12 +109,17 @@ public class CCTextDocumentService implements TextDocumentService {
 
     @Override
     public void didClose(DidCloseTextDocumentParams params) {
-        LOGGER.info("didRemove");
+        String uri = params.getTextDocument().getUri();
+        LOGGER.info("didClose");
+        DocumentModel model = index.getDocument(uri);
+        model.setOpen(false);
+        updateDiagnostics();
     }
 
     @Override
     public void didSave(DidSaveTextDocumentParams params) {
         LOGGER.info("didSave");
+        updateDiagnostics();
     }
 
     public void findClones() {

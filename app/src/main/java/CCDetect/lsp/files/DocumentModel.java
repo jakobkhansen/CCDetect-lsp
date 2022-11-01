@@ -1,48 +1,61 @@
 package CCDetect.lsp.files;
 
 import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-
-import org.eclipse.lsp4j.Range;
+import java.util.stream.Collectors;
 
 import CCDetect.lsp.CodeClone;
 
 public class DocumentModel {
 
-    private final String uri;
+    private final Path path;
     protected String text;
     private List<CodeClone> clones = new ArrayList<>();
+    private boolean isOpen = false;
 
     private static final Logger LOGGER = Logger.getLogger(
             Logger.GLOBAL_LOGGER_NAME);
 
-    public DocumentModel(String uri, String text) {
-        this.uri = uri;
+    public DocumentModel(Path path, String text) {
+        this.path = path;
         setText(text);
-        try (
-                Reader r = new StringReader(text);
-                BufferedReader reader = new BufferedReader(r);) {
-            String lineText;
-            int lineNumber = 0;
-            while ((lineText = reader.readLine()) != null) {
-                lineNumber++;
-            }
-        } catch (IOException e) {
-            LOGGER.info(e.getMessage());
-        }
     }
 
     public String getText() {
+        if (text == null) {
+            String docContent = getDocumentContent();
+            setText(getDocumentContent());
+        }
         return text;
+    }
+
+    public String getDocumentContent() {
+
+        try (
+                BufferedReader reader = Files.newBufferedReader(
+                        path,
+                        Charset.forName("UTF-8"))) {
+            String content = reader.lines().collect(Collectors.joining("\n"));
+            reader.close();
+            return content;
+        } catch (Exception e) {
+            LOGGER.info(e.toString());
+        }
+
+        return null;
     }
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public boolean hasText() {
+        return text != null;
     }
 
     public void freeText() {
@@ -50,7 +63,15 @@ public class DocumentModel {
     }
 
     public String getUri() {
-        return uri;
+        return path.toUri().toString();
+    }
+
+    public void setOpen(boolean value) {
+        this.isOpen = value;
+    }
+
+    public boolean isOpen() {
+        return isOpen;
     }
 
     public void setClones(List<CodeClone> clones) {

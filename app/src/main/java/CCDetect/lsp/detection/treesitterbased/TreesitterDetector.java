@@ -23,7 +23,6 @@ import ai.serenade.treesitter.Node;
 import ai.serenade.treesitter.TSQueryCursor;
 import ai.serenade.treesitter.TSQueryMatch;
 import ai.serenade.treesitter.TSRange;
-import ai.serenade.treesitter.TreeCursor;
 
 /**
  * TreesitterDetector
@@ -39,12 +38,14 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
 
     @Override
     public List<CodeClone> getClones() {
+        LOGGER.info("clones: " + clones.size());
         return clones;
     }
 
     @Override
     public void onIndexChange(DocumentIndex<TreesitterDocumentModel> index) {
         LOGGER.info("onIndexChange TreesitterDetector");
+
         Timer timerIndexChange = new Timer();
         timerIndexChange.start();
         clones = new ArrayList<>();
@@ -84,11 +85,11 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         for (int i = 0; i < indices.length; i++) {
             indices[i] = i;
         }
-        LOGGER.info("Indices:     " + Printer.print(indices));
-        LOGGER.info("Fingerprint: " + Printer.print(fingerprint));
-        LOGGER.info("Suffix:      " + Printer.print(suff.getSuffix()));
-        LOGGER.info("Inverse:     " + Printer.print(suff.getInverseSuffix()));
-        LOGGER.info("LCP:         " + Printer.print(suff.getLcp()));
+        // LOGGER.info("Indices: " + Printer.print(indices));
+        // LOGGER.info("Fingerprint: " + Printer.print(fingerprint));
+        // LOGGER.info("Suffix: " + Printer.print(suff.getSuffix()));
+        // LOGGER.info("Inverse: " + Printer.print(suff.getInverseSuffix()));
+        // LOGGER.info("LCP: " + Printer.print(suff.getLcp()));
 
         int[] cloneIndices = extractCloneIndicesFromSA();
         LOGGER.info("Clone indices: " + Printer.print(cloneIndices));
@@ -159,7 +160,9 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             if (!document.hasChanged()) {
                 continue;
             }
-            document.buildTree();
+            if (!document.hasTree()) {
+                document.buildTree();
+            }
             document.resetFingerprint();
 
             Node root = document.getAST().getTree().getRootNode();
@@ -187,8 +190,21 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
 
             }
             document.setChanged(false);
-            document.freeTree();
+
+            if (!document.isOpen()) {
+                document.freeText();
+                document.freeTree();
+            }
         }
+
+        int counter = 0;
+        for (TreesitterDocumentModel doc : index) {
+            if (doc.hasText()) {
+                counter++;
+            }
+        }
+        LOGGER.info("Document files in memory: " + counter);
+
         timer.stop();
         timer.log("Time to fetch tokens");
 

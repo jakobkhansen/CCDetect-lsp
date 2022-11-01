@@ -46,7 +46,7 @@ public class TreeSitterLibrary {
 
             LOGGER.info("Treesitter loaded");
         } catch (Exception e) {
-            LOGGER.info(e.getMessage());
+            LOGGER.info(e.toString());
         } finally {
 
         }

@@ -38,7 +38,7 @@ public class FiletypeIterator implements ProjectFileIterator {
                                             .equals(filetype))
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            LOGGER.info(e.getMessage());
+            LOGGER.info(e.toString());
         }
 
         return filePaths;

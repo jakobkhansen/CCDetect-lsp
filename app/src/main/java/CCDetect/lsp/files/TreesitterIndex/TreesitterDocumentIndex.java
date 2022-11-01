@@ -27,6 +27,7 @@ import CCDetect.lsp.files.fileiterators.FiletypeIterator;
 import CCDetect.lsp.files.fileiterators.GitProjectIterator;
 import CCDetect.lsp.files.fileiterators.ProjectFileIterator;
 import CCDetect.lsp.server.Configuration;
+import CCDetect.lsp.utils.Printer;
 import CCDetect.lsp.utils.Timer;
 
 /**
@@ -47,18 +48,11 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
 
     @Override
     public void indexProject() {
-        Timer timer = new Timer();
-        timer.start();
         List<Path> filePaths = getFilePathsInProject();
         for (Path p : filePaths) {
-            String documentContent = getDocumentContent(p);
-            if (documentContent != null) {
-                TreesitterDocumentModel model = new TreesitterDocumentModel(p.toUri().toString(), documentContent);
-                updateDocument(p.toUri().toString(), model);
-            }
+            TreesitterDocumentModel model = new TreesitterDocumentModel(p, null);
+            updateDocument(p.toUri().toString(), model);
         }
-        timer.stop();
-        timer.log("Time to parse project");
     }
 
     private List<Path> getFilePathsInProject() {
@@ -66,21 +60,6 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
         ProjectFileIterator iterator = new GitProjectIterator(rootUri, config.getLanguage());
 
         return StreamSupport.stream(iterator.spliterator(), false).collect(Collectors.toList());
-    }
-
-    private String getDocumentContent(Path file) {
-        try (
-                BufferedReader reader = Files.newBufferedReader(
-                        file,
-                        Charset.forName("UTF-8"))) {
-            String content = reader.lines().collect(Collectors.joining("\n"));
-            reader.close();
-            return content;
-        } catch (Exception e) {
-            LOGGER.info(e.getMessage());
-        }
-
-        return null;
     }
 
     @Override
@@ -101,9 +80,13 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
 
     @Override
     public void updateDocument(String uri, Range range, String updatedContent) {
+        LOGGER.info("uri: " + uri);
+        LOGGER.info("Index: " + Printer.print(documents));
 
         double t1 = System.nanoTime();
         TreesitterDocumentModel document = documents.get(uri);
+        LOGGER.info("got document " + document.getUri());
+        LOGGER.info("content " + document.getText());
         document.updateDocument(range, updatedContent);
         document.setChanged(true);
         double t2 = System.nanoTime();

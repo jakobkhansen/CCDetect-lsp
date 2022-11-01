@@ -37,7 +37,7 @@ public class App {
             CCGeneralLogger.setup();
             CCFileStateLogger.setup();
         } catch (IOException e) {
-            LOGGER.info(e.getMessage());
+            LOGGER.info(e.toString());
         }
     }
 
