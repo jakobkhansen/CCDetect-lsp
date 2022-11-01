@@ -16,7 +16,6 @@ public class DocumentModel {
 
     private final String uri;
     protected String text;
-    private final List<DocumentLine> lines = new ArrayList<>();
     private List<CodeClone> clones = new ArrayList<>();
 
     private static final Logger LOGGER = Logger.getLogger(
@@ -31,8 +30,6 @@ public class DocumentModel {
             String lineText;
             int lineNumber = 0;
             while ((lineText = reader.readLine()) != null) {
-                DocumentLine line = new DocumentLine(uri, lineNumber, lineText);
-                lines.add(line);
                 lineNumber++;
             }
         } catch (IOException e) {
@@ -52,33 +49,8 @@ public class DocumentModel {
         setText(null);
     }
 
-    public List<DocumentLine> getLines() {
-        return lines;
-    }
-
     public String getUri() {
         return uri;
-    }
-
-    public List<DocumentLine> getLinesInRange(Range range) {
-        int startLine = range.getStart().getLine();
-        int endLine = range.getEnd().getLine();
-
-        return lines.subList(startLine, endLine + 1);
-    }
-
-    public String getLineTextInRange(Range range) {
-        int startLine = range.getStart().getLine();
-        int endLine = range.getEnd().getLine();
-
-        List<DocumentLine> rangeLines = lines.subList(startLine, endLine + 1);
-        StringBuilder linesString = new StringBuilder();
-
-        for (DocumentLine line : rangeLines) {
-            linesString.append("\n" + line.toString());
-        }
-
-        return linesString.toString();
     }
 
     public void setClones(List<CodeClone> clones) {
@@ -94,11 +66,6 @@ public class DocumentModel {
     }
 
     public String toString() {
-        StringBuilder out = new StringBuilder();
-        for (DocumentLine line : lines) {
-            out.append(line + "\n");
-        }
-
-        return out.toString();
+        return text;
     }
 }
