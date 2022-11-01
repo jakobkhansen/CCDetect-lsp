@@ -1,7 +1,10 @@
 package CCDetect.lsp.files;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -28,18 +31,14 @@ public class DocumentModel {
 
     public String getText() {
         if (text == null) {
-            String docContent = getDocumentContent();
             setText(getDocumentContent());
         }
         return text;
     }
 
     public String getDocumentContent() {
-
-        try (
-                BufferedReader reader = Files.newBufferedReader(
-                        path,
-                        Charset.forName("UTF-8"))) {
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(Files.newInputStream(path), "utf-8"));
             String content = reader.lines().collect(Collectors.joining("\n"));
             reader.close();
             return content;

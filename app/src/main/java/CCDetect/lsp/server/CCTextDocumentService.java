@@ -27,6 +27,7 @@ import CCDetect.lsp.files.DocumentIndex;
 import CCDetect.lsp.files.DocumentModel;
 import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentIndex;
 import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentModel;
+import CCDetect.lsp.utils.Timer;
 
 /**
  * CCTextDocumentService
@@ -87,6 +88,8 @@ public class CCTextDocumentService implements TextDocumentService {
 
     @Override
     public void didChange(DidChangeTextDocumentParams params) {
+        Timer timer = new Timer();
+        timer.start();
         LOGGER.info("didChange");
 
         String uri = params.getTextDocument().getUri();
@@ -105,6 +108,8 @@ public class CCTextDocumentService implements TextDocumentService {
 
         findClones();
         updateDiagnostics();
+        timer.stop();
+        timer.log("didChange total time");
     }
 
     @Override
