@@ -40,10 +40,14 @@ public class CCTextDocumentService implements TextDocumentService {
     private CloneDetector<TreesitterDocumentModel> detector;
 
     public void initialize(String rootUri) {
+        Timer timer = new Timer();
+        timer.start();
         createIndex(rootUri);
         createDetector();
         findClones();
         updateDiagnostics();
+        timer.stop();
+        timer.log("Initialize time");
     }
 
     public void createIndex(String rootUri) {
@@ -93,7 +97,6 @@ public class CCTextDocumentService implements TextDocumentService {
         LOGGER.info("didChange");
 
         String uri = params.getTextDocument().getUri();
-        LOGGER.info("didChangeUri" + uri);
 
         if (!index.containsDocument(uri)) {
             LOGGER.info("Unknown document");
