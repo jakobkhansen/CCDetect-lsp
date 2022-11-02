@@ -84,6 +84,7 @@ public class CCTextDocumentService implements TextDocumentService {
 
         TreesitterDocumentModel model = new TreesitterDocumentModel(path, null);
         model.setOpen(true);
+        model.buildTree();
 
         index.updateDocument(uri, model);
         updateClones();
