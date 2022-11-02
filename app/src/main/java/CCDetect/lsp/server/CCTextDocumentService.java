@@ -93,6 +93,7 @@ public class CCTextDocumentService implements TextDocumentService {
         LOGGER.info("didChange");
 
         String uri = params.getTextDocument().getUri();
+        LOGGER.info("didChangeUri" + uri);
 
         if (!index.containsDocument(uri)) {
             LOGGER.info("Unknown document");

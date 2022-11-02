@@ -1,6 +1,7 @@
 package CCDetect.lsp.files.fileiterators;
 
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -23,11 +24,12 @@ public class GitProjectIterator implements ProjectFileIterator {
     public GitProjectIterator(String rootUri, String filetype) {
         this.rootUri = rootUri;
         this.filetype = filetype;
+        LOGGER.info("rootUri " + rootUri);
     }
 
     private List<Path> getFilePathsInProject() {
         List<Path> filePaths = new ArrayList<>();
-        String command = String.format("git --git-dir=%s/.git ls-files", rootUri);
+        String command = String.format("git --git-dir=./.git ls-files");
         LOGGER.info("command " + command);
         try {
             Process p = Runtime.getRuntime().exec(command);
@@ -43,7 +45,7 @@ public class GitProjectIterator implements ProjectFileIterator {
                         continue;
                     }
                 }
-                filePaths.add(Paths.get(rootUri, pathString));
+                filePaths.add(Paths.get(pathString));
             }
         } catch (Exception e) {
             LOGGER.info(e.toString());

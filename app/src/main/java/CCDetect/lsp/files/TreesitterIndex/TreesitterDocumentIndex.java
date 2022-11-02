@@ -1,13 +1,6 @@
 package CCDetect.lsp.files.TreesitterIndex;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.net.URI;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -15,19 +8,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.eclipse.lsp4j.Range;
 
-import CCDetect.lsp.CodeClone;
 import CCDetect.lsp.files.DocumentIndex;
 import CCDetect.lsp.files.DocumentModel;
-import CCDetect.lsp.files.fileiterators.FiletypeIterator;
 import CCDetect.lsp.files.fileiterators.GitProjectIterator;
 import CCDetect.lsp.files.fileiterators.ProjectFileIterator;
 import CCDetect.lsp.server.Configuration;
-import CCDetect.lsp.utils.Printer;
 import CCDetect.lsp.utils.Timer;
 
 /**
@@ -80,18 +69,14 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
 
     @Override
     public void updateDocument(String uri, Range range, String updatedContent) {
-        LOGGER.info("uri: " + uri);
-        LOGGER.info("Index: " + Printer.print(documents));
-
-        double t1 = System.nanoTime();
+        Timer timer = new Timer();
+        timer.start();
         TreesitterDocumentModel document = documents.get(uri);
-        LOGGER.info("got document " + document.getUri());
-        LOGGER.info("content " + document.getText());
         document.updateDocument(range, updatedContent);
         document.setChanged(true);
-        double t2 = System.nanoTime();
-        double runtimeInMs = (t2 - t1) / 1000000.0;
-        LOGGER.info("Time to incremental reparse: " + runtimeInMs);
+        timer.stop();
+
+        timer.log("Time to incremental reparse");
     }
 
     @Override
