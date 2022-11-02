@@ -84,4 +84,9 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
         return documents.containsKey(uri);
     }
 
+    @Override
+    public int size() {
+        return documents.size();
+    }
+
 }

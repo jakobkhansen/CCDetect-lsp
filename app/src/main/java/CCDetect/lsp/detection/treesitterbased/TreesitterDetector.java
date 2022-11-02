@@ -15,6 +15,7 @@ import CCDetect.lsp.detection.CloneDetector;
 import CCDetect.lsp.files.DocumentIndex;
 import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentModel;
 import CCDetect.lsp.server.Configuration;
+import CCDetect.lsp.server.NotificationHandler;
 import CCDetect.lsp.treesitter.TreeSitterLibrary;
 import CCDetect.lsp.utils.Printer;
 import CCDetect.lsp.utils.RangeConverter;
@@ -73,6 +74,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         int[] fingerprint = Ints.toArray(fullFingerprint);
 
         // Build suffix, inverse, lcp
+        NotificationHandler.startNotification("clones", "Finding clones");
         Timer timer = new Timer();
         timer.start();
         ExtendedSuffixArray suff = new SAIS().buildExtendedSuffixArray(fingerprint);
@@ -120,6 +122,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         }
         timerIndexChange.stop();
         timerIndexChange.log("indexDidChange time");
+        NotificationHandler.endNotification("clones", clones.size() + " clones found");
     }
 
     private int[] extractCloneIndicesFromSA() {
@@ -156,15 +159,24 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         Configuration config = Configuration.getInstance();
         Timer timer = new Timer();
         timer.start();
+        NotificationHandler.startNotification("index", "Indexing documents");
+        int documentsProcessed = 0;
         for (TreesitterDocumentModel document : index) {
             if (!document.hasChanged()) {
+                documentsProcessed++;
                 continue;
             }
+
+            // Report progress
+            NotificationHandler.progressReportNotification("index", documentsProcessed, index.size());
+
+            // If AST is not in memory, build it
             if (!document.hasTree()) {
                 document.buildTree();
             }
             document.resetFingerprint();
 
+            // Build fingerprint for document
             Node root = document.getAST().getTree().getRootNode();
             String query = config.getFragmentQuery();
 
@@ -189,13 +201,17 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                 document.addFingerprint(fingerprint);
 
             }
+            // Document has been validated, it is no longer invalid
             document.setChanged(false);
 
+            // Free document resources if it is not open
             if (!document.isOpen()) {
                 document.freeText();
                 document.freeTree();
             }
+            documentsProcessed++;
         }
+        NotificationHandler.endNotification("index", null);
 
         int counter = 0;
         for (TreesitterDocumentModel doc : index) {
