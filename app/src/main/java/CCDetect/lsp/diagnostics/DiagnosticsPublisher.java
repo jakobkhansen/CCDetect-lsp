@@ -23,7 +23,7 @@ import CCDetect.lsp.server.CCLanguageServer;
  */
 public class DiagnosticsPublisher {
 
-    static DiagnosticSeverity CODECLONE_DIAGNOSTIC_SEVERITY = DiagnosticSeverity.Hint;
+    static DiagnosticSeverity CODECLONE_DIAGNOSTIC_SEVERITY = DiagnosticSeverity.Information;
 
     private static final Logger LOGGER = Logger.getLogger(
             Logger.GLOBAL_LOGGER_NAME);
