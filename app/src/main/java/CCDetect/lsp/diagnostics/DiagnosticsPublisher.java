@@ -23,7 +23,7 @@ import CCDetect.lsp.server.CCLanguageServer;
  */
 public class DiagnosticsPublisher {
 
-    static DiagnosticSeverity CODECLONE_DIAGNOSTIC_SEVERITY = DiagnosticSeverity.Error;
+    static DiagnosticSeverity CODECLONE_DIAGNOSTIC_SEVERITY = DiagnosticSeverity.Information;
 
     private static final Logger LOGGER = Logger.getLogger(
             Logger.GLOBAL_LOGGER_NAME);
@@ -41,7 +41,7 @@ public class DiagnosticsPublisher {
     public static Diagnostic convertCloneToDiagnostic(CodeClone clone) {
         Diagnostic diagnostic = new Diagnostic(
                 clone.getRange(),
-                "Clone(s) detected");
+                clone.getMatches().size() + " clone(s) detected");
         diagnostic.setSeverity(CODECLONE_DIAGNOSTIC_SEVERITY);
 
         List<DiagnosticRelatedInformation> diagnosticInformation = new ArrayList<>();

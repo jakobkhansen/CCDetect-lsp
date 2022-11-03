@@ -1,84 +1,76 @@
 package CCDetect.lsp.files;
 
 import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-
-import org.eclipse.lsp4j.Range;
+import java.util.stream.Collectors;
 
 import CCDetect.lsp.CodeClone;
 
 public class DocumentModel {
 
-    private final String uri;
+    private final Path path;
     protected String text;
-    private final List<DocumentLine> lines = new ArrayList<>();
     private List<CodeClone> clones = new ArrayList<>();
+    private boolean isOpen = false;
 
     private static final Logger LOGGER = Logger.getLogger(
             Logger.GLOBAL_LOGGER_NAME);
 
-    public DocumentModel(String uri, String text) {
-        this.uri = uri;
+    public DocumentModel(Path path, String text) {
+        this.path = path;
         setText(text);
-        try (
-                Reader r = new StringReader(text);
-                BufferedReader reader = new BufferedReader(r);) {
-            String lineText;
-            int lineNumber = 0;
-            while ((lineText = reader.readLine()) != null) {
-                DocumentLine line = new DocumentLine(uri, lineNumber, lineText);
-                lines.add(line);
-                lineNumber++;
-            }
-        } catch (IOException e) {
-            LOGGER.info(e.getMessage());
-        }
     }
 
     public String getText() {
+        if (text == null) {
+            setText(getDocumentContent());
+        }
         return text;
+    }
+
+    public String getDocumentContent() {
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(Files.newInputStream(path), "utf-8"));
+            String content = reader.lines().collect(Collectors.joining("\n"));
+            reader.close();
+            return content;
+        } catch (Exception e) {
+            LOGGER.info(e.toString());
+        }
+
+        return null;
     }
 
     public void setText(String text) {
         this.text = text;
     }
 
+    public boolean hasText() {
+        return text != null;
+    }
+
     public void freeText() {
         setText(null);
     }
 
-    public List<DocumentLine> getLines() {
-        return lines;
-    }
-
     public String getUri() {
-        return uri;
+        return path.toUri().toString();
     }
 
-    public List<DocumentLine> getLinesInRange(Range range) {
-        int startLine = range.getStart().getLine();
-        int endLine = range.getEnd().getLine();
-
-        return lines.subList(startLine, endLine + 1);
+    public void setOpen(boolean value) {
+        this.isOpen = value;
     }
 
-    public String getLineTextInRange(Range range) {
-        int startLine = range.getStart().getLine();
-        int endLine = range.getEnd().getLine();
-
-        List<DocumentLine> rangeLines = lines.subList(startLine, endLine + 1);
-        StringBuilder linesString = new StringBuilder();
-
-        for (DocumentLine line : rangeLines) {
-            linesString.append("\n" + line.toString());
-        }
-
-        return linesString.toString();
+    public boolean isOpen() {
+        return isOpen;
     }
 
     public void setClones(List<CodeClone> clones) {
@@ -94,11 +86,6 @@ public class DocumentModel {
     }
 
     public String toString() {
-        StringBuilder out = new StringBuilder();
-        for (DocumentLine line : lines) {
-            out.append(line + "\n");
-        }
-
-        return out.toString();
+        return text;
     }
 }

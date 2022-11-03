@@ -24,6 +24,8 @@ public interface DocumentIndex<T extends DocumentModel> extends Iterable<T> {
 
     boolean containsDocument(String uri);
 
+    int size();
+
     default void updateClones(List<CodeClone> clones) {
 
         for (DocumentModel doc : this) {

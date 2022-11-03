@@ -1,5 +1,7 @@
 package CCDetect.lsp.server;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
@@ -25,6 +27,7 @@ import CCDetect.lsp.files.DocumentIndex;
 import CCDetect.lsp.files.DocumentModel;
 import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentIndex;
 import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentModel;
+import CCDetect.lsp.utils.Timer;
 
 /**
  * CCTextDocumentService
@@ -37,10 +40,14 @@ public class CCTextDocumentService implements TextDocumentService {
     private CloneDetector<TreesitterDocumentModel> detector;
 
     public void initialize(String rootUri) {
+        Timer timer = new Timer();
+        timer.start();
         createIndex(rootUri);
         createDetector();
         findClones();
         updateDiagnostics();
+        timer.stop();
+        timer.log("Initialize time");
     }
 
     public void createIndex(String rootUri) {
@@ -57,7 +64,10 @@ public class CCTextDocumentService implements TextDocumentService {
             CodeActionParams params) {
         LOGGER.info("codeActions published");
         return CompletableFuture.supplyAsync(() -> {
-            DocumentModel document = index.getDocument(params.getTextDocument().getUri());
+
+            String uri = params.getTextDocument().getUri();
+
+            DocumentModel document = index.getDocument(uri);
             Range range = params.getRange();
 
             return CodeActionProvider.createCodeActions(document, range);
@@ -67,18 +77,26 @@ public class CCTextDocumentService implements TextDocumentService {
     @Override
     public void didOpen(DidOpenTextDocumentParams params) {
         LOGGER.info("didOpen");
+        String uri = params.getTextDocument().getUri();
+        String uriFormatted = uri.substring(7);
 
-        TreesitterDocumentModel model = new TreesitterDocumentModel(params.getTextDocument().getUri(),
-                params.getTextDocument().getText());
+        Path path = Paths.get(uriFormatted);
 
-        index.updateDocument(params.getTextDocument().getUri(), model);
+        TreesitterDocumentModel model = new TreesitterDocumentModel(path, null);
+        model.setOpen(true);
+        model.buildTree();
+
+        index.updateDocument(uri, model);
         updateClones();
         updateDiagnostics();
     }
 
     @Override
     public void didChange(DidChangeTextDocumentParams params) {
+        Timer timer = new Timer();
+        timer.start();
         LOGGER.info("didChange");
+
         String uri = params.getTextDocument().getUri();
 
         if (!index.containsDocument(uri)) {
@@ -95,16 +113,23 @@ public class CCTextDocumentService implements TextDocumentService {
 
         findClones();
         updateDiagnostics();
+        timer.stop();
+        timer.log("didChange total time");
     }
 
     @Override
     public void didClose(DidCloseTextDocumentParams params) {
-        LOGGER.info("didRemove");
+        String uri = params.getTextDocument().getUri();
+        LOGGER.info("didClose");
+        DocumentModel model = index.getDocument(uri);
+        model.setOpen(false);
+        updateDiagnostics();
     }
 
     @Override
     public void didSave(DidSaveTextDocumentParams params) {
         LOGGER.info("didSave");
+        updateDiagnostics();
     }
 
     public void findClones() {

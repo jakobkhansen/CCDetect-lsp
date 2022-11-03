@@ -26,7 +26,7 @@ public class CodeCloneJumpProvider {
         for (CodeClone clone : document.getClones()) {
             if (clone.isInRange(range)) {
                 for (CodeClone otherClone : clone.getMatches()) {
-                    CodeAction action = new CodeAction("Jump to matching clone");
+                    CodeAction action = new CodeAction("Jump to matching clone in " + otherClone.getUri());
 
                     Command command = new Command("showDocument", "showDocument");
                     List<Object> arguments = new ArrayList<>();

@@ -1,5 +1,6 @@
 package CCDetect.lsp.files.TreesitterIndex;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
@@ -19,12 +20,12 @@ public class TreesitterDocumentModel extends DocumentModel {
     private ArrayList<Fingerprint> fingerprints = new ArrayList<>();
     private boolean hasChanged = true;
 
-    public TreesitterDocumentModel(String uri, String text) {
-        super(uri, text);
+    public TreesitterDocumentModel(Path path, String text) {
+        super(path, text);
     }
 
     public void buildTree() {
-        ast = new TreesitterDocumentAST(text);
+        ast = new TreesitterDocumentAST(getText());
     }
 
     public void freeTree() {
@@ -36,6 +37,10 @@ public class TreesitterDocumentModel extends DocumentModel {
 
     public TreesitterDocumentAST getAST() {
         return ast;
+    }
+
+    public boolean hasTree() {
+        return ast != null;
     }
 
     public ArrayList<Fingerprint> getFingerprint() {
@@ -73,9 +78,9 @@ public class TreesitterDocumentModel extends DocumentModel {
         int start = 0, end = 0;
         int currLine = 0, currChar = 0;
 
-        for (int i = 0; i < text.length(); i++) {
+        for (int i = 0; i < getText().length(); i++) {
 
-            char c = text.charAt(i);
+            char c = getText().charAt(i);
 
             if (currLine == startLine && currChar == startChar) {
                 start = i;
@@ -91,11 +96,10 @@ public class TreesitterDocumentModel extends DocumentModel {
             }
         }
 
-        String prefix = text.substring(0, start);
-        String suffix = text.substring(end, text.length());
+        String prefix = getText().substring(0, start);
+        String suffix = getText().substring(end, getText().length());
         setText(prefix + updatedContent + suffix);
         setChanged(true);
-        LOGGER.info("SETTING TEXT: " + getText());
 
         if (ast == null) {
             buildTree();

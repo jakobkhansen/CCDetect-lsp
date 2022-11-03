@@ -15,6 +15,7 @@ import CCDetect.lsp.detection.CloneDetector;
 import CCDetect.lsp.files.DocumentIndex;
 import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentModel;
 import CCDetect.lsp.server.Configuration;
+import CCDetect.lsp.server.NotificationHandler;
 import CCDetect.lsp.treesitter.TreeSitterLibrary;
 import CCDetect.lsp.utils.Printer;
 import CCDetect.lsp.utils.RangeConverter;
@@ -23,7 +24,6 @@ import ai.serenade.treesitter.Node;
 import ai.serenade.treesitter.TSQueryCursor;
 import ai.serenade.treesitter.TSQueryMatch;
 import ai.serenade.treesitter.TSRange;
-import ai.serenade.treesitter.TreeCursor;
 
 /**
  * TreesitterDetector
@@ -35,24 +35,24 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
     List<CodeClone> clones;
     TreesitterFingerprintGenerator fingerprintGenerator = new TreesitterFingerprintGenerator();
     TokenSourceMap sourceMap;
-    int[] SA, ISA, LCP;
+    // int[] SA, ISA, LCP;
 
     @Override
     public List<CodeClone> getClones() {
+        LOGGER.info("clones: " + clones.size());
         return clones;
     }
 
     @Override
     public void onIndexChange(DocumentIndex<TreesitterDocumentModel> index) {
         LOGGER.info("onIndexChange TreesitterDetector");
+
         Timer timerIndexChange = new Timer();
         timerIndexChange.start();
         clones = new ArrayList<>();
         sourceMap = new TokenSourceMap();
 
-        LOGGER.info("BUILDING F");
         buildFingerprints(index);
-        LOGGER.info("BUILT F");
         // Build fingerprint
         ArrayList<Integer> fullFingerprint = new ArrayList<>();
         for (TreesitterDocumentModel doc : index) {
@@ -74,27 +74,40 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         int[] fingerprint = Ints.toArray(fullFingerprint);
 
         // Build suffix, inverse, lcp
+        NotificationHandler.startNotification("clones", "Finding clones");
         Timer timer = new Timer();
         timer.start();
         ExtendedSuffixArray suff = new SAIS().buildExtendedSuffixArray(fingerprint);
         timer.stop();
         timer.log("Time to build suffix array, inverse and lcp");
-        SA = suff.getSuffix();
-        ISA = suff.getInverseSuffix();
-        LCP = suff.getLcp();
+        int[] SA = suff.getSuffix();
+        int[] ISA = suff.getInverseSuffix();
+        int[] LCP = suff.getLcp();
         int[] indices = new int[fingerprint.length];
         for (int i = 0; i < indices.length; i++) {
             indices[i] = i;
         }
-        LOGGER.info("Indices:     " + Printer.print(indices));
-        LOGGER.info("Fingerprint: " + Printer.print(fingerprint));
-        LOGGER.info("Suffix:      " + Printer.print(suff.getSuffix()));
-        LOGGER.info("Inverse:     " + Printer.print(suff.getInverseSuffix()));
-        LOGGER.info("LCP:         " + Printer.print(suff.getLcp()));
+        // LOGGER.info("Indices: " + Printer.print(indices));
+        // LOGGER.info("Fingerprint: " + Printer.print(fingerprint));
+        // LOGGER.info("Suffix: " + Printer.print(suff.getSuffix()));
+        // LOGGER.info("Inverse: " + Printer.print(suff.getInverseSuffix()));
+        // LOGGER.info("LCP: " + Printer.print(suff.getLcp()));
 
-        int[] cloneIndices = extractCloneIndicesFromSA();
+        int[] cloneIndices = extractCloneIndicesFromSA(SA, ISA, LCP);
         LOGGER.info("Clone indices: " + Printer.print(cloneIndices));
 
+        Map<Integer, CodeClone> cloneMap = getClones(SA, ISA, LCP, cloneIndices);
+
+        for (CodeClone clone : cloneMap.values()) {
+            clones.add(clone);
+        }
+
+        timerIndexChange.stop();
+        timerIndexChange.log("indexDidChange time");
+        NotificationHandler.endNotification("clones", clones.size() + " clones found");
+    }
+
+    private Map<Integer, CodeClone> getClones(int[] SA, int[] ISA, int[] LCP, int[] cloneIndices) {
         RangeConverter converter = new RangeConverter();
         Map<Integer, CodeClone> cloneMap = new HashMap<>();
         for (int i = 0; i < cloneIndices.length; i++) {
@@ -112,18 +125,27 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             CodeClone secondClone = cloneMap.getOrDefault(secondIndex,
                     new CodeClone(second.getUri(), converter.convertFromRight(second.getRangeBetween())));
 
+            CodeClone.addMatch(firstClone, secondClone);
+
+            for (CodeClone clone : firstClone.getMatches()) {
+                if (clone != firstClone && clone != secondClone) {
+                    CodeClone.addMatch(secondClone, clone);
+                }
+            }
+
+            for (CodeClone clone : secondClone.getMatches()) {
+                if (clone != firstClone && clone != secondClone) {
+                    CodeClone.addMatch(firstClone, clone);
+                }
+            }
+
             cloneMap.put(firstIndex, firstClone);
             cloneMap.put(secondIndex, secondClone);
-            CodeClone.addMatch(firstClone, secondClone);
         }
-        for (CodeClone clone : cloneMap.values()) {
-            clones.add(clone);
-        }
-        timerIndexChange.stop();
-        timerIndexChange.log("indexDidChange time");
+        return cloneMap;
     }
 
-    private int[] extractCloneIndicesFromSA() {
+    private int[] extractCloneIndicesFromSA(int[] SA, int[] ISA, int[] LCP) {
         Configuration config = Configuration.getInstance();
         int cloneThreshold = config.getCloneTokenThreshold();
         // Fetch clones, ignore contained clones
@@ -157,13 +179,24 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         Configuration config = Configuration.getInstance();
         Timer timer = new Timer();
         timer.start();
+        NotificationHandler.startNotification("index", "Indexing documents");
+        int documentsProcessed = 0;
         for (TreesitterDocumentModel document : index) {
             if (!document.hasChanged()) {
+                documentsProcessed++;
                 continue;
             }
-            document.buildTree();
+
+            // Report progress
+            NotificationHandler.progressReportNotification("index", documentsProcessed, index.size());
+
+            // If AST is not in memory, build it
+            if (!document.hasTree()) {
+                document.buildTree();
+            }
             document.resetFingerprint();
 
+            // Build fingerprint for document
             Node root = document.getAST().getTree().getRootNode();
             String query = config.getFragmentQuery();
 
@@ -183,15 +216,31 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                     continue;
                 }
 
-                LOGGER.info("BUILDING FINGERPRINT: " + document.getText());
                 Fingerprint fingerprint = fingerprintGenerator.getFingerprint(document.getText(),
                         document.getUri(), matchNode);
                 document.addFingerprint(fingerprint);
 
             }
+            // Document has been validated, it is no longer invalid
             document.setChanged(false);
-            document.freeTree();
+
+            // Free document resources if it is not open
+            if (!document.isOpen()) {
+                document.freeText();
+                document.freeTree();
+            }
+            documentsProcessed++;
         }
+        NotificationHandler.endNotification("index", null);
+
+        int counter = 0;
+        for (TreesitterDocumentModel doc : index) {
+            if (doc.hasText()) {
+                counter++;
+            }
+        }
+        LOGGER.info("Document files in memory: " + counter);
+
         timer.stop();
         timer.log("Time to fetch tokens");
 
