@@ -47,10 +47,7 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
     }
 
     private List<Path> getFilePathsInProject() {
-        Configuration config = Configuration.getInstance();
-        ProjectFileIterator iterator = new GitProjectIterator(rootUri, config.getLanguage());
-
-        return StreamSupport.stream(iterator.spliterator(), false).collect(Collectors.toList());
+        return StreamSupport.stream(projectFileIterator.spliterator(), false).collect(Collectors.toList());
     }
 
     @Override
