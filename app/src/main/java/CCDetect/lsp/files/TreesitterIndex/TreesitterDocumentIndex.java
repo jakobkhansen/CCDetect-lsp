@@ -30,9 +30,11 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
     Map<String, TreesitterDocumentModel> documents = Collections.synchronizedMap(
             new HashMap<>());
     String rootUri;
+    ProjectFileIterator projectFileIterator;
 
-    public TreesitterDocumentIndex(String rootUri) {
+    public TreesitterDocumentIndex(String rootUri, ProjectFileIterator projectFileIterator) {
         this.rootUri = rootUri;
+        this.projectFileIterator = projectFileIterator;
     }
 
     @Override

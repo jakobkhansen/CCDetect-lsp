@@ -27,6 +27,7 @@ import CCDetect.lsp.files.DocumentIndex;
 import CCDetect.lsp.files.DocumentModel;
 import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentIndex;
 import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentModel;
+import CCDetect.lsp.files.fileiterators.GitProjectIterator;
 import CCDetect.lsp.utils.Timer;
 
 /**
@@ -51,7 +52,8 @@ public class CCTextDocumentService implements TextDocumentService {
     }
 
     public void createIndex(String rootUri) {
-        index = new TreesitterDocumentIndex(rootUri);
+        Configuration config = Configuration.getInstance();
+        index = new TreesitterDocumentIndex(rootUri, new GitProjectIterator(rootUri, config.getLanguage()));
         index.indexProject();
     }
 
