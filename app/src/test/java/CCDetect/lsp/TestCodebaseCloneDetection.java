@@ -5,6 +5,7 @@ import java.io.File;
 import org.junit.Before;
 import org.junit.Test;
 
+import CCDetect.lsp.detection.treesitterbased.TreesitterDetector;
 import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentIndex;
 import CCDetect.lsp.files.fileiterators.FiletypeIterator;
 import CCDetect.lsp.files.fileiterators.ProjectFileIterator;
@@ -35,5 +36,7 @@ public class TestCodebaseCloneDetection {
         ProjectFileIterator iterator = new FiletypeIterator(rootUri, config.getLanguage());
         TreesitterDocumentIndex index = new TreesitterDocumentIndex(rootUri, iterator);
         index.indexProject();
+        TreesitterDetector detector = new TreesitterDetector();
+        detector.onIndexChange(index);
     }
 }
