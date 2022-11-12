@@ -62,4 +62,8 @@ public class CodeClone {
         clone1.addMatchingClone(clone2);
         clone2.addMatchingClone(clone1);
     }
+
+    public boolean equals(CodeClone clone) {
+        return range.equals(clone.getRange()) && uri.equals(clone.getUri());
+    }
 }
