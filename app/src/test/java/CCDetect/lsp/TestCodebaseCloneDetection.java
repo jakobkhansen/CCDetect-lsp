@@ -76,6 +76,7 @@ public class TestCodebaseCloneDetection {
                 fail("Expected clone not found");
             }
         }
+        assertEquals("Found incorrect number of clones", expectedClones.length, clones.size());
     }
 
 }
