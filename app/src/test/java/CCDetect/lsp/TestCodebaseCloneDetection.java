@@ -47,7 +47,14 @@ public class TestCodebaseCloneDetection {
 
                 new CodeClone(rootUri + "/Another.java", new Range(
                         new Position(9, 4),
-                        new Position(15, 5)))
+                        new Position(15, 5))),
+
+                new CodeClone(rootUri + "/BinarySearch.java", new Range(
+                        new Position(6, 35),
+                        new Position(22, 5))),
+                new CodeClone(rootUri + "/BinarySearch.java", new Range(
+                        new Position(28, 44),
+                        new Position(44, 5)))
         };
 
         ProjectFileIterator iterator = new FiletypeIterator(rootUri, config.getLanguage());
