@@ -53,19 +53,26 @@ public class TestCodebaseCloneDetection {
 
         CodeClone[] expectedClones = new CodeClone[] {
                 new CodeClone(rootUri + "/Class.java", new Range(
+                        new Position(11, 4),
+                        new Position(17, 5))),
+                new CodeClone(rootUri + "/Another.java", new Range(
                         new Position(10, 4),
                         new Position(16, 5))),
 
-                new CodeClone(rootUri + "/Another.java", new Range(
-                        new Position(9, 4),
-                        new Position(15, 5))),
+                new CodeClone(rootUri + "/BinarySearch.java", new Range(
+                        new Position(7, 35),
+                        new Position(23, 5))),
+                new CodeClone(rootUri + "/BinarySearch.java", new Range(
+                        new Position(30, 44),
+                        new Position(46, 5))),
 
-                new CodeClone(rootUri + "/BinarySearch.java", new Range(
-                        new Position(6, 35),
-                        new Position(22, 5))),
-                new CodeClone(rootUri + "/BinarySearch.java", new Range(
-                        new Position(28, 44),
-                        new Position(44, 5)))
+                new CodeClone(rootUri + "/LinkedList.java", new Range(
+                        new Position(131, 25),
+                        new Position(142, 9))),
+                new CodeClone(rootUri + "/LinkedList.java", new Range(
+                        new Position(163, 19),
+                        new Position(175, 5)))
+
         };
 
         ProjectFileIterator iterator = new FiletypeIterator(rootUri, config.getLanguage());
@@ -84,7 +91,7 @@ public class TestCodebaseCloneDetection {
                 }
             }
             if (!found) {
-                fail("Expected clone not found");
+                fail("Expected clone not found: " + expectedClone);
             }
         }
         assertEquals("Found incorrect number of clones", expectedClones.length, clones.size());

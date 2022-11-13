@@ -8,6 +8,7 @@ import org.eclipse.lsp4j.Range;
  */
 public class Class {
 
+    // Clone in Another.main
     public static void main(String[] args) {
         String hello = "Hello world";
         int x = 10;

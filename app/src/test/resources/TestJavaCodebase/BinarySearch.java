@@ -4,6 +4,7 @@ package TestJavaCodebase;
  * BinarySearch
  */
 public class BinarySearch {
+    // Clone in BinarySearch.binarySearchDuplicate
     public static void binarySearch(int arr[], int first, int last, int key) {
         int mid = (first + last) / 2;
         while (first <= last) {
@@ -26,6 +27,7 @@ public class BinarySearch {
         return 1;
     }
 
+    // Clone in BinarySearch.binarySearch
     public static void binarySearchDuplicate(int arr[], int first, int last, int key) {
         int mid = (first + last) / 2;
         while (first <= last) {
