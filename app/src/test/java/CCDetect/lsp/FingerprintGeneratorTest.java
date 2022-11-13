@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.UnsupportedEncodingException;
+import java.util.logging.Filter;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -25,8 +28,17 @@ import ai.serenade.treesitter.Tree;
 public class FingerprintGeneratorTest {
     Configuration config;
 
+    private static final Logger LOGGER = Logger.getLogger(
+            Logger.GLOBAL_LOGGER_NAME);
+
     @Before
     public void init() {
+        LOGGER.setFilter(new Filter() {
+            @Override
+            public boolean isLoggable(LogRecord record) {
+                return false;
+            }
+        });
         config = Configuration.getInstance();
         config.setLanguage("java");
         config.setCloneTokenThreshold(75);

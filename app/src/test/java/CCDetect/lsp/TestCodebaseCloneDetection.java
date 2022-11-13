@@ -1,11 +1,13 @@
 package CCDetect.lsp;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.util.List;
+import java.util.logging.Filter;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
@@ -24,8 +26,17 @@ import CCDetect.lsp.server.Configuration;
 public class TestCodebaseCloneDetection {
     Configuration config;
 
+    private static final Logger LOGGER = Logger.getLogger(
+            Logger.GLOBAL_LOGGER_NAME);
+
     @Before
     public void init() {
+        LOGGER.setFilter(new Filter() {
+            @Override
+            public boolean isLoggable(LogRecord record) {
+                return false;
+            }
+        });
         config = Configuration.getInstance();
         config.setLanguage("java");
         config.setCloneTokenThreshold(50);
