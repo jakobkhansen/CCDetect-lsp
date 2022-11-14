@@ -48,6 +48,10 @@ public class CodeClone {
         return range;
     }
 
+    public void setRange(Range range) {
+        this.range = range;
+    }
+
     public String getUri() {
         return uri;
     }

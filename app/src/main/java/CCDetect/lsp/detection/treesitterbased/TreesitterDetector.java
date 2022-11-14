@@ -8,6 +8,8 @@ import java.util.logging.Logger;
 
 import com.google.common.primitives.Ints;
 
+import org.eclipse.lsp4j.Range;
+
 import CCDetect.lsp.CodeClone;
 import CCDetect.lsp.datastructures.ExtendedSuffixArray;
 import CCDetect.lsp.datastructures.SAIS;
@@ -122,8 +124,10 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             CodeClone firstClone = cloneMap.getOrDefault(firstIndex,
                     new CodeClone(first.getUri(), converter.convertFromRight(first.getRangeBetween())));
 
+            // Override ending range if new clone is bigger
+            Range range = converter.convertFromRight(second.getRangeBetween());
             CodeClone secondClone = cloneMap.getOrDefault(secondIndex,
-                    new CodeClone(second.getUri(), converter.convertFromRight(second.getRangeBetween())));
+                    new CodeClone(second.getUri(), range));
 
             CodeClone.addMatch(firstClone, secondClone);
 
@@ -151,7 +155,6 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         // Fetch clones, ignore contained clones
         ArrayList<Integer> clones = new ArrayList<>();
         for (int i = 0; i < SA.length; i++) {
-
             if (LCP[ISA[i]] >= cloneThreshold) {
                 // Ignore contained clones
                 clones.add(i);
@@ -159,6 +162,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                 while (i < SA.length &&
                         LCP[ISA[i - 1]] > LCP[ISA[i]] &&
                         LCP[ISA[i]] >= cloneThreshold) {
+                    LOGGER.info("skipped " + i);
                     i++;
                 }
             }
