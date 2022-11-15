@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 
 import com.google.common.primitives.Ints;
 
+import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
 import CCDetect.lsp.CodeClone;
@@ -121,13 +122,23 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             TokenSourcePair first = getTokenSourcePairFromIndex(firstIndex, cloneSize);
             TokenSourcePair second = getTokenSourcePairFromIndex(secondIndex, cloneSize);
 
-            CodeClone firstClone = cloneMap.getOrDefault(firstIndex,
-                    new CodeClone(first.getUri(), converter.convertFromRight(first.getRangeBetween())));
+            Range firstRange = converter.convertFromRight(first.getRangeBetween());
+            Range secondRange = converter.convertFromRight(second.getRangeBetween());
 
-            // Override ending range if new clone is bigger
-            Range range = converter.convertFromRight(second.getRangeBetween());
+            CodeClone firstClone = cloneMap.getOrDefault(firstIndex,
+                    new CodeClone(first.getUri(), firstRange));
             CodeClone secondClone = cloneMap.getOrDefault(secondIndex,
-                    new CodeClone(second.getUri(), range));
+                    new CodeClone(second.getUri(), secondRange));
+            if (cloneSize > firstClone.getCloneSize()) {
+                LOGGER.info("Overriden secondClone range");
+                firstClone.setRange(firstRange);
+                firstClone.setCloneSize(cloneSize);
+            }
+            if (cloneSize > secondClone.getCloneSize()) {
+                LOGGER.info("Overriden firstClone range");
+                secondClone.setRange(secondRange);
+                secondClone.setCloneSize(cloneSize);
+            }
 
             CodeClone.addMatch(firstClone, secondClone);
 
