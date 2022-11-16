@@ -16,6 +16,8 @@ import CCDetect.lsp.datastructures.SAIS;
 import CCDetect.lsp.detection.CloneDetector;
 import CCDetect.lsp.detection.treesitterbased.fingerprint.Fingerprint;
 import CCDetect.lsp.detection.treesitterbased.fingerprint.TreesitterFingerprintGenerator;
+import CCDetect.lsp.detection.treesitterbased.sourcemap.DocumentSourceMap;
+import CCDetect.lsp.detection.treesitterbased.sourcemap.SourceMap;
 import CCDetect.lsp.detection.treesitterbased.sourcemap.TokenSource;
 import CCDetect.lsp.detection.treesitterbased.sourcemap.TokenSourceMap;
 import CCDetect.lsp.detection.treesitterbased.sourcemap.TokenSourcePair;
@@ -41,7 +43,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             Logger.GLOBAL_LOGGER_NAME);
     List<CodeClone> clones;
     TreesitterFingerprintGenerator fingerprintGenerator = new TreesitterFingerprintGenerator();
-    TokenSourceMap sourceMap;
+    SourceMap sourceMap;
     ExtendedSuffixArray eSuff;
     // int[] SA, ISA, LCP;
 
@@ -58,12 +60,16 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         Timer timerIndexChange = new Timer();
         timerIndexChange.start();
         clones = new ArrayList<>();
-        sourceMap = new TokenSourceMap();
+        sourceMap = new DocumentSourceMap(index);
 
         buildFingerprints(index);
         // Build fingerprint
         ArrayList<Integer> fullFingerprint = new ArrayList<>();
         for (TreesitterDocumentModel doc : index) {
+            LOGGER.info("doc " + doc.getUri());
+            LOGGER.info("tokenCount " + doc.getTokenCount());
+            LOGGER.info("rangeStart " + doc.getFingerprintStart());
+            LOGGER.info("rangeEnd " + doc.getFingerprintEnd());
             for (Fingerprint f : doc.getFingerprint()) {
 
                 TSRange[] ranges = f.getRanges();
@@ -71,13 +77,12 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                 for (int i = 0; i < fingerprint.length; i++) {
                     int tokenValue = fingerprint[i];
                     fullFingerprint.add(tokenValue);
-                    sourceMap.put(f.getUri(), ranges[i]);
                 }
             }
         }
         // 0 terminal
         fullFingerprint.add(0);
-        sourceMap.put(null, null);
+        LOGGER.info("fingerprint size: " + fullFingerprint.size());
 
         int[] fingerprint = Ints.toArray(fullFingerprint);
 
@@ -207,9 +212,12 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         timer.start();
         NotificationHandler.startNotification("index", "Indexing documents");
         int documentsProcessed = 0;
+        int tokenCount = 0;
         for (TreesitterDocumentModel document : index) {
             if (!document.hasChanged()) {
                 documentsProcessed++;
+                document.setFingerprintRange(tokenCount, tokenCount + document.getTokenCount() - 1);
+                tokenCount += document.getTokenCount();
                 continue;
             }
 
@@ -255,21 +263,14 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                 document.freeText();
                 document.freeTree();
             }
+            document.setFingerprintRange(tokenCount, tokenCount + document.getTokenCount() - 1);
             documentsProcessed++;
+            tokenCount += document.getTokenCount();
         }
         NotificationHandler.endNotification("index", null);
 
-        int counter = 0;
-        for (TreesitterDocumentModel doc : index) {
-            if (doc.hasText()) {
-                counter++;
-            }
-        }
-        LOGGER.info("Document files in memory: " + counter);
-
         timer.stop();
         timer.log("Time to fetch tokens");
-
     }
 
     private boolean filterRecursiveChildren(Node node) {

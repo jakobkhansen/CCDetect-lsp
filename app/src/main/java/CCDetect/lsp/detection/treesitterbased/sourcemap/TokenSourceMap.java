@@ -8,7 +8,7 @@ import ai.serenade.treesitter.TSRange;
 /**
  * TokenSourceMap
  */
-public class TokenSourceMap {
+public class TokenSourceMap implements SourceMap {
 
     List<TokenSource> sourceMap = new ArrayList<>();
 
