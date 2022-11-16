@@ -19,7 +19,6 @@ import CCDetect.lsp.detection.treesitterbased.fingerprint.TreesitterFingerprintG
 import CCDetect.lsp.detection.treesitterbased.sourcemap.DocumentSourceMap;
 import CCDetect.lsp.detection.treesitterbased.sourcemap.SourceMap;
 import CCDetect.lsp.detection.treesitterbased.sourcemap.TokenSource;
-import CCDetect.lsp.detection.treesitterbased.sourcemap.TokenSourceMap;
 import CCDetect.lsp.detection.treesitterbased.sourcemap.TokenSourcePair;
 import CCDetect.lsp.files.DocumentIndex;
 import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentModel;
@@ -66,13 +65,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         // Build fingerprint
         ArrayList<Integer> fullFingerprint = new ArrayList<>();
         for (TreesitterDocumentModel doc : index) {
-            LOGGER.info("doc " + doc.getUri());
-            LOGGER.info("tokenCount " + doc.getTokenCount());
-            LOGGER.info("rangeStart " + doc.getFingerprintStart());
-            LOGGER.info("rangeEnd " + doc.getFingerprintEnd());
             for (Fingerprint f : doc.getFingerprint()) {
-
-                TSRange[] ranges = f.getRanges();
                 int[] fingerprint = f.getFingerprint();
                 for (int i = 0; i < fingerprint.length; i++) {
                     int tokenValue = fingerprint[i];
@@ -82,7 +75,6 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         }
         // 0 terminal
         fullFingerprint.add(0);
-        LOGGER.info("fingerprint size: " + fullFingerprint.size());
 
         int[] fingerprint = Ints.toArray(fullFingerprint);
 
@@ -139,12 +131,10 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             CodeClone secondClone = cloneMap.getOrDefault(secondIndex,
                     new CodeClone(second.getUri(), secondRange));
             if (cloneSize > firstClone.getCloneSize()) {
-                LOGGER.info("Overriden secondClone range");
                 firstClone.setRange(firstRange);
                 firstClone.setCloneSize(cloneSize);
             }
             if (cloneSize > secondClone.getCloneSize()) {
-                LOGGER.info("Overriden firstClone range");
                 secondClone.setRange(secondRange);
                 secondClone.setCloneSize(cloneSize);
             }

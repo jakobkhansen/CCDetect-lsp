@@ -81,9 +81,6 @@ public class TestCodebaseCloneDetection {
         TreesitterDetector detector = new TreesitterDetector();
         detector.onIndexChange(index);
         List<CodeClone> clones = detector.getClones();
-        for (CodeClone codeClone : clones) {
-            System.out.println(codeClone);
-        }
 
         for (CodeClone expectedClone : expectedClones) {
             boolean found = false;
