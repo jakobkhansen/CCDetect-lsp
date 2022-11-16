@@ -26,4 +26,24 @@ public class ExtendedSuffixArray {
     public int[] getLcp() {
         return lcp;
     }
+
+    public int getRank(int suffixIndex) {
+        return inverseSuffix[suffixIndex];
+    }
+
+    public int getLCPValue(int suffixIndex) {
+        return lcp[getRank(suffixIndex)];
+    }
+
+    public int getLCPMatchIndex(int suffixIndex) {
+        return suffix[getRank(suffixIndex) - 1];
+    }
+
+    public int getPreceedingSuffixLCPValue(int suffixIndex) {
+        return lcp[getRank(suffixIndex - 1)];
+    }
+
+    public int size() {
+        return suffix.length;
+    }
 }

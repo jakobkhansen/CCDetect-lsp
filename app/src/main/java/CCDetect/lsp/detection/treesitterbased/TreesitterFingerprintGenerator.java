@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 
 import com.google.common.primitives.Ints;
 
-import CCDetect.lsp.utils.Printer;
 import ai.serenade.treesitter.Node;
 import ai.serenade.treesitter.TSRange;
 
@@ -46,7 +45,7 @@ public class TreesitterFingerprintGenerator {
         return new Fingerprint(Ints.toArray(out), ranges, uri, node.toRange());
     }
 
-    private int tokenToValue(String token) {
+    public int tokenToValue(String token) {
         if (!tokenToCharMap.containsKey(token)) {
             tokenToCharMap.put(token, tokenCounter++);
         }

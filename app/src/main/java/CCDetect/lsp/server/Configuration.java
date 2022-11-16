@@ -19,6 +19,17 @@ public class Configuration {
     private String[] extra_nodes;
     private int clone_token_threshold;
 
+    public static void createInstanceFromJson(String json) {
+        instance = JSONUtility.toModel(json, Configuration.class);
+    }
+
+    public static Configuration getInstance() {
+        if (instance == null) {
+            instance = new Configuration();
+        }
+        return instance;
+    }
+
     public String getLanguage() {
         return language;
     }
@@ -39,12 +50,23 @@ public class Configuration {
         return clone_token_threshold;
     }
 
-    public static void createInstanceFromJson(String json) {
-        LOGGER.info(json);
-        instance = JSONUtility.toModel(json, Configuration.class);
+    public void setLanguage(String language) {
+        this.language = language;
     }
 
-    public static Configuration getInstance() {
-        return instance;
+    public void setFragmentQuery(String fragmentQuery) {
+        this.fragment_query = fragmentQuery;
+    }
+
+    public void setIgnoreNodes(String[] ignoreNodes) {
+        this.ignore_nodes = ignoreNodes;
+    }
+
+    public void setExtraNodes(String[] extraNodes) {
+        this.extra_nodes = extraNodes;
+    }
+
+    public void setCloneTokenThreshold(int cloneTokenThreshold) {
+        this.clone_token_threshold = cloneTokenThreshold;
     }
 }

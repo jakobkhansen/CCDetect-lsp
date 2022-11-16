@@ -13,10 +13,17 @@ public class CodeClone {
     private String uri;
     private Range range;
     private List<CodeClone> matchingClones = new ArrayList<>();
+    private int cloneSize = 0;
 
     public CodeClone(String uri, Range range) {
         this.uri = uri;
         this.range = range;
+    }
+
+    public CodeClone(String uri, Range range, int cloneSize) {
+        this.uri = uri;
+        this.range = range;
+        this.cloneSize = cloneSize;
     }
 
     public boolean isInRange(Range otherRange) {
@@ -48,8 +55,20 @@ public class CodeClone {
         return range;
     }
 
+    public void setRange(Range range) {
+        this.range = range;
+    }
+
     public String getUri() {
         return uri;
+    }
+
+    public int getCloneSize() {
+        return cloneSize;
+    }
+
+    public void setCloneSize(int cloneSize) {
+        this.cloneSize = cloneSize;
     }
 
     @Override
@@ -61,5 +80,9 @@ public class CodeClone {
     public static void addMatch(CodeClone clone1, CodeClone clone2) {
         clone1.addMatchingClone(clone2);
         clone2.addMatchingClone(clone1);
+    }
+
+    public boolean equals(CodeClone clone) {
+        return range.equals(clone.getRange()) && uri.equals(clone.getUri());
     }
 }

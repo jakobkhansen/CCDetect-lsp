@@ -14,6 +14,9 @@ public class NotificationHandler {
 
     public static void startNotification(String token, String title) {
         LanguageClient client = CCLanguageServer.getInstance().client;
+        if (client == null) {
+            return;
+        }
         ProgressParams params = new ProgressParams();
         WorkDoneProgressBegin notification = new WorkDoneProgressBegin();
         params.setToken(token);
@@ -24,6 +27,9 @@ public class NotificationHandler {
 
     public static void endNotification(String token, String message) {
         LanguageClient client = CCLanguageServer.getInstance().client;
+        if (client == null) {
+            return;
+        }
         ProgressParams params = new ProgressParams();
         WorkDoneProgressEnd notification = new WorkDoneProgressEnd();
         notification.setMessage(message);
@@ -33,16 +39,24 @@ public class NotificationHandler {
     }
 
     public static void progressReportNotification(String token, int progress, int total) {
+
+        LanguageClient client = CCLanguageServer.getInstance().client;
+        if (client == null) {
+            return;
+        }
+
         int onePercentage = total / 100;
         if (onePercentage > 0 && progress % onePercentage != 0) {
             return;
         }
-        LanguageClient client = CCLanguageServer.getInstance().client;
+
         ProgressParams params = new ProgressParams();
         WorkDoneProgressReport notification = new WorkDoneProgressReport();
         notification.setPercentage((progress * 100) / total);
+
         params.setToken(token);
         params.setValue(Either.forLeft(notification));
+
         client.notifyProgress(params);
     }
 }

@@ -30,9 +30,11 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
     Map<String, TreesitterDocumentModel> documents = Collections.synchronizedMap(
             new HashMap<>());
     String rootUri;
+    ProjectFileIterator projectFileIterator;
 
-    public TreesitterDocumentIndex(String rootUri) {
+    public TreesitterDocumentIndex(String rootUri, ProjectFileIterator projectFileIterator) {
         this.rootUri = rootUri;
+        this.projectFileIterator = projectFileIterator;
     }
 
     @Override
@@ -45,10 +47,7 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
     }
 
     private List<Path> getFilePathsInProject() {
-        Configuration config = Configuration.getInstance();
-        ProjectFileIterator iterator = new GitProjectIterator(rootUri, config.getLanguage());
-
-        return StreamSupport.stream(iterator.spliterator(), false).collect(Collectors.toList());
+        return StreamSupport.stream(projectFileIterator.spliterator(), false).collect(Collectors.toList());
     }
 
     @Override
