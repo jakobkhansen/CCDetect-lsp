@@ -5,7 +5,6 @@ import java.util.logging.Logger;
 import CCDetect.lsp.detection.treesitterbased.fingerprint.Fingerprint;
 import CCDetect.lsp.files.DocumentIndex;
 import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentModel;
-import ai.serenade.treesitter.TSRange;
 
 /**
  * DocumentSourceMap
@@ -22,12 +21,11 @@ public class DocumentSourceMap implements SourceMap {
 
     @Override
     public TokenSource getSource(int index) {
-        // TODO Auto-generated method stub
         for (TreesitterDocumentModel doc : documentIndex) {
             if (isInRange(doc, index)) {
                 int current = index - doc.getFingerprintStart();
                 for (Fingerprint fingerprint : doc.getFingerprint()) {
-                    if (current <= fingerprint.getRanges().length) {
+                    if (current < fingerprint.getRanges().length) {
                         return new TokenSource(doc.getUri(), fingerprint.getRanges()[current]);
                     }
                     current -= fingerprint.getRanges().length;
