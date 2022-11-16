@@ -12,8 +12,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import CCDetect.lsp.detection.treesitterbased.Fingerprint;
-import CCDetect.lsp.detection.treesitterbased.TreesitterFingerprintGenerator;
+import CCDetect.lsp.detection.treesitterbased.fingerprint.Fingerprint;
+import CCDetect.lsp.detection.treesitterbased.fingerprint.TreesitterFingerprintGenerator;
 import CCDetect.lsp.server.Configuration;
 import CCDetect.lsp.treesitter.TreeSitterLibrary;
 import ai.serenade.treesitter.Node;

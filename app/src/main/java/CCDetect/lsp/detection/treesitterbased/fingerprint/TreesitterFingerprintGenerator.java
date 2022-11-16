@@ -1,4 +1,4 @@
-package CCDetect.lsp.detection.treesitterbased;
+package CCDetect.lsp.detection.treesitterbased.fingerprint;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,6 +8,8 @@ import java.util.logging.Logger;
 
 import com.google.common.primitives.Ints;
 
+import CCDetect.lsp.detection.treesitterbased.NodeTraversal;
+import CCDetect.lsp.detection.treesitterbased.TokenFetchVisitor;
 import ai.serenade.treesitter.Node;
 import ai.serenade.treesitter.TSRange;
 

@@ -15,6 +15,8 @@ import CCDetect.lsp.CodeClone;
 import CCDetect.lsp.datastructures.ExtendedSuffixArray;
 import CCDetect.lsp.datastructures.SAIS;
 import CCDetect.lsp.detection.CloneDetector;
+import CCDetect.lsp.detection.treesitterbased.fingerprint.Fingerprint;
+import CCDetect.lsp.detection.treesitterbased.fingerprint.TreesitterFingerprintGenerator;
 import CCDetect.lsp.detection.treesitterbased.sourcemap.TokenSource;
 import CCDetect.lsp.detection.treesitterbased.sourcemap.TokenSourceMap;
 import CCDetect.lsp.detection.treesitterbased.sourcemap.TokenSourcePair;

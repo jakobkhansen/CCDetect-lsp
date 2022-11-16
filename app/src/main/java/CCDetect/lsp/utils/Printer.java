@@ -7,10 +7,10 @@ import com.google.common.base.Strings;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
-import CCDetect.lsp.detection.treesitterbased.Fingerprint;
-import CCDetect.lsp.detection.treesitterbased.TokenSource;
-import CCDetect.lsp.detection.treesitterbased.TokenSourceMap;
-import CCDetect.lsp.detection.treesitterbased.TreesitterFingerprintGenerator;
+import CCDetect.lsp.detection.treesitterbased.fingerprint.Fingerprint;
+import CCDetect.lsp.detection.treesitterbased.fingerprint.TreesitterFingerprintGenerator;
+import CCDetect.lsp.detection.treesitterbased.sourcemap.TokenSource;
+import CCDetect.lsp.detection.treesitterbased.sourcemap.TokenSourceMap;
 import ai.serenade.treesitter.TSInputEdit;
 import ai.serenade.treesitter.TSPoint;
 import ai.serenade.treesitter.TSRange;
