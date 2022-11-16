@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 
 import com.google.common.primitives.Ints;
 
-import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
 import CCDetect.lsp.CodeClone;
