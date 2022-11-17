@@ -1,4 +1,4 @@
-package CCDetect.lsp.detection.treesitterbased;
+package CCDetect.lsp.detection.treesitterbased.fingerprint;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,6 +8,8 @@ import java.util.logging.Logger;
 
 import com.google.common.primitives.Ints;
 
+import CCDetect.lsp.detection.treesitterbased.nodetraversal.NodeTraversal;
+import CCDetect.lsp.detection.treesitterbased.nodetraversal.TokenFetchVisitor;
 import ai.serenade.treesitter.Node;
 import ai.serenade.treesitter.TSRange;
 
@@ -34,9 +36,6 @@ public class TreesitterFingerprintGenerator {
             String token = text.substring(range.getStartByte(), range.getEndByte());
             out.add(tokenToValue(token));
             tokensSeen++;
-            if (tokensSeen % 1000000 == 0) {
-                LOGGER.info("Processed " + tokensSeen + " tokens");
-            }
         }
 
         // Method delimiter

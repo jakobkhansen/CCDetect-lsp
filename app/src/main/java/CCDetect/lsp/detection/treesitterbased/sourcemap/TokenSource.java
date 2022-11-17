@@ -1,4 +1,4 @@
-package CCDetect.lsp.detection.treesitterbased;
+package CCDetect.lsp.detection.treesitterbased.sourcemap;
 
 import ai.serenade.treesitter.TSRange;
 

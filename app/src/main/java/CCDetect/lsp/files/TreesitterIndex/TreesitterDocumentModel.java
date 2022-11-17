@@ -7,18 +7,22 @@ import java.util.logging.Logger;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
-import CCDetect.lsp.detection.treesitterbased.Fingerprint;
+import CCDetect.lsp.detection.treesitterbased.fingerprint.Fingerprint;
 import CCDetect.lsp.files.DocumentModel;
 import ai.serenade.treesitter.TSInputEdit;
 import ai.serenade.treesitter.TSPoint;
+import ai.serenade.treesitter.TSRange;
 
 public class TreesitterDocumentModel extends DocumentModel {
-
-    private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private TreesitterDocumentAST ast;
     private ArrayList<Fingerprint> fingerprints = new ArrayList<>();
     private boolean hasChanged = true;
+
+    int tokenCount = 0;
+
+    int fingerprintStart = 0;
+    int fingerprintEnd = 0;
 
     public TreesitterDocumentModel(Path path, String text) {
         super(path, text);
@@ -49,10 +53,12 @@ public class TreesitterDocumentModel extends DocumentModel {
 
     public void addFingerprint(Fingerprint fingerprint) {
         this.fingerprints.add(fingerprint);
+        tokenCount += fingerprint.getFingerprint().length;
     }
 
     public void resetFingerprint() {
         this.fingerprints = new ArrayList<>();
+        tokenCount = 0;
     }
 
     public boolean hasChanged() {
@@ -61,6 +67,23 @@ public class TreesitterDocumentModel extends DocumentModel {
 
     public void setChanged(boolean value) {
         hasChanged = value;
+    }
+
+    public void setFingerprintRange(int start, int end) {
+        this.fingerprintStart = start;
+        this.fingerprintEnd = end;
+    }
+
+    public int getFingerprintStart() {
+        return fingerprintStart;
+    }
+
+    public int getFingerprintEnd() {
+        return fingerprintEnd;
+    }
+
+    public int getTokenCount() {
+        return tokenCount;
     }
 
     // TODO refactor this and ensure correct
