@@ -45,6 +45,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
     TreesitterFingerprintGenerator fingerprintGenerator = new TreesitterFingerprintGenerator();
     SourceMap sourceMap;
     ExtendedSuffixArray eSuff;
+    int tokenCount = 0;
     // int[] SA, ISA, LCP;
 
     @Override
@@ -68,20 +69,20 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         }
 
         // Build fingerprint
-        ArrayList<Integer> fullFingerprint = new ArrayList<>();
+        int[] fingerprint = new int[tokenCount + 1];
+        int i = 0;
         for (TreesitterDocumentModel doc : index) {
             for (Fingerprint f : doc.getFingerprint()) {
-                int[] fingerprint = f.getFingerprint();
-                for (int i = 0; i < fingerprint.length; i++) {
-                    int tokenValue = fingerprint[i];
-                    fullFingerprint.add(tokenValue);
+                int[] fingerprintPart = f.getFingerprint();
+                for (int j = 0; j < fingerprintPart.length; j++) {
+                    int tokenValue = fingerprintPart[j];
+                    fingerprint[i] = tokenValue;
+                    i++;
                 }
             }
         }
         // 0 terminal
-        fullFingerprint.add(0);
-
-        int[] fingerprint = Ints.toArray(fullFingerprint);
+        fingerprint[i] = 0;
 
         // Build suffix, inverse, lcp
         NotificationHandler.startNotification("clones", "Finding clones");
@@ -207,7 +208,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         timer.start();
         NotificationHandler.startNotification("index", "Indexing documents");
         int documentsProcessed = 0;
-        int tokenCount = 0;
+        tokenCount = 0;
         for (TreesitterDocumentModel document : index) {
             if (!document.hasChanged()) {
                 documentsProcessed++;
