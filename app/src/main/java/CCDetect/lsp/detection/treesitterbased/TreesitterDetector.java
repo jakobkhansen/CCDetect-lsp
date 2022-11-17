@@ -16,6 +16,7 @@ import CCDetect.lsp.datastructures.SAIS;
 import CCDetect.lsp.detection.CloneDetector;
 import CCDetect.lsp.detection.treesitterbased.fingerprint.Fingerprint;
 import CCDetect.lsp.detection.treesitterbased.fingerprint.TreesitterFingerprintGenerator;
+import CCDetect.lsp.detection.treesitterbased.sourcemap.BinarySearchSourceMap;
 import CCDetect.lsp.detection.treesitterbased.sourcemap.DocumentSourceMap;
 import CCDetect.lsp.detection.treesitterbased.sourcemap.SourceMap;
 import CCDetect.lsp.detection.treesitterbased.sourcemap.TokenSource;
@@ -59,9 +60,13 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         Timer timerIndexChange = new Timer();
         timerIndexChange.start();
         clones = new ArrayList<>();
-        sourceMap = new DocumentSourceMap(index);
 
         buildFingerprints(index);
+
+        if (sourceMap == null) {
+            sourceMap = new BinarySearchSourceMap(index);
+        }
+
         // Build fingerprint
         ArrayList<Integer> fullFingerprint = new ArrayList<>();
         for (TreesitterDocumentModel doc : index) {

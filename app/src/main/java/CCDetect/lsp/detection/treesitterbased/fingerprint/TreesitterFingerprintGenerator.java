@@ -36,9 +36,6 @@ public class TreesitterFingerprintGenerator {
             String token = text.substring(range.getStartByte(), range.getEndByte());
             out.add(tokenToValue(token));
             tokensSeen++;
-            if (tokensSeen % 1000000 == 0) {
-                LOGGER.info("Processed " + tokensSeen + " tokens");
-            }
         }
 
         // Method delimiter

@@ -13,17 +13,15 @@ import ai.serenade.treesitter.TSRange;
 public class TokenFetchVisitor implements NodeVisitor {
 
     List<TSRange> ranges = new ArrayList<>();
-    private static final Logger LOGGER = Logger.getLogger(
-            Logger.GLOBAL_LOGGER_NAME);
     NodeFilter filter = new NodeFilter();
 
     @Override
     public void visit(Node node) {
-        if (filter.shouldIgnore(node) || node.isExtra()) {
+        if (node.getChildCount() > 0 && !filter.isExtra(node)) {
             return;
         }
 
-        if (node.getChildCount() > 0 && !filter.isExtra(node)) {
+        if (filter.shouldIgnore(node) || node.isExtra()) {
             return;
         }
 
