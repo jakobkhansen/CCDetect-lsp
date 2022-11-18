@@ -21,8 +21,6 @@ public class TreeSitterLanguageResolver {
                 return Languages.typescript();
             case "py":
                 return Languages.python();
-            case "rust":
-                return Languages.rust();
             // TODO add more I guess
 
             default:
