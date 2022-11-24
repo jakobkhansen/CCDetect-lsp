@@ -26,22 +26,39 @@ public class DynamicSACA {
         Map<Integer, Integer> lf = getLF(suff, oldText);
 
         // Stage 1, copy elements which are not changed
-        for (int i = 0; i < position; i++) {
+        for (int i = 0; i < suff.getSuffix().length; i++) {
             newSA[i] = suff.getSuffix()[i];
             newISA[newSA[i]] = i;
         }
 
-        for (int i = position + 1; i < newSA.length; i++) {
-            newSA[i] = suff.getSuffix()[i - 1];
-            newISA[newSA[i - 1]] = i;
+        // Stage 3, insert new row, increasing SA at all values larger than the location
+        // its inserted
+
+        int pos = lf.get(newISA[position]);
+
+        // Increment all values in SA greater than or equal to position
+        for (int i = position; i < suff.getInverseSuffix().length; i++) {
+            newSA[suff.getInverseSuffix()[i]]++;
         }
 
-        // Stage 3, insert new row
-        // for (int i = position; i < suff.getInverseSuffix().length; i++) {
-        // LOGGER.info("here: " + suff.getInverseSuffix()[i]);
-        // newSA[newISA[i]]++;
-        //
-        // }
+        // Increment all values in ISA greater than or equal to LF(ISA[position])
+        for (int i = pos; i < suff.getSuffix().length; i++) {
+            System.out.println(suff.getSuffix()[i]);
+            newISA[suff.getSuffix()[i]]++;
+        }
+
+        // Insert new row in SA
+        for (int i = newSA.length - 2; i >= pos; i--) {
+            System.out.println(i);
+            newSA[i + 1] = newSA[i];
+        }
+        newSA[pos] = position;
+
+        // Insert new row in ISA
+        for (int i = newISA.length - 2; i >= newSA[pos]; i--) {
+            newISA[i + 1] = newISA[i];
+        }
+        newISA[newSA[pos]] = pos;
 
         return new ExtendedSuffixArray(newSA, newISA, suff.getLcp());
     }
