@@ -23,12 +23,12 @@ public class DynamicSACATest {
     public void testUpdateSingleCharacter() {
         SAIS sais = new SAIS();
         DynamicSACA dynSACA = new DynamicSACA();
-        String originalText = "ctctgc";
+        String originalText = "qweroiupxzcvpoiuqweroiu";
         System.out.println("originalText: " + originalText);
         int[] original = stringToIntArray(originalText);
         ExtendedSuffixArray eSuffBanana = sais.buildExtendedSuffixArray(original);
-        int[] updated = stringToIntArray("ctgctgc");
-        ExtendedSuffixArray eSuffUpdated = dynSACA.insertSingleChar(eSuffBanana, original, updated, 2);
+        int[] updated = stringToIntArray("qweroxiupxzcvpoiuqweroiu");
+        ExtendedSuffixArray eSuffUpdated = dynSACA.insertSingleChar(eSuffBanana, original, updated, 5);
 
         ExtendedSuffixArray expected = sais.buildExtendedSuffixArray(updated);
 

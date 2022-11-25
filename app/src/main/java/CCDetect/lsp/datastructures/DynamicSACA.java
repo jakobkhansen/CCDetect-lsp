@@ -21,35 +21,48 @@ public class DynamicSACA {
         LOGGER.info("newText: " + Printer.print(newText));
         LOGGER.info("oldSuffix: " + Printer.print(suff.getSuffix()));
         LOGGER.info("oldISA: " + Printer.print(suff.getInverseSuffix()));
-        int[] newSA = new int[suff.getSuffix().length + 1];
-        int[] newISA = new int[suff.getSuffix().length + 1];
-        Map<Integer, Integer> lf = getLF(suff, oldText);
+        int[] oldSA = suff.getSuffix();
+        int[] oldISA = suff.getInverseSuffix();
+        int[] newSA = new int[oldSA.length + 1];
+        int[] newISA = new int[oldISA.length + 1];
+        int[] l = getL(suff, oldText);
 
         // Stage 1, copy elements which are not changed
-        for (int i = 0; i < suff.getSuffix().length; i++) {
+        for (int i = 0; i < oldSA.length; i++) {
             newSA[i] = suff.getSuffix()[i];
             newISA[newSA[i]] = i;
         }
 
+        // Stage 2, update L
+        int storedLetter = l[oldISA[position]];
+        l[oldISA[position]] = newText[position];
+
         // Stage 3, insert new row, increasing SA at all values larger than the location
         // its inserted
+        int pos = getLFDynamic(newISA[position], oldSA, l, oldText);
 
-        int pos = lf.get(newISA[position]);
+        System.out.println("here " + storedLetter);
+        System.out.println(Printer.print(l));
+        System.out.println(pos);
+
+        // Insert new row in L
+        for (int i = l.length - 2; i >= pos; i--) {
+            l[i + 1] = l[i];
+        }
+        l[pos] = storedLetter;
 
         // Increment all values in SA greater than or equal to position
-        for (int i = position; i < suff.getInverseSuffix().length; i++) {
-            newSA[suff.getInverseSuffix()[i]]++;
+        for (int i = position; i < oldISA.length; i++) {
+            newSA[oldISA[i]]++;
         }
 
         // Increment all values in ISA greater than or equal to LF(ISA[position])
-        for (int i = pos; i < suff.getSuffix().length; i++) {
-            System.out.println(suff.getSuffix()[i]);
-            newISA[suff.getSuffix()[i]]++;
+        for (int i = pos; i < oldSA.length; i++) {
+            newISA[oldSA[i]]++;
         }
 
         // Insert new row in SA
         for (int i = newSA.length - 2; i >= pos; i--) {
-            System.out.println(i);
             newSA[i + 1] = newSA[i];
         }
         newSA[pos] = position;
@@ -60,50 +73,77 @@ public class DynamicSACA {
         }
         newISA[newSA[pos]] = pos;
 
-        return new ExtendedSuffixArray(newSA, newISA, suff.getLcp());
+        if (pos >= position) {
+            System.out.println("Incremented");
+            pos++;
+        }
+        System.out.println("Suff before stage 4 " + Printer.print(newSA));
+        System.out.println("pos " + pos);
+
+        // Stage 4
+        int posLF = getLFDynamic(pos - 1, newSA, l, newText);
+        System.out.println("posLF " + posLF);
+        System.exit(0);
+        while (pos != posLF) {
+            System.out.println(pos);
+            System.out.println(posLF);
+            int newPos = getLFDynamic(pos, newSA, l, newText);
+            moveRow(pos, posLF, newSA, newISA, l);
+            pos = newPos;
+            posLF = getLFDynamic(posLF, newSA, l, newText);
+        }
+
+        return new ExtendedSuffixArray(newSA, newISA, new SAIS().buildLCPArray(newText, newSA, newISA));
     }
 
-    // TODO this was harder than expected, maybe re-evaulate
-    private Map<Integer, Integer> getLF(ExtendedSuffixArray suff, int[] oldText) {
-        // Result
-        Map<Integer, Integer> lf = new HashMap<>();
+    private int[] getL(ExtendedSuffixArray suff, int[] oldText) {
+        int[] l = new int[suff.getSuffix().length + 1];
 
-        // Used to count number of characters which occur before the first instance of a
-        // char
-        Map<Integer, Integer> charsBefore = new LinkedHashMap<>();
+        for (int i = 0; i < l.length - 1; i++) {
+            l[i] = oldText[Math.floorMod(suff.getSuffix()[i] - 1, suff.getSuffix().length)];
+        }
+        return l;
+    }
 
-        // Used to build rank array
-        Map<Integer, Integer> charCount = new HashMap<>();
+    private int getLFDynamic(int index, int[] sa, int[] l, int[] text) {
 
-        // Used to determine how many occurences of the same char occur before the
-        // character on this index in one in L
-        int[] charRank = new int[oldText.length];
-
-        int[] sa = suff.getSuffix();
-
-        // Build charsBefore
-        int count = 0;
-        for (int i = 0; i < sa.length; i++) {
-            charsBefore.put(oldText[sa[i]],
-                    Math.min(charsBefore.getOrDefault(oldText[sa[i]], Integer.MAX_VALUE), count));
-            count++;
+        int charsBefore = 0;
+        for (int i = 0; i < text.length; i++) {
+            charsBefore += text[i] < l[index] ? 1 : 0;
         }
 
-        // Build charRank
-        for (int i = 0; i < sa.length; i++) {
-            int lCharIndex = Math.floorMod(sa[i] - 1, sa.length);
-            charRank[lCharIndex] = charCount.getOrDefault(oldText[lCharIndex], 0);
-            charCount.put(oldText[lCharIndex], charCount.getOrDefault(oldText[lCharIndex], 0) + 1);
+        int rank = 0;
+        for (int i = 0; i < index; i++) {
+            rank += l[i] == l[index] ? 1 : 0;
         }
+        return charsBefore + rank;
+    }
 
-        // Build LF based on charsBefore and charRank
-        for (int i = 0; i < sa.length; i++) {
-            int lCharIndex = Math.floorMod(sa[i] - 1, sa.length);
-
-            lf.put(i, charsBefore.get(oldText[lCharIndex]) + charRank[lCharIndex]);
-
+    private void moveRow(int i, int j, int[] newSA, int[] newISA, int[] l) {
+        System.out.println("moveRow " + i + " " + j);
+        if (i > j) {
+            int tmp = j;
+            j = i;
+            i = tmp;
         }
+        System.out.println("SA Setting " + i + " to " + j);
+        // Update L
+        int tmp = l[i];
+        l[i] = l[j];
+        l[j] = tmp;
 
-        return lf;
+        // Update SA
+        int iPos = newSA[i];
+        int temp = newSA[j];
+        newSA[j] = newSA[i];
+        newSA[i] = temp;
+
+        // Update ISA
+        for (int index = i; index < j; index++) {
+            System.out.println("ISA Decrementing " + newSA[index]);
+            newISA[newSA[index]]--;
+        }
+        System.out.println("setting " + iPos + " to " + j);
+        newISA[iPos] = j;
     }
 }
