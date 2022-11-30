@@ -20,7 +20,7 @@ public class DynamicSACA {
         int[] oldISA = suff.getInverseSuffix();
         int[] newSA = new int[oldSA.length + 1];
         int[] newISA = new int[oldISA.length + 1];
-        int[] l = getL(suff, oldText);
+        int[] l = getL(oldSA, oldText, newSA.length);
         System.out.println("l: " + Printer.print(l));
 
         // Stage 1, copy elements which are not changed
@@ -28,8 +28,13 @@ public class DynamicSACA {
             newSA[i] = suff.getSuffix()[i];
             newISA[newSA[i]] = i;
         }
+        for (int i = 0; i < oldText.length; i++) {
+            System.out.println(i + " " + getLFDynamic(i, l, l.length - 1));
 
-        int originalPos = getLFDynamic(oldISA[position], l, oldText);
+        }
+
+        int originalPos = getLFDynamic(oldISA[position], l, l.length - 1);
+        System.out.println("originalPos " + originalPos);
 
         // Stage 2, update L
         int storedLetter = l[oldISA[position]];
@@ -46,7 +51,8 @@ public class DynamicSACA {
             newSA[oldISA[i]]++;
         }
         int pos = originalPos + (originalPos >= position ? 1 : 0);
-        // int pos = getLFDynamic(oldISA[position], l, newText);
+        // int pos = getLFDynamic(oldISA[position], l, l.length);
+        // int pos = originalPos;
 
         // Increment all values in ISA greater than or equal to LF(ISA[position])
         for (int i = originalPos; i < oldSA.length; i++) {
@@ -68,35 +74,35 @@ public class DynamicSACA {
         // I think the problem is that posLF is not calculated correctly, according to
         // Reorder function in dyn suff paper
         // Look at how LF(index(T'[i])) is calculated
-        int posLF = getLFDynamic((pos - 1), l, newText);
+        int posLF = getLFDynamic((pos - 1), l, l.length);
         while (pos != posLF) {
-            int newPos = getLFDynamic(pos, l, newText);
+            int newPos = getLFDynamic(pos, l, l.length);
             moveRow(pos, posLF, newSA, newISA, l);
             pos = newPos;
-            posLF = getLFDynamic(posLF, l, newText);
+            posLF = getLFDynamic(posLF, l, l.length);
             System.out.println("pos " + pos);
             System.out.println("posLF " + posLF);
         }
-        System.out.println("final SA " + Printer.print(newSA));
 
-        return new ExtendedSuffixArray(newSA, newISA, new SAIS().buildLCPArray(newText, newSA, newISA));
+        System.out.println("l " + Printer.print(l));
+        return new ExtendedSuffixArray(newSA, newISA, suff.getLcp());
     }
 
-    // Returns L with an extra spot for added character
-    public int[] getL(ExtendedSuffixArray suff, int[] oldText) {
-        int[] l = new int[suff.getSuffix().length + 1];
+    // Returns L in an array with custom extra size
+    public int[] getL(int[] suff, int[] text, int size) {
+        int[] l = new int[size];
 
-        for (int i = 0; i < l.length - 1; i++) {
-            l[i] = oldText[Math.floorMod(suff.getSuffix()[i] - 1, suff.getSuffix().length)];
+        for (int i = 0; i < suff.length; i++) {
+            l[i] = text[Math.floorMod(suff[i] - 1, suff.length)];
         }
         return l;
     }
 
-    public int getLFDynamic(int index, int[] l, int[] text) {
+    public int getLFDynamic(int index, int[] l, int size) {
 
         int charsBefore = 0;
-        for (int i = 0; i < text.length; i++) {
-            charsBefore += text[i] < l[index] ? 1 : 0;
+        for (int i = 0; i < size; i++) {
+            charsBefore += l[i] < l[index] ? 1 : 0;
         }
         int rank = 0;
         for (int i = 0; i < index; i++) {
@@ -107,16 +113,9 @@ public class DynamicSACA {
 
     private void moveRow(int i, int j, int[] newSA, int[] newISA, int[] l) {
         System.out.println("moveRow " + i + " " + j);
-        if (i > j) {
-            int tmp = j;
-            j = i;
-            i = tmp;
-        }
         // System.out.println("SA Setting " + i + " to " + j);
         // Update L
-        int tmp = l[i];
-        l[i] = l[j];
-        l[j] = tmp;
+        move(l, i, j);
 
         // Update SA
         int iPos = newSA[i];
@@ -138,5 +137,22 @@ public class DynamicSACA {
             arr[i] = arr[i - 1];
         }
         arr[index] = element;
+    }
+
+    // Move arr[i] to index j
+    private void move(int[] arr, int i, int j) {
+        int item = arr[i];
+        if (i < j) {
+            for (int k = i; k < j; k++) {
+                arr[i] = arr[i + 1];
+            }
+        } else {
+            for (int k = i; k > j; k--) {
+                arr[i] = arr[i - 1];
+            }
+
+        }
+        // Mo
+        arr[j] = item;
     }
 }
