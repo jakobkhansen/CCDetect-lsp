@@ -12,8 +12,8 @@ public class DynamicSACA {
             Logger.GLOBAL_LOGGER_NAME);
 
     public ExtendedSuffixArray insertSingleChar(ExtendedSuffixArray suff, int[] oldText, int[] newText, int position) {
-        System.out.println("oldText: " + Printer.print(oldText));
-        System.out.println("newText: " + Printer.print(newText));
+        // System.out.println("oldText: " + Printer.print(oldText));
+        // System.out.println("newText: " + Printer.print(newText));
         // LOGGER.info("oldSuffix: " + Printer.print(suff.getSuffix()));
         // LOGGER.info("oldISA: " + Printer.print(suff.getInverseSuffix()));
         int[] oldSA = suff.getSuffix();
@@ -21,67 +21,66 @@ public class DynamicSACA {
         int[] newSA = new int[oldSA.length + 1];
         int[] newISA = new int[oldISA.length + 1];
         int[] l = getL(oldSA, oldText, newSA.length);
-        System.out.println("l: " + Printer.print(l));
 
         // Stage 1, copy elements which are not changed
         for (int i = 0; i < oldSA.length; i++) {
             newSA[i] = suff.getSuffix()[i];
             newISA[newSA[i]] = i;
         }
-        for (int i = 0; i < oldText.length; i++) {
-            System.out.println(i + " " + getLFDynamic(i, l, l.length - 1));
-
-        }
 
         int originalPos = getLFDynamic(oldISA[position], l, l.length - 1);
-        System.out.println("originalPos " + originalPos);
 
         // Stage 2, update L
+        System.out.println("L before overwrite " + Printer.print(l));
         int storedLetter = l[oldISA[position]];
         l[oldISA[position]] = newText[position];
+        System.out.println();
+
+        int pointOfInsertion = getLFDynamic(oldISA[position], l, l.length - 1);
+        pointOfInsertion += storedLetter <= newText[position] ? 1 : 0;
 
         // Stage 3, insert new row, increasing SA at all values larger than the location
         // its inserted
 
         // Insert new row in L
-        insert(l, originalPos, storedLetter);
+        insert(l, pointOfInsertion, storedLetter);
 
         // Increment all values in SA greater than or equal to position
         for (int i = position; i < oldISA.length; i++) {
             newSA[oldISA[i]]++;
         }
-        int pos = originalPos + (originalPos >= position ? 1 : 0);
+        int pos = originalPos + (originalPos >= pointOfInsertion ? 1 : 0);
+        // int pos = 3;
         // int pos = getLFDynamic(oldISA[position], l, l.length);
         // int pos = originalPos;
 
         // Increment all values in ISA greater than or equal to LF(ISA[position])
-        for (int i = originalPos; i < oldSA.length; i++) {
+        for (int i = pointOfInsertion; i < oldSA.length; i++) {
             newISA[oldSA[i]]++;
         }
 
         // Insert new row in SA
-        insert(newSA, originalPos, position);
+        insert(newSA, pointOfInsertion, position);
 
         // Insert new row in ISA
-        insert(newISA, newSA[originalPos], originalPos);
+        insert(newISA, position, pointOfInsertion);
 
         System.out.println("L before stage 4 " + Printer.print(l));
         System.out.println("SA before stage 4 " + Printer.print(newSA));
         System.out.println("ISA before stage 4 " + Printer.print(newISA));
-        System.out.println("pos " + pos);
         // Stage 4
 
         // I think the problem is that posLF is not calculated correctly, according to
         // Reorder function in dyn suff paper
         // Look at how LF(index(T'[i])) is calculated
-        int posLF = getLFDynamic((pos - 1), l, l.length);
-        while (pos != posLF) {
+
+        int expectedPos = getLFDynamic(pointOfInsertion, l, l.length);
+        while (pos != expectedPos) {
             int newPos = getLFDynamic(pos, l, l.length);
-            moveRow(pos, posLF, newSA, newISA, l);
+            moveRow(pos, expectedPos, newSA, newISA, l);
+            System.out.println("l after moverow " + Printer.print(l));
             pos = newPos;
-            posLF = getLFDynamic(posLF, l, l.length);
-            System.out.println("pos " + pos);
-            System.out.println("posLF " + posLF);
+            expectedPos = getLFDynamic(expectedPos, l, l.length);
         }
 
         System.out.println("l " + Printer.print(l));
@@ -119,9 +118,8 @@ public class DynamicSACA {
 
         // Update SA
         int iPos = newSA[i];
-        int temp = newSA[j];
-        newSA[j] = newSA[i];
-        newSA[i] = temp;
+
+        move(newSA, i, j);
 
         // Update ISA
         for (int index = i; index < j; index++) {
@@ -144,13 +142,12 @@ public class DynamicSACA {
         int item = arr[i];
         if (i < j) {
             for (int k = i; k < j; k++) {
-                arr[i] = arr[i + 1];
+                arr[k] = arr[k + 1];
             }
         } else {
             for (int k = i; k > j; k--) {
-                arr[i] = arr[i - 1];
+                arr[k] = arr[k - 1];
             }
-
         }
         // Mo
         arr[j] = item;
