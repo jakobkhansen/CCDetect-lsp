@@ -50,4 +50,8 @@ application {
 
 test {
     testLogging.showStandardStreams = true
+    testLogging {
+		events "failed"
+		exceptionFormat "full"
+	}
 }
