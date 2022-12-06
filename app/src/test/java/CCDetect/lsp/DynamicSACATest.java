@@ -13,6 +13,7 @@ import CCDetect.lsp.datastructures.DynamicSACA;
 import CCDetect.lsp.datastructures.ExtendedSuffixArray;
 import CCDetect.lsp.datastructures.SAIS;
 import CCDetect.lsp.utils.Printer;
+import CCDetect.lsp.utils.Timer;
 
 /**
  * DynamicSATest
@@ -55,10 +56,19 @@ public class DynamicSACATest {
         ExtendedSuffixArray eSuffBanana = sais.buildExtendedSuffixArray(original);
         int[] updated = stringToIntArray(edit);
 
+        Timer linearTimer = new Timer();
+        linearTimer.start();
         ExtendedSuffixArray expected = sais.buildExtendedSuffixArray(updated);
+        linearTimer.stop();
 
+        Timer incrementalTimer = new Timer();
+        incrementalTimer.start();
         ExtendedSuffixArray eSuffUpdated = dynSACA.insertSingleChar(eSuffBanana,
                 original, updated, position);
+        incrementalTimer.stop();
+
+        linearTimer.log("Linear time");
+        incrementalTimer.log("Incremental time");
 
         int[] l = dynSACA.getL(expected.getSuffix(), updated, expected.getSuffix().length);
         System.out.println("Expected L " + Printer.print(l));
@@ -72,8 +82,8 @@ public class DynamicSACATest {
         System.out.println("Actual ISA: " +
                 Printer.print(eSuffUpdated.getInverseSuffix()));
 
-        // assertArrayEquals(expected.getInverseSuffix(),
-        // eSuffUpdated.getInverseSuffix());
+        assertArrayEquals(expected.getInverseSuffix(),
+                eSuffUpdated.getInverseSuffix());
 
     }
 
@@ -83,17 +93,11 @@ public class DynamicSACATest {
             String end = input.substring(i);
             String start = input.substring(0, i);
             String edit = start + insert + end;
-            System.out.println("input " + input);
-            System.out.println("edit " + edit);
-            System.out.println("i " + i);
             testDynamicSuffix(input, edit, i);
         }
 
         // Test end
         String edit = input + insert;
-        System.out.println("input " + input);
-        System.out.println("edit " + edit);
-        System.out.println("i " + (edit.length() - 1));
         testDynamicSuffix(input, edit, edit.length() - 1);
     }
 
@@ -104,6 +108,7 @@ public class DynamicSACATest {
     }
 
     @Test
+
     public void testShortSingleInsert() {
         testDynamicSuffix("cacgacg", "cacagacg", 3);
         testDynamicSuffix("ab", "aab", 0);
@@ -111,6 +116,9 @@ public class DynamicSACATest {
         testDynamicSuffix("ab", "aab", 1);
         testDynamicSuffix("dc", "dbc", 1);
         testDynamicSuffix("ab", "axb", 1);
+        testDynamicSuffix("abc", "axbc", 1);
+        testDynamicSuffix("axbc", "axbcd", 4);
+        testDynamicSuffix("axbcd", "axbcda", 5);
 
         testDynamicSuffix("mississippi", "missiissippi", 4);
         testDynamicSuffix("mississippi", "missiissippi", 5);
