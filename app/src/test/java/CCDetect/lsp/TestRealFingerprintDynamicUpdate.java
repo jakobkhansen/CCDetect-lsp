@@ -19,9 +19,9 @@ import CCDetect.lsp.utils.Printer;
 import CCDetect.lsp.utils.Timer;
 
 public class TestRealFingerprintDynamicUpdate {
-    @Test
-    public void testCCDetectFingerprint() throws Exception {
-        String path = "src/test/resources/Fingerprints/ccdetect.txt";
+
+    public void testFile(String path) throws Exception {
+
         File file = new File(path);
 
         BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -55,6 +55,16 @@ public class TestRealFingerprintDynamicUpdate {
         assertArrayEquals(expected.getInverseSuffix(), dynUpdated.getInverseSuffix());
 
         reader.close();
+    }
+
+    @Test
+    public void testCCDetectFingerprint() throws Exception {
+        testFile("src/test/resources/Fingerprints/ccdetect.txt");
+    }
+
+    @Test
+    public void testWorldWindFingerprint() throws Exception {
+        testFile("src/test/resources/Fingerprints/worldwind.txt");
     }
 
     public ExtendedSuffixArray buildOldSuffix(Iterator<String> iter) throws Exception {
