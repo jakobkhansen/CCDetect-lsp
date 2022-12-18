@@ -3,6 +3,7 @@ package CCDetect.lsp.datastructures;
 import java.util.logging.Logger;
 
 import CCDetect.lsp.utils.Printer;
+import CCDetect.lsp.utils.Timer;
 
 /**
  * DynamicSA
@@ -68,7 +69,7 @@ public class DynamicSACA {
             expectedPos = getLFDynamic(expectedPos, l, l.length);
         }
 
-        return new ExtendedSuffixArray(newSA, newISA, suff.getLcp());
+        return new ExtendedSuffixArray(newSA, newISA, new SAIS().buildLCPArray(newText, newSA, newISA));
     }
 
     // Returns L in an array with custom extra size
@@ -83,6 +84,8 @@ public class DynamicSACA {
 
     public int getLFDynamic(int index, int[] l, int size) {
 
+        Timer timer = new Timer();
+        timer.start();
         int charsBefore = 0;
         for (int i = 0; i < size; i++) {
             charsBefore += l[i] < l[index] ? 1 : 0;
@@ -91,6 +94,8 @@ public class DynamicSACA {
         for (int i = 0; i < index; i++) {
             rank += l[i] == l[index] ? 1 : 0;
         }
+        timer.stop();
+        timer.log("LF");
         return charsBefore + rank;
     }
 

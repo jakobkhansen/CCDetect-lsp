@@ -95,10 +95,10 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         // Only for logging
         // int[] indices = new int[fingerprint.length];
         // LOGGER.info("Indices: " + Printer.print(indices));
-        LOGGER.info("Fingerprint: " + Printer.print(fingerprint));
-        LOGGER.info("Suffix: " + Printer.print(eSuff.getSuffix()));
-        LOGGER.info("Inverse: " + Printer.print(eSuff.getInverseSuffix()));
-        LOGGER.info("LCP: " + Printer.print(eSuff.getLcp()));
+        // LOGGER.info("Fingerprint: " + Printer.print(fingerprint));
+        // LOGGER.info("Suffix: " + Printer.print(eSuff.getSuffix()));
+        // LOGGER.info("Inverse: " + Printer.print(eSuff.getInverseSuffix()));
+        // LOGGER.info("LCP: " + Printer.print(eSuff.getLcp()));
         //
         int[] cloneIndices = extractCloneIndicesFromSA();
         LOGGER.info("Clone indices: " + Printer.print(cloneIndices));
@@ -256,6 +256,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                 document.freeText();
                 document.freeTree();
             }
+
             document.setFingerprintRange(tokenCount, tokenCount + document.getTokenCount() - 1);
             documentsProcessed++;
             tokenCount += document.getTokenCount();

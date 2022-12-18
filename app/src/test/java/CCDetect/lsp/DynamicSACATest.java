@@ -67,8 +67,8 @@ public class DynamicSACATest {
                 original, updated, position);
         incrementalTimer.stop();
 
-        linearTimer.log("Linear time");
-        incrementalTimer.log("Incremental time");
+        // linearTimer.log("Linear time");
+        // incrementalTimer.log("Incremental time");
 
         int[] l = dynSACA.getL(expected.getSuffix(), updated, expected.getSuffix().length);
         System.out.println("Expected L " + Printer.print(l));
