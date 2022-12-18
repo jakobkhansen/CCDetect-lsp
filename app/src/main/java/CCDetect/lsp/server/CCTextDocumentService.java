@@ -113,8 +113,6 @@ public class CCTextDocumentService implements TextDocumentService {
             index.updateDocument(uri, change.getRange(), change.getText());
         }
 
-        findClones();
-        updateDiagnostics();
         timer.stop();
         timer.log("didChange total time");
     }
@@ -131,7 +129,14 @@ public class CCTextDocumentService implements TextDocumentService {
     @Override
     public void didSave(DidSaveTextDocumentParams params) {
         LOGGER.info("didSave");
+        Timer timer = new Timer();
+        timer.start();
+
+        findClones();
         updateDiagnostics();
+
+        timer.stop();
+        timer.log("didSave total time");
     }
 
     public void findClones() {
