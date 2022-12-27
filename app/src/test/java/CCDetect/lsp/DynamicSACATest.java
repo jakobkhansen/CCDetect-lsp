@@ -42,14 +42,13 @@ public class DynamicSACATest {
             }
         }
         assertTrue(found);
-        System.out.println(current);
         for (int i = inputArr.length - 1; i >= 0; i--) {
             assertEquals(inputArr[i], l[current]);
             current = saca.getLFDynamic(current, l, l.length);
         }
     }
 
-    public void testDynamicSuffix(String input, String edit, int position) {
+    public void testDynamicSuffixInsertSingle(String input, String edit, int position) {
         SAIS sais = new SAIS();
         DynamicSACA dynSACA = new DynamicSACA();
         int[] original = stringToIntArray(input);
@@ -69,9 +68,6 @@ public class DynamicSACATest {
 
         // linearTimer.log("Linear time");
         // incrementalTimer.log("Incremental time");
-
-        int[] l = dynSACA.getL(expected.getSuffix(), updated, expected.getSuffix().length);
-        System.out.println("Expected L " + Printer.print(l));
 
         System.out.println("Expected SA: " + Printer.print(expected.getSuffix()));
         System.out.println("Actual SA: " + Printer.print(eSuffUpdated.getSuffix()));
@@ -93,36 +89,36 @@ public class DynamicSACATest {
             String end = input.substring(i);
             String start = input.substring(0, i);
             String edit = start + insert + end;
-            testDynamicSuffix(input, edit, i);
+            testDynamicSuffixInsertSingle(input, edit, i);
         }
 
         // Test end
         String edit = input + insert;
-        testDynamicSuffix(input, edit, edit.length() - 1);
+        testDynamicSuffixInsertSingle(input, edit, edit.length() - 1);
     }
 
     @Test
     public void testInsertSingleCharacter() {
-        testDynamicSuffix("ctctgc", "ctgctgc", 2);
-        testDynamicSuffix("atgcg", "attgcg", 1);
+        testDynamicSuffixInsertSingle("ctctgc", "ctgctgc", 2);
+        testDynamicSuffixInsertSingle("atgcg", "attgcg", 1);
     }
 
     @Test
 
     public void testShortSingleInsert() {
-        testDynamicSuffix("cacgacg", "cacagacg", 3);
-        testDynamicSuffix("ab", "aab", 0);
-        testDynamicSuffix("ab", "aab", 1);
-        testDynamicSuffix("ab", "aab", 1);
-        testDynamicSuffix("dc", "dbc", 1);
-        testDynamicSuffix("ab", "axb", 1);
-        testDynamicSuffix("abc", "axbc", 1);
-        testDynamicSuffix("axbc", "axbcd", 4);
-        testDynamicSuffix("axbcd", "axbcda", 5);
+        testDynamicSuffixInsertSingle("cacgacg", "cacagacg", 3);
+        testDynamicSuffixInsertSingle("ab", "aab", 0);
+        testDynamicSuffixInsertSingle("ab", "aab", 1);
+        testDynamicSuffixInsertSingle("ab", "aab", 1);
+        testDynamicSuffixInsertSingle("dc", "dbc", 1);
+        testDynamicSuffixInsertSingle("ab", "axb", 1);
+        testDynamicSuffixInsertSingle("abc", "axbc", 1);
+        testDynamicSuffixInsertSingle("axbc", "axbcd", 4);
+        testDynamicSuffixInsertSingle("axbcd", "axbcda", 5);
 
-        testDynamicSuffix("mississippi", "missiissippi", 4);
-        testDynamicSuffix("mississippi", "missiissippi", 5);
-        testDynamicSuffix("pneumonoultramicroscopicsilicovolcanoconiosis",
+        testDynamicSuffixInsertSingle("mississippi", "missiissippi", 4);
+        testDynamicSuffixInsertSingle("mississippi", "missiissippi", 5);
+        testDynamicSuffixInsertSingle("pneumonoultramicroscopicsilicovolcanoconiosis",
                 "pneumonoulxtramicroscopicsilicovolcanoconiosis", 10);
     }
 
@@ -132,6 +128,47 @@ public class DynamicSACATest {
         testInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis", "a");
         testInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis", "x");
         testInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis", "h");
+    }
+
+    public void testDynamicSuffixInsertFactor(String input, String edit, int start, int end) {
+        SAIS sais = new SAIS();
+        DynamicSACA dynSACA = new DynamicSACA();
+        int[] original = stringToIntArray(input);
+        ExtendedSuffixArray eSuffBanana = sais.buildExtendedSuffixArray(original);
+        int[] updated = stringToIntArray(edit);
+
+        Timer linearTimer = new Timer();
+        linearTimer.start();
+        ExtendedSuffixArray expected = sais.buildExtendedSuffixArray(updated);
+        linearTimer.stop();
+
+        Timer incrementalTimer = new Timer();
+        incrementalTimer.start();
+        ExtendedSuffixArray eSuffUpdated = dynSACA.insertFactor(eSuffBanana,
+                original, updated, start, end);
+        incrementalTimer.stop();
+
+        // linearTimer.log("Linear time");
+        // incrementalTimer.log("Incremental time");
+
+        System.out.println("Expected SA: " + Printer.print(expected.getSuffix()));
+        System.out.println("Actual SA: " + Printer.print(eSuffUpdated.getSuffix()));
+        assertArrayEquals(expected.getSuffix(), eSuffUpdated.getSuffix());
+
+        System.out.println("Expected ISA: " +
+                Printer.print(expected.getInverseSuffix()));
+        System.out.println("Actual ISA: " +
+                Printer.print(eSuffUpdated.getInverseSuffix()));
+
+        assertArrayEquals(expected.getInverseSuffix(),
+                eSuffUpdated.getInverseSuffix());
+
+    }
+
+    @Test
+    public void testInsertSmallFactor() {
+        testDynamicSuffixInsertFactor("ab", "axxb", 1, 2);
+
     }
 
     public int[] stringToIntArray(String input) {

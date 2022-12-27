@@ -33,7 +33,6 @@ public class TestRealFingerprintDynamicUpdate {
 
         int[] newFingerprint = Arrays.stream(iter.next().split("\\s+")).mapToInt(Integer::parseInt).toArray();
         int updateIndex = Integer.parseInt(iter.next());
-        System.out.println("updateIndex " + updateIndex);
 
         SAIS sais = new SAIS();
         Timer linearTimer = new Timer();
