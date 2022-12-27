@@ -72,6 +72,22 @@ public class DynamicSACA {
         return new ExtendedSuffixArray(newSA, newISA, new SAIS().buildLCPArray(newText, newSA, newISA));
     }
 
+    // Inserts a factor into the suffix array at position [start, end] (inclusive)
+    public ExtendedSuffixArray insertFactor(ExtendedSuffixArray suff, int[] oldText, int[] newText, int start,
+            int end) {
+        int insertLength = (end - start) + 1;
+        int[] oldSA = suff.getSuffix();
+        int[] oldISA = suff.getInverseSuffix();
+        int[] newSA = new int[oldSA.length + insertLength];
+        int[] newISA = new int[oldISA.length + insertLength];
+        int[] l = getL(oldSA, oldText, newSA.length);
+
+        System.out.println("start " + start + " end " + end);
+        System.out.println("insertLength " + insertLength);
+
+        return null;
+    }
+
     // Returns L in an array with custom extra size
     public int[] getL(int[] suff, int[] text, int size) {
         int[] l = new int[size];
