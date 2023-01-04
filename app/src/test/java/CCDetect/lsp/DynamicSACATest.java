@@ -42,6 +42,7 @@ public class DynamicSACATest {
             }
         }
         assertTrue(found);
+        System.out.println(current);
         for (int i = inputArr.length - 1; i >= 0; i--) {
             assertEquals(inputArr[i], l[current]);
             current = saca.getLFDynamic(current, l, l.length);
@@ -151,6 +152,9 @@ public class DynamicSACATest {
         // linearTimer.log("Linear time");
         // incrementalTimer.log("Incremental time");
 
+        int[] l = dynSACA.getL(expected.getSuffix(), updated, expected.getSuffix().length);
+        System.out.println("Expected L " + Printer.print(l));
+
         System.out.println("Expected SA: " + Printer.print(expected.getSuffix()));
         System.out.println("Actual SA: " + Printer.print(eSuffUpdated.getSuffix()));
         assertArrayEquals(expected.getSuffix(), eSuffUpdated.getSuffix());
@@ -167,7 +171,15 @@ public class DynamicSACATest {
 
     @Test
     public void testInsertSmallFactor() {
-        testDynamicSuffixInsertFactor("ab", "axxb", 1, 2);
+        testDynamicSuffixInsertFactor("b", "ab", 0, 0);
+        testDynamicSuffixInsertFactor("ctctgc", "ctgctgc", 2, 2);
+
+        testDynamicSuffixInsertFactor("b", "bac", 1, 2);
+        testDynamicSuffixInsertFactor("b", "bacd", 1, 3);
+        testDynamicSuffixInsertFactor("b", "abb", 0, 1);
+        // testDynamicSuffixInsertFactor("ac", "adac", 1, 2);
+        // testDynamicSuffixInsertFactor("ab", "abab", 2, 3);
+        // testDynamicSuffixInsertFactor("b", "bbb", 1, 2);
 
     }
 
