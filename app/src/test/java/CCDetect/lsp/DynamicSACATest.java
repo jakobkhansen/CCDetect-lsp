@@ -90,12 +90,16 @@ public class DynamicSACATest {
             String end = input.substring(i);
             String start = input.substring(0, i);
             String edit = start + insert + end;
-            testDynamicSuffixInsertSingle(input, edit, i);
+            System.out.println("EDIT: " + edit);
+            System.out.println("i " + i + " j " + (i + insert.length() - 1));
+            testDynamicSuffixInsertFactor(input, edit, i, i + insert.length() - 1);
         }
 
         // Test end
         String edit = input + insert;
-        testDynamicSuffixInsertSingle(input, edit, edit.length() - 1);
+        int start = input.length();
+        int end = start + insert.length() - 1;
+        testDynamicSuffixInsertFactor(input, edit, start, end);
     }
 
     @Test
@@ -176,10 +180,20 @@ public class DynamicSACATest {
 
         testDynamicSuffixInsertFactor("b", "bac", 1, 2);
         testDynamicSuffixInsertFactor("b", "bacd", 1, 3);
+        testDynamicSuffixInsertFactor("b", "ab", 0, 0);
         testDynamicSuffixInsertFactor("b", "abb", 0, 1);
-        // testDynamicSuffixInsertFactor("ac", "adac", 1, 2);
-        // testDynamicSuffixInsertFactor("ab", "abab", 2, 3);
-        // testDynamicSuffixInsertFactor("b", "bbb", 1, 2);
+        testDynamicSuffixInsertFactor("ac", "adac", 1, 2);
+        testDynamicSuffixInsertFactor("ab", "abab", 2, 3);
+        testDynamicSuffixInsertFactor("b", "bbb", 0, 1);
+        testDynamicSuffixInsertFactor("b", "asldkjsalkdjb", 0, 11);
+        testDynamicSuffixInsertFactor("bcd", "bbcadcd", 1, 4);
+
+        testDynamicSuffixInsertFactor("bcd", "bcdxxx", 3, 5);
+        testDynamicSuffixInsertFactor("bcd", "bxadpxcd", 1, 5);
+
+        // testDynamicSuffixInsertFactor("bcd", "bcajd", 2, 3);
+        // testInsertOnAllIndices("bcd", "hx");
+        // testInsertOnAllIndices("bcd", "aj");
 
     }
 
