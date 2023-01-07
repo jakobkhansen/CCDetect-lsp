@@ -191,10 +191,16 @@ public class DynamicSACATest {
         testDynamicSuffixInsertFactor("bcd", "bcdxxx", 3, 5);
         testDynamicSuffixInsertFactor("bcd", "bxadpxcd", 1, 5);
 
-        // testDynamicSuffixInsertFactor("bcd", "bcajd", 2, 3);
-        // testInsertOnAllIndices("bcd", "hx");
-        // testInsertOnAllIndices("bcd", "aj");
+        testDynamicSuffixInsertFactor("bcd", "bccdd", 2, 3);
+        testInsertOnAllIndices("bcd", "hx");
+        testInsertOnAllIndices("bcd", "aj");
 
+    }
+
+    @Test
+    public void testInsertFactorOnAllIndices() {
+        testInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis", "habc");
+        testInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis", "xxxxxasldkjsadoiqw");
     }
 
     public int[] stringToIntArray(String input) {
