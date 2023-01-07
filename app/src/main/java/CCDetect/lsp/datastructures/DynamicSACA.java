@@ -96,26 +96,34 @@ public class DynamicSACA {
         }
 
         // Stage 2, replace in L
-        int posFirstModified = getLFDynamic(oldISA[start], l, l.length - insertLength);
-        int originalPos = posFirstModified;
+        int posFirstModified = oldISA[start];
+        int previousCS = getLFDynamic(posFirstModified, l, l.length - insertLength);
 
         System.out.println("ISA[start] = " + oldISA[start]);
         int storedLetter = l[oldISA[start]];
         l[oldISA[start]] = newText[end];
+        System.out.println("Stored letter " + storedLetter);
 
         int pointOfInsertion = getLFDynamic(oldISA[start], l, l.length - insertLength);
-        pointOfInsertion += storedLetter <= newText[end] ? 1 : 0;
-        System.out.println("pointOfInsertion " + pointOfInsertion);
-        System.out.println("L after stage 2 " + Printer.print(l));
+        // Number of smaller characters is one off if the char we have stored is less
+        // than the one we inserted
+        pointOfInsertion += storedLetter < newText[end] ? 1 : 0;
 
-        System.out.println("l length before " + (l.length - insertLength));
         // Stage 3, Insert new rows in L
         for (int i = end - 1; i >= start; i--) {
             System.out.println("Inserting " + newText[i] + " at " + pointOfInsertion + " in L");
-            insert(l, pointOfInsertion, newText[i]);
 
-            // Increment previous cs if we inserted before it
-            originalPos += pointOfInsertion <= originalPos ? 1 : 0;
+            insert(l, pointOfInsertion, newText[i]);
+            System.out.println("HERE " + l[pointOfInsertion]);
+
+            // Increment previousCS and/or posFirstModified if we inserted before them
+            previousCS += pointOfInsertion <= previousCS ? 1 : 0;
+            posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;
+
+            System.out.println("Previous CS=" + previousCS + ", value in L= " + l[previousCS]);
+            System.out.println("first modified=" + posFirstModified + ", value in L= " + l[posFirstModified]);
+            System.out.println("L after insert= " + Printer.print(l));
+            System.out.println();
 
             // Increment all values in SA greater than or equal to position
             for (int j = 0; j < newSA.length; j++) {
@@ -134,42 +142,46 @@ public class DynamicSACA {
 
             int l_length = l.length - insertLength + ((end - 1) - (i - 1));
 
-            System.out.println("l length " + l_length);
+            int oldPOS = pointOfInsertion;
             pointOfInsertion = getLFDynamic(pointOfInsertion, l, l_length);
-            pointOfInsertion += storedLetter <= newText[end] ? 1 : 0;
+            // Again number of smaller characters is one off potentially
+            pointOfInsertion += storedLetter < newText[i] ? 1 : 0;
+
+            // Rank is one off if the character is the same and inserted after the stored
+            // char
+            if (posFirstModified < oldPOS && newText[i] == storedLetter) {
+                pointOfInsertion++;
+            }
+
         }
-        System.out.println("Inserting " + storedLetter + " at " + pointOfInsertion + " in L");
+        // Inserting final character that we substituted before
+
         insert(l, pointOfInsertion, storedLetter);
+        previousCS += pointOfInsertion <= previousCS ? 1 : 0;
+        posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;
+
+        // Update SA
         for (int i = 0; i < newSA.length; i++) {
             newSA[i] += newSA[i] >= start ? 1 : 0;
         }
-        for (int j = 0; j < newISA.length; j++) {
-            newISA[j] += newISA[j] >= pointOfInsertion ? 1 : 0;
+
+        // Updates ISA
+        for (int i = 0; i < newISA.length; i++) {
+            newISA[i] += newISA[i] >= pointOfInsertion ? 1 : 0;
         }
         insert(newSA, pointOfInsertion, start);
         insert(newISA, start, pointOfInsertion);
 
-        System.out.println("L after stage 3 " + Printer.print(l));
-        System.out.println("SA after stage 3 " + Printer.print(newSA));
-        System.out.println("ISA after stage 3 " + Printer.print(newISA));
-
-        originalPos += pointOfInsertion <= originalPos ? 1 : 0;
-
         // Stage 4
-        int pos = originalPos;
+        int pos = previousCS;
         int expectedPos = getLFDynamic(pointOfInsertion, l, l.length);
 
-        System.out.println("pos " + pos);
-        System.out.println("expectedPos " + expectedPos);
         while (pos != expectedPos) {
-            System.out.println("pos " + pos);
-            System.out.println("expectedPos " + expectedPos);
             int newPos = getLFDynamic(pos, l, l.length);
             moveRow(pos, expectedPos, newSA, newISA, l);
             pos = newPos;
             expectedPos = getLFDynamic(expectedPos, l, l.length);
         }
-        System.out.println("L after stage 4 " + Printer.print(l));
 
         return new ExtendedSuffixArray(newSA, newISA, suff.getLcp());
     }
