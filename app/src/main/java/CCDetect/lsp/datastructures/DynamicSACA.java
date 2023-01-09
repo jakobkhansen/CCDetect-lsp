@@ -82,12 +82,6 @@ public class DynamicSACA {
         int[] newISA = new int[oldISA.length + insertLength];
 
         int[] l = getL(oldSA, oldText, newSA.length);
-        System.out.println("Old text " + Printer.print(oldText));
-        System.out.println("Old SA " + Printer.print(oldSA));
-        System.out.println("Old ISA " + Printer.print(oldISA));
-        System.out.println("New text " + Printer.print(newText));
-        System.out.println("Old L " + Printer.print(l));
-        System.out.println("start=" + start + " end=" + end);
 
         // Stage 1, copy elements which are not changed
         for (int i = 0; i < oldSA.length; i++) {
@@ -99,10 +93,8 @@ public class DynamicSACA {
         int posFirstModified = oldISA[start];
         int previousCS = getLFDynamic(posFirstModified, l, l.length - insertLength);
 
-        System.out.println("ISA[start] = " + oldISA[start]);
         int storedLetter = l[oldISA[start]];
         l[oldISA[start]] = newText[end];
-        System.out.println("Stored letter " + storedLetter);
 
         int pointOfInsertion = getLFDynamic(oldISA[start], l, l.length - insertLength);
         // Number of smaller characters is one off if the char we have stored is less
@@ -111,19 +103,14 @@ public class DynamicSACA {
 
         // Stage 3, Insert new rows in L
         for (int i = end - 1; i >= start; i--) {
-            System.out.println("Inserting " + newText[i] + " at " + pointOfInsertion + " in L");
 
             insert(l, pointOfInsertion, newText[i]);
-            System.out.println("HERE " + l[pointOfInsertion]);
+
+            int l_length = l.length - insertLength + ((end - 1) - (i - 1));
 
             // Increment previousCS and/or posFirstModified if we inserted before them
             previousCS += pointOfInsertion <= previousCS ? 1 : 0;
             posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;
-
-            System.out.println("Previous CS=" + previousCS + ", value in L= " + l[previousCS]);
-            System.out.println("first modified=" + posFirstModified + ", value in L= " + l[posFirstModified]);
-            System.out.println("L after insert= " + Printer.print(l));
-            System.out.println();
 
             // Increment all values in SA greater than or equal to position
             for (int j = 0; j < newSA.length; j++) {
@@ -139,8 +126,6 @@ public class DynamicSACA {
 
             // Insert new row in ISA
             insert(newISA, start, pointOfInsertion);
-
-            int l_length = l.length - insertLength + ((end - 1) - (i - 1));
 
             int oldPOS = pointOfInsertion;
             pointOfInsertion = getLFDynamic(pointOfInsertion, l, l_length);
