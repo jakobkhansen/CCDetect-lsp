@@ -53,18 +53,22 @@ public class DynamicSACA {
     }
 
     public void resizeArrays(int newSize) {
+        int oldSize = actualSize;
         int[] newSA = new int[newSize];
         int[] newISA = new int[newSize];
         int[] newLCP = new int[newSize];
+        int[] newL = new int[newSize];
 
-        for (int i = 0; i < newSize; i++) {
+        for (int i = 0; i < oldSize; i++) {
             newSA[i] = sa[i];
             newISA[i] = isa[i];
             newLCP[i] = lcp[i];
+            newL[i] = l[i];
         }
         sa = newSA;
         isa = newISA;
         lcp = newLCP;
+        l = newL;
     }
 
     public ExtendedSuffixArray getExtendedSuffixArray() {
@@ -144,9 +148,6 @@ public class DynamicSACA {
         int oldSize = actualSize;
         int newSize = actualSize + newText.length;
         updateSizes(newSize);
-        System.out.println("Arrays");
-        System.out.println(actualSize);
-        System.out.println(arraySize);
         int end = newText.length - 1;
 
         // Stage 2, replace in L
@@ -166,22 +167,21 @@ public class DynamicSACA {
 
             insert(l, pointOfInsertion, newText[i]);
 
-            int l_length = actualSize - (i - 1);
-            System.out.println("l length: " + l_length);
+            int l_length = newSize - (i + 1);
 
             // Increment previousCS and/or posFirstModified if we inserted before them
             previousCS += pointOfInsertion <= previousCS ? 1 : 0;
             posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;
 
             // Increment all values in SA greater than or equal to position
-            for (int j = 0; j < newSize; j++) {
+            for (int j = 0; j < l_length; j++) {
                 sa[j] += sa[j] >= position ? 1 : 0;
             }
 
             insert(sa, pointOfInsertion, position);
 
             // Increment all values in ISA greater than or equal to LF(ISA[position])
-            for (int j = 0; j < isa.length; j++) {
+            for (int j = 0; j < l_length; j++) {
                 isa[j] += isa[j] >= pointOfInsertion ? 1 : 0;
             }
 
@@ -207,12 +207,12 @@ public class DynamicSACA {
         posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;
 
         // Update SA
-        for (int i = 0; i < sa.length; i++) {
+        for (int i = 0; i < newSize; i++) {
             sa[i] += sa[i] >= position ? 1 : 0;
         }
 
         // Updates ISA
-        for (int i = 0; i < isa.length; i++) {
+        for (int i = 0; i < newSize; i++) {
             isa[i] += isa[i] >= pointOfInsertion ? 1 : 0;
         }
         insert(sa, pointOfInsertion, position);
@@ -220,15 +220,14 @@ public class DynamicSACA {
 
         // Stage 4
         int pos = previousCS;
-        int expectedPos = getLFDynamic(pointOfInsertion, l, l.length);
+        int expectedPos = getLFDynamic(pointOfInsertion, l, newSize);
 
         while (pos != expectedPos) {
-            int newPos = getLFDynamic(pos, l, l.length);
+            int newPos = getLFDynamic(pos, l, newSize);
             moveRow(pos, expectedPos, sa, isa, l);
             pos = newPos;
-            expectedPos = getLFDynamic(expectedPos, l, l.length);
+            expectedPos = getLFDynamic(expectedPos, l, newSize);
         }
-
     }
 
     // Returns L in an array with custom extra size

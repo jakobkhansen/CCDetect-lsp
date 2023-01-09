@@ -31,31 +31,29 @@ public class TestRealFingerprintDynamicUpdate {
         int[] oldFingerprint = Arrays.stream(iter.next().split("\\s+")).mapToInt(Integer::parseInt).toArray();
         ExtendedSuffixArray old = buildOldSuffix(iter);
 
-        int[] newFingerprint = Arrays.stream(iter.next().split("\\s+")).mapToInt(Integer::parseInt).toArray();
-        int[] indices = Arrays.stream(iter.next().split("\\s+")).mapToInt(Integer::parseInt).toArray();
-        int updateIndexStart = indices[0];
-        int updateIndexEnd = indices[1];
+        int[] edit = Arrays.stream(iter.next().split("\\s+")).mapToInt(Integer::parseInt).toArray();
+        int position = Integer.parseInt(iter.next());
 
         SAIS sais = new SAIS();
         Timer linearTimer = new Timer();
         linearTimer.start();
-        ExtendedSuffixArray expected = sais.buildExtendedSuffixArray(newFingerprint);
+        int[] newArray = insertIntoIntArray(oldFingerprint, edit, position);
+        ExtendedSuffixArray expected = sais.buildExtendedSuffixArray(newArray);
         linearTimer.stop();
 
-        // DynamicSACA dynSACA = new DynamicSACA();
-        // Timer incrementalTimer = new Timer();
-        // incrementalTimer.start();
-        // ExtendedSuffixArray dynUpdated = dynSACA.insertFactor(old, oldFingerprint,
-        // newFingerprint,
-        // updateIndexStart, updateIndexEnd);
-        // incrementalTimer.stop();
-        //
-        // linearTimer.log("Linear time");
-        // incrementalTimer.log("Incremental time");
-        //
-        // assertArrayEquals(expected.getSuffix(), dynUpdated.getSuffix());
-        // assertArrayEquals(expected.getInverseSuffix(),
-        // dynUpdated.getInverseSuffix());
+        DynamicSACA dynSACA = new DynamicSACA(oldFingerprint, old, oldFingerprint.length);
+        Timer incrementalTimer = new Timer();
+        incrementalTimer.start();
+        dynSACA.insertFactor(edit, position);
+        ExtendedSuffixArray dynUpdated = dynSACA.getExtendedSuffixArray();
+        incrementalTimer.stop();
+
+        linearTimer.log("Linear time");
+        incrementalTimer.log("Incremental time");
+
+        assertArrayEquals(expected.getSuffix(), dynUpdated.getSuffix());
+        assertArrayEquals(expected.getInverseSuffix(),
+                dynUpdated.getInverseSuffix());
 
         reader.close();
     }
@@ -63,17 +61,17 @@ public class TestRealFingerprintDynamicUpdate {
     // TODO reimplement tests
     @Test
     public void testCCDetectFingerprint() throws Exception {
-        // testFile("src/test/resources/Fingerprints/ccdetect.txt");
+        testFile("src/test/resources/Fingerprints/ccdetect.txt");
     }
 
     @Test
     public void testWorldWindFingerprint() throws Exception {
-        // testFile("src/test/resources/Fingerprints/worldwind.txt");
+        testFile("src/test/resources/Fingerprints/worldwind.txt");
     }
 
     @Test
     public void testWorldWindFingerprintFactor() throws Exception {
-        // testFile("src/test/resources/Fingerprints/worldwind_factor.txt");
+        testFile("src/test/resources/Fingerprints/worldwind_factor.txt");
     }
 
     public ExtendedSuffixArray buildOldSuffix(Iterator<String> iter) throws Exception {
@@ -87,5 +85,24 @@ public class TestRealFingerprintDynamicUpdate {
         int[] oldLCP = Arrays.stream(oldLCPLine.split("\\s+")).mapToInt(Integer::parseInt).toArray();
 
         return new ExtendedSuffixArray(oldSA, oldISA, oldLCP);
+    }
+
+    public static int[] insertIntoIntArray(int[] input, int[] insert, int position) {
+        int[] result = new int[input.length + insert.length];
+        int index = 0;
+        for (int i = 0; i < position; i++) {
+            result[index] = input[i];
+            index++;
+        }
+        for (int i = 0; i < insert.length; i++) {
+            result[index] = insert[i];
+            index++;
+        }
+        for (int i = position; i < input.length; i++) {
+            result[index] = input[i];
+            index++;
+        }
+
+        return result;
     }
 }

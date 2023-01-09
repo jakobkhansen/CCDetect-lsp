@@ -81,6 +81,15 @@ public class Printer {
         return out.toString();
     }
 
+    public static String print(int[] ints, int size) {
+        StringBuilder out = new StringBuilder("int[ ");
+        for (int i = 0; i < size; i++) {
+            out.append(Strings.padEnd("" + ints[i], 6, ' ') + " ");
+        }
+        out.append("]");
+        return out.toString();
+    }
+
     public static <K, V> String print(Map<K, V> map) {
         StringBuilder out = new StringBuilder("Map(");
         for (K key : map.keySet()) {
