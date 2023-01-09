@@ -32,7 +32,9 @@ public class TestRealFingerprintDynamicUpdate {
         ExtendedSuffixArray old = buildOldSuffix(iter);
 
         int[] newFingerprint = Arrays.stream(iter.next().split("\\s+")).mapToInt(Integer::parseInt).toArray();
-        int updateIndex = Integer.parseInt(iter.next());
+        int[] indices = Arrays.stream(iter.next().split("\\s+")).mapToInt(Integer::parseInt).toArray();
+        int updateIndexStart = indices[0];
+        int updateIndexEnd = indices[1];
 
         SAIS sais = new SAIS();
         Timer linearTimer = new Timer();
@@ -43,8 +45,8 @@ public class TestRealFingerprintDynamicUpdate {
         DynamicSACA dynSACA = new DynamicSACA();
         Timer incrementalTimer = new Timer();
         incrementalTimer.start();
-        ExtendedSuffixArray dynUpdated = dynSACA.insertSingleChar(old, oldFingerprint, newFingerprint,
-                updateIndex);
+        ExtendedSuffixArray dynUpdated = dynSACA.insertFactor(old, oldFingerprint, newFingerprint,
+                updateIndexStart, updateIndexEnd);
         incrementalTimer.stop();
 
         linearTimer.log("Linear time");
@@ -64,6 +66,11 @@ public class TestRealFingerprintDynamicUpdate {
     @Test
     public void testWorldWindFingerprint() throws Exception {
         testFile("src/test/resources/Fingerprints/worldwind.txt");
+    }
+
+    @Test
+    public void testWorldWindFingerprintFactor() throws Exception {
+        testFile("src/test/resources/Fingerprints/worldwind_factor.txt");
     }
 
     public ExtendedSuffixArray buildOldSuffix(Iterator<String> iter) throws Exception {
