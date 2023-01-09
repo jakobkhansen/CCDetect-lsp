@@ -15,7 +15,7 @@ public class SuffixArrayTest {
 
     @Test
     public void testBanana() {
-        int[] input = stringToIntArray("banana");
+        int[] input = stringToIntArrayWithTerminator("banana");
         int max = Arrays.stream(input).max().getAsInt();
 
         SAIS sais = new SAIS();
@@ -24,7 +24,7 @@ public class SuffixArrayTest {
     }
 
     public void testMississippi() {
-        int[] input = stringToIntArray("mississippi");
+        int[] input = stringToIntArrayWithTerminator("mississippi");
         int max = Arrays.stream(input).max().getAsInt();
         SAIS sais = new SAIS();
         int[] suff = sais.buildSuffixArray(input, max + 1);
@@ -34,7 +34,7 @@ public class SuffixArrayTest {
     }
 
     public void testVeryLongWord() {
-        int[] input = stringToIntArray("pneumonoultramicroscopicsilicovolcanoconiosis");
+        int[] input = stringToIntArrayWithTerminator("pneumonoultramicroscopicsilicovolcanoconiosis");
         int max = Arrays.stream(input).max().getAsInt();
         SAIS sais = new SAIS();
         int[] suff = sais.buildSuffixArray(input, max + 1);
@@ -45,7 +45,7 @@ public class SuffixArrayTest {
 
     }
 
-    public int[] stringToIntArray(String input) {
+    public int[] stringToIntArrayWithTerminator(String input) {
         return input.chars().map(c -> {
             return (int) c - 'a';
         }).toArray();

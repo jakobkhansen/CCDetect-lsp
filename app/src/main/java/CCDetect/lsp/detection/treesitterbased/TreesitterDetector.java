@@ -11,6 +11,7 @@ import com.google.common.primitives.Ints;
 import org.eclipse.lsp4j.Range;
 
 import CCDetect.lsp.CodeClone;
+import CCDetect.lsp.datastructures.DynamicSACA;
 import CCDetect.lsp.datastructures.ExtendedSuffixArray;
 import CCDetect.lsp.datastructures.SAIS;
 import CCDetect.lsp.detection.CloneDetector;
@@ -46,7 +47,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
     SourceMap sourceMap;
     ExtendedSuffixArray eSuff;
     int tokenCount = 0;
-    // int[] SA, ISA, LCP;
+    Configuration config = Configuration.getInstance();
 
     @Override
     public List<CodeClone> getClones() {
@@ -88,7 +89,12 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         NotificationHandler.startNotification("clones", "Finding clones");
         Timer timer = new Timer();
         timer.start();
-        eSuff = new SAIS().buildExtendedSuffixArray(fingerprint);
+        if (eSuff == null || !config.isDynamicDetection()) {
+            eSuff = new SAIS().buildExtendedSuffixArray(fingerprint);
+        } else {
+            // DynamicSACA saca = new DynamicSACA();
+            // saca.insertFactor(esuff, oldText, newText, start, end);
+        }
         timer.stop();
         timer.log("Time to build suffix array, inverse and lcp");
 
@@ -163,7 +169,6 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
     }
 
     private int[] extractCloneIndicesFromSA() {
-        Configuration config = Configuration.getInstance();
         int cloneThreshold = config.getCloneTokenThreshold();
         // Fetch clones, ignore contained clones
         ArrayList<Integer> clones = new ArrayList<>();
@@ -200,7 +205,6 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
     }
 
     private void buildFingerprints(DocumentIndex<TreesitterDocumentModel> index) {
-        Configuration config = Configuration.getInstance();
         Timer timer = new Timer();
         timer.start();
         NotificationHandler.startNotification("index", "Indexing documents");

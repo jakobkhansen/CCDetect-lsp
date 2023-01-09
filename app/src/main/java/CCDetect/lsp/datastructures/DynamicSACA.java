@@ -12,12 +12,80 @@ public class DynamicSACA {
     private static final Logger LOGGER = Logger.getLogger(
             Logger.GLOBAL_LOGGER_NAME);
 
+    int EXTRA_SIZE_INCREASE = 200;
+
+    int[] l;
+    int[] sa;
+    int[] isa;
+    int[] lcp;
+    int arraySize = 0;
+    int actualSize = 0;
+
+    // Assume initial arrays are of same size
+    // Creates a dynamic suffix array datastructure with initialSize potential size
+    public DynamicSACA(int[] initialText, int[] initialSA, int[] initialISA, int[] initialLCP, int initialSize) {
+        arraySize = initialSize;
+        actualSize = initialText.length;
+        sa = new int[arraySize];
+        isa = new int[arraySize];
+        lcp = new int[arraySize];
+
+        for (int i = 0; i < initialText.length; i++) {
+            sa[i] = initialSA[i];
+            isa[i] = initialISA[i];
+            lcp[i] = initialLCP[i];
+        }
+        l = calculateL(initialSA, initialText, initialSize);
+    }
+
+    public DynamicSACA(int[] initialText, ExtendedSuffixArray initialESuff, int initialSize) {
+        this(initialText, initialESuff.getSuffix(), initialESuff.getInverseSuffix(), initialESuff.getLcp(),
+                initialSize);
+    }
+
+    public void updateSizes(int newSize) {
+        if (newSize > arraySize) {
+            int newArraySize = newSize + EXTRA_SIZE_INCREASE;
+            resizeArrays(newArraySize);
+            arraySize = newArraySize;
+        }
+        actualSize = newSize;
+    }
+
+    public void resizeArrays(int newSize) {
+        int[] newSA = new int[newSize];
+        int[] newISA = new int[newSize];
+        int[] newLCP = new int[newSize];
+
+        for (int i = 0; i < newSize; i++) {
+            newSA[i] = sa[i];
+            newISA[i] = isa[i];
+            newLCP[i] = lcp[i];
+        }
+        sa = newSA;
+        isa = newISA;
+        lcp = newLCP;
+    }
+
+    public ExtendedSuffixArray getExtendedSuffixArray() {
+        int[] smallSA = new int[actualSize];
+        int[] smallISA = new int[actualSize];
+        int[] smallLCP = new int[actualSize];
+
+        for (int i = 0; i < actualSize; i++) {
+            smallSA[i] = sa[i];
+            smallISA[i] = isa[i];
+            smallLCP[i] = lcp[i];
+        }
+        return new ExtendedSuffixArray(smallSA, smallISA, smallLCP);
+    }
+
     public ExtendedSuffixArray insertSingleChar(ExtendedSuffixArray suff, int[] oldText, int[] newText, int position) {
         int[] oldSA = suff.getSuffix();
         int[] oldISA = suff.getInverseSuffix();
         int[] newSA = new int[oldSA.length + 1];
         int[] newISA = new int[oldISA.length + 1];
-        int[] l = getL(oldSA, oldText, newSA.length);
+        int[] l = calculateL(oldSA, oldText, newSA.length);
 
         // Stage 1, copy elements which are not changed
         for (int i = 0; i < oldSA.length; i++) {
@@ -72,60 +140,53 @@ public class DynamicSACA {
     }
 
     // Inserts a factor into the suffix array at position [start, end] (inclusive)
-    public ExtendedSuffixArray insertFactor(ExtendedSuffixArray suff, int[] oldText, int[] newText, int start,
-            int end) {
-        int insertLength = (end - start) + 1;
-        int[] oldSA = suff.getSuffix();
-        int[] oldISA = suff.getInverseSuffix();
-
-        int[] newSA = new int[oldSA.length + insertLength];
-        int[] newISA = new int[oldISA.length + insertLength];
-
-        int[] l = getL(oldSA, oldText, newSA.length);
-
-        // Stage 1, copy elements which are not changed
-        for (int i = 0; i < oldSA.length; i++) {
-            newSA[i] = suff.getSuffix()[i];
-            newISA[newSA[i]] = i;
-        }
+    public void insertFactor(int[] newText, int position) {
+        int oldSize = actualSize;
+        int newSize = actualSize + newText.length;
+        updateSizes(newSize);
+        System.out.println("Arrays");
+        System.out.println(actualSize);
+        System.out.println(arraySize);
+        int end = newText.length - 1;
 
         // Stage 2, replace in L
-        int posFirstModified = oldISA[start];
-        int previousCS = getLFDynamic(posFirstModified, l, l.length - insertLength);
+        int posFirstModified = isa[position];
+        int previousCS = getLFDynamic(posFirstModified, l, oldSize);
 
-        int storedLetter = l[oldISA[start]];
-        l[oldISA[start]] = newText[end];
+        int storedLetter = l[isa[position]];
+        l[isa[position]] = newText[end];
 
-        int pointOfInsertion = getLFDynamic(oldISA[start], l, l.length - insertLength);
+        int pointOfInsertion = getLFDynamic(isa[position], l, oldSize);
         // Number of smaller characters is one off if the char we have stored is less
         // than the one we inserted
         pointOfInsertion += storedLetter < newText[end] ? 1 : 0;
 
         // Stage 3, Insert new rows in L
-        for (int i = end - 1; i >= start; i--) {
+        for (int i = end - 1; i >= 0; i--) {
 
             insert(l, pointOfInsertion, newText[i]);
 
-            int l_length = l.length - insertLength + ((end - 1) - (i - 1));
+            int l_length = actualSize - (i - 1);
+            System.out.println("l length: " + l_length);
 
             // Increment previousCS and/or posFirstModified if we inserted before them
             previousCS += pointOfInsertion <= previousCS ? 1 : 0;
             posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;
 
             // Increment all values in SA greater than or equal to position
-            for (int j = 0; j < newSA.length; j++) {
-                newSA[j] += newSA[j] >= start ? 1 : 0;
+            for (int j = 0; j < newSize; j++) {
+                sa[j] += sa[j] >= position ? 1 : 0;
             }
 
-            insert(newSA, pointOfInsertion, start);
+            insert(sa, pointOfInsertion, position);
 
             // Increment all values in ISA greater than or equal to LF(ISA[position])
-            for (int j = 0; j < newISA.length; j++) {
-                newISA[j] += newISA[j] >= pointOfInsertion ? 1 : 0;
+            for (int j = 0; j < isa.length; j++) {
+                isa[j] += isa[j] >= pointOfInsertion ? 1 : 0;
             }
 
             // Insert new row in ISA
-            insert(newISA, start, pointOfInsertion);
+            insert(isa, position, pointOfInsertion);
 
             int oldPOS = pointOfInsertion;
             pointOfInsertion = getLFDynamic(pointOfInsertion, l, l_length);
@@ -146,16 +207,16 @@ public class DynamicSACA {
         posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;
 
         // Update SA
-        for (int i = 0; i < newSA.length; i++) {
-            newSA[i] += newSA[i] >= start ? 1 : 0;
+        for (int i = 0; i < sa.length; i++) {
+            sa[i] += sa[i] >= position ? 1 : 0;
         }
 
         // Updates ISA
-        for (int i = 0; i < newISA.length; i++) {
-            newISA[i] += newISA[i] >= pointOfInsertion ? 1 : 0;
+        for (int i = 0; i < isa.length; i++) {
+            isa[i] += isa[i] >= pointOfInsertion ? 1 : 0;
         }
-        insert(newSA, pointOfInsertion, start);
-        insert(newISA, start, pointOfInsertion);
+        insert(sa, pointOfInsertion, position);
+        insert(isa, position, pointOfInsertion);
 
         // Stage 4
         int pos = previousCS;
@@ -163,16 +224,15 @@ public class DynamicSACA {
 
         while (pos != expectedPos) {
             int newPos = getLFDynamic(pos, l, l.length);
-            moveRow(pos, expectedPos, newSA, newISA, l);
+            moveRow(pos, expectedPos, sa, isa, l);
             pos = newPos;
             expectedPos = getLFDynamic(expectedPos, l, l.length);
         }
 
-        return new ExtendedSuffixArray(newSA, newISA, suff.getLcp());
     }
 
     // Returns L in an array with custom extra size
-    public int[] getL(int[] suff, int[] text, int size) {
+    public static int[] calculateL(int[] suff, int[] text, int size) {
         int[] l = new int[size];
 
         for (int i = 0; i < suff.length; i++) {
@@ -185,7 +245,11 @@ public class DynamicSACA {
         return l;
     }
 
-    public int getLFDynamic(int index, int[] l, int size) {
+    public void setL(int[] sa, int[] text) {
+        l = calculateL(sa, text, text.length);
+    }
+
+    public static int getLFDynamic(int index, int[] l, int size) {
 
         Timer timer = new Timer();
         timer.start();
