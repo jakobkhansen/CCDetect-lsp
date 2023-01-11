@@ -106,7 +106,6 @@ public class Printer {
 
         out += fingerprint.getUri() + "\n";
         out += fingerprint.getFingerprint() + "\n";
-        out += print(fingerprint.getMethodRange()) + "\n";
 
         return out;
     }

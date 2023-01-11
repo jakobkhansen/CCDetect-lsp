@@ -41,7 +41,7 @@ public class TreesitterFingerprintGenerator {
         // Method delimiter
         out.add(1);
 
-        return new Fingerprint(Ints.toArray(out), ranges, uri, node.toRange());
+        return new Fingerprint(Ints.toArray(out), ranges, uri);
     }
 
     public int tokenToValue(String token) {
