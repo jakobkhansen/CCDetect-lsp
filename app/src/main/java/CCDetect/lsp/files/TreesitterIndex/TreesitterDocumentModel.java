@@ -2,6 +2,7 @@ package CCDetect.lsp.files.TreesitterIndex;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.eclipse.lsp4j.Position;
@@ -11,12 +12,12 @@ import CCDetect.lsp.detection.treesitterbased.fingerprint.Fingerprint;
 import CCDetect.lsp.files.DocumentModel;
 import ai.serenade.treesitter.TSInputEdit;
 import ai.serenade.treesitter.TSPoint;
-import ai.serenade.treesitter.TSRange;
 
 public class TreesitterDocumentModel extends DocumentModel {
 
     private TreesitterDocumentAST ast;
     private ArrayList<Fingerprint> fingerprints = new ArrayList<>();
+    private ArrayList<Fingerprint> oldFingerprint = new ArrayList<>();
     private boolean hasChanged = true;
 
     int tokenCount = 0;
@@ -51,12 +52,17 @@ public class TreesitterDocumentModel extends DocumentModel {
         return fingerprints;
     }
 
+    public ArrayList<Fingerprint> getOldFingerprint() {
+        return oldFingerprint;
+    }
+
     public void addFingerprint(Fingerprint fingerprint) {
         this.fingerprints.add(fingerprint);
         tokenCount += fingerprint.getFingerprint().length;
     }
 
     public void resetFingerprint() {
+        this.oldFingerprint = this.fingerprints;
         this.fingerprints = new ArrayList<>();
         tokenCount = 0;
     }
