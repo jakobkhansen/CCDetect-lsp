@@ -8,6 +8,8 @@ import java.util.logging.Logger;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
+import CCDetect.lsp.datastructures.editdistance.EditOperation;
+import CCDetect.lsp.datastructures.editdistance.EditOperationsCalculator;
 import CCDetect.lsp.detection.treesitterbased.fingerprint.Fingerprint;
 import CCDetect.lsp.files.DocumentModel;
 import ai.serenade.treesitter.TSInputEdit;
@@ -17,7 +19,7 @@ public class TreesitterDocumentModel extends DocumentModel {
 
     private TreesitterDocumentAST ast;
     private ArrayList<Fingerprint> fingerprints = new ArrayList<>();
-    private ArrayList<Fingerprint> oldFingerprint = new ArrayList<>();
+    private ArrayList<Fingerprint> oldFingerprints = new ArrayList<>();
     private boolean hasChanged = true;
 
     int tokenCount = 0;
@@ -52,7 +54,7 @@ public class TreesitterDocumentModel extends DocumentModel {
         return fingerprints;
     }
 
-    public ArrayList<Fingerprint> getOldFingerprint() {
+    public ArrayList<Fingerprint> getOldFingerprints() {
         return oldFingerprint;
     }
 
@@ -146,5 +148,33 @@ public class TreesitterDocumentModel extends DocumentModel {
                 newEndPoint);
         ast.incrementalUpdate(text, edit);
 
+    }
+
+    public List<EditOperation> getEditOperationsFromOldFingerprint() {
+        List<Integer> fullOldFingerprintList = new ArrayList<>();
+        List<Integer> fullNewFingerprintList = new ArrayList<>();
+        for (Fingerprint f : oldFingerprints) {
+            for (int i : f.getFingerprint()) {
+                fullOldFingerprintList.add(i);
+            }
+        }
+
+        for (Fingerprint f : fingerprints) {
+            for (int i : f.getFingerprint()) {
+                fullNewFingerprintList.add(i);
+            }
+        }
+        int[] fullOldFingerprint = fullOldFingerprintList.stream().mapToInt(i -> i).toArray();
+        int[] fullNewFingerprint = fullNewFingerprintList.stream().mapToInt(i -> i).toArray();
+
+        List<EditOperation> operations = EditOperationsCalculator.findEditOperations(fullOldFingerprint,
+                fullNewFingerprint);
+
+        // Update positions of all operations based on the fingerprints offset
+        for (EditOperation operation : operations) {
+            operation.setPosition(operation.getPosition() + fingerprintStart);
+        }
+
+        return operations;
     }
 }
