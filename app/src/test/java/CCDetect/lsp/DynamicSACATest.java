@@ -95,8 +95,8 @@ public class DynamicSACATest {
         ExtendedSuffixArray eSuffUpdated = dynSACA.getExtendedSuffixArray(resultArray);
         incrementalTimer.stop();
 
-        linearTimer.log("Linear time");
-        incrementalTimer.log("Incremental time");
+        // linearTimer.log("Linear time");
+        // incrementalTimer.log("Incremental time");
 
         // int[] l = DynamicSACA.calculateL(expected.getSuffix(), resultArray,
         // expected.getSuffix().length);
@@ -140,7 +140,6 @@ public class DynamicSACATest {
         testDynamicSuffixInsertFactor("bcd", "cd", 2);
         testInsertOnAllIndices("bcd", "hx");
         testInsertOnAllIndices("bcd", "aj");
-
     }
 
     @Test
@@ -149,6 +148,38 @@ public class DynamicSACATest {
                 "habc");
         testInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis",
                 "xxxxxasldkjsadoiqw");
+    }
+
+    @Test
+    public void deleteSmallFactor() {
+        testDynamicSuffixDeleteFactor("abc", 1, 2);
+    }
+
+    public void testDynamicSuffixDeleteFactor(String input, int position, int length) {
+        SAIS sais = new SAIS();
+        int[] originalArray = stringToIntArrayWithTerminator(input);
+        ExtendedSuffixArray eSuffOriginal = sais.buildExtendedSuffixArray(originalArray);
+        int[] resultArray = stringToIntArrayWithTerminator(getStringWithDelete(input, position, length));
+        LOGGER.info("Result array " + Printer.print(resultArray));
+        System.out.println(Printer.print(originalArray));
+        System.out.println(Printer.print(resultArray));
+
+        Timer linearTimer = new Timer();
+        linearTimer.start();
+        ExtendedSuffixArray expected = sais.buildExtendedSuffixArray(resultArray);
+        linearTimer.stop();
+
+        int[] l = DynamicSACA.calculateL(expected.getSuffix(), resultArray,
+                expected.getSuffix().length);
+        LOGGER.info("Expected L " + Printer.print(l));
+
+        DynamicSACA dynSACA = new DynamicSACA(originalArray, eSuffOriginal, eSuffOriginal.size() + 100);
+        Timer incrementalTimer = new Timer();
+        incrementalTimer.start();
+        dynSACA.deleteFactor(originalArray, position, length);
+        ExtendedSuffixArray eSuffUpdated = dynSACA.getExtendedSuffixArray(resultArray);
+        incrementalTimer.stop();
+
     }
 
     public int[] stringToIntArrayWithTerminator(String input) {
@@ -165,5 +196,9 @@ public class DynamicSACATest {
 
     public String getStringWithEdit(String input, String edit, int position) {
         return input.substring(0, position) + edit + input.substring(position);
+    }
+
+    public String getStringWithDelete(String input, int position, int length) {
+        return input.substring(0, position) + input.substring(position + length);
     }
 }
