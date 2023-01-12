@@ -52,7 +52,6 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
 
     @Override
     public void updateDocument(String uri, TreesitterDocumentModel updatedDocument) {
-
         documents.put(uri, updatedDocument);
     }
 

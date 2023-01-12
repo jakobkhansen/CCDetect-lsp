@@ -71,7 +71,7 @@ public class DynamicSACA {
         l = newL;
     }
 
-    public ExtendedSuffixArray getExtendedSuffixArray() {
+    public ExtendedSuffixArray getExtendedSuffixArray(int[] fingerprint) {
         int[] smallSA = new int[actualSize];
         int[] smallISA = new int[actualSize];
         int[] smallLCP = new int[actualSize];
@@ -81,7 +81,11 @@ public class DynamicSACA {
             smallISA[i] = isa[i];
             smallLCP[i] = lcp[i];
         }
-        return new ExtendedSuffixArray(smallSA, smallISA, smallLCP);
+
+        // Placeholder LCP array since we aren't dynamically updating yet
+        SAIS sais = new SAIS();
+        int[] lcp = sais.buildLCPArray(fingerprint, smallSA, smallISA);
+        return new ExtendedSuffixArray(smallSA, smallISA, lcp);
     }
 
     public ExtendedSuffixArray insertSingleChar(ExtendedSuffixArray suff, int[] oldText, int[] newText, int position) {

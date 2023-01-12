@@ -92,7 +92,7 @@ public class DynamicSACATest {
         incrementalTimer.start();
         DynamicSACA dynSACA = new DynamicSACA(originalArray, eSuffBanana, eSuffBanana.size() + 100);
         dynSACA.insertFactor(editArray, position);
-        ExtendedSuffixArray eSuffUpdated = dynSACA.getExtendedSuffixArray();
+        ExtendedSuffixArray eSuffUpdated = dynSACA.getExtendedSuffixArray(resultArray);
         incrementalTimer.stop();
 
         linearTimer.log("Linear time");

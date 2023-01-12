@@ -3,9 +3,13 @@ package CCDetect.lsp.utils;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class Converter<T, U> {
+
+    private static final Logger LOGGER = Logger.getLogger(
+            Logger.GLOBAL_LOGGER_NAME);
 
     private final Function<T, U> fromDto;
     private final Function<U, T> fromEntity;

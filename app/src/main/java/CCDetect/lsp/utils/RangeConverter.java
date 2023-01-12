@@ -1,5 +1,7 @@
 package CCDetect.lsp.utils;
 
+import java.util.logging.Logger;
+
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
@@ -11,6 +13,8 @@ import ai.serenade.treesitter.TSRange;
  */
 public class RangeConverter
         extends Converter<Range, TSRange> {
+    private static final Logger LOGGER = Logger.getLogger(
+            Logger.GLOBAL_LOGGER_NAME);
 
     public RangeConverter() {
         super(

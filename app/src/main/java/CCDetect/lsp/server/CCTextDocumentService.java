@@ -80,6 +80,10 @@ public class CCTextDocumentService implements TextDocumentService {
     public void didOpen(DidOpenTextDocumentParams params) {
         LOGGER.info("didOpen");
         String uri = params.getTextDocument().getUri();
+        if (index.containsDocument(uri)) {
+            LOGGER.info("Opened already indexed document");
+            return;
+        }
         String uriFormatted = uri.substring(7);
 
         Path path = Paths.get(uriFormatted);

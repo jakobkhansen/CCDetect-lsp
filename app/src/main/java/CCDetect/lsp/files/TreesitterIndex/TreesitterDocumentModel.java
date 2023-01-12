@@ -17,6 +17,9 @@ import ai.serenade.treesitter.TSPoint;
 
 public class TreesitterDocumentModel extends DocumentModel {
 
+    private static final Logger LOGGER = Logger.getLogger(
+            Logger.GLOBAL_LOGGER_NAME);
+
     private TreesitterDocumentAST ast;
     private ArrayList<Fingerprint> fingerprints = new ArrayList<>();
     private ArrayList<Fingerprint> oldFingerprints = new ArrayList<>();
@@ -54,8 +57,16 @@ public class TreesitterDocumentModel extends DocumentModel {
         return fingerprints;
     }
 
+    public void setFingerprints(ArrayList<Fingerprint> fingerprints) {
+        this.fingerprints = fingerprints;
+    }
+
     public ArrayList<Fingerprint> getOldFingerprints() {
-        return oldFingerprint;
+        return oldFingerprints;
+    }
+
+    public void setOldFingerprints(ArrayList<Fingerprint> oldFingerprints) {
+        this.oldFingerprints = oldFingerprints;
     }
 
     public void addFingerprint(Fingerprint fingerprint) {
@@ -64,7 +75,7 @@ public class TreesitterDocumentModel extends DocumentModel {
     }
 
     public void resetFingerprint() {
-        this.oldFingerprint = this.fingerprints;
+        this.oldFingerprints = this.fingerprints;
         this.fingerprints = new ArrayList<>();
         tokenCount = 0;
     }
