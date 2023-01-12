@@ -98,17 +98,18 @@ public class DynamicSACATest {
         linearTimer.log("Linear time");
         incrementalTimer.log("Incremental time");
 
-        int[] l = DynamicSACA.calculateL(expected.getSuffix(), resultArray, expected.getSuffix().length);
-        System.out.println("Expected L " + Printer.print(l));
-
-        System.out.println("Expected SA: " + Printer.print(expected.getSuffix()));
-        System.out.println("Actual SA: " + Printer.print(eSuffUpdated.getSuffix()));
+        // int[] l = DynamicSACA.calculateL(expected.getSuffix(), resultArray,
+        // expected.getSuffix().length);
+        // System.out.println("Expected L " + Printer.print(l));
+        //
+        // System.out.println("Expected SA: " + Printer.print(expected.getSuffix()));
+        // System.out.println("Actual SA: " + Printer.print(eSuffUpdated.getSuffix()));
         assertArrayEquals(expected.getSuffix(), eSuffUpdated.getSuffix());
 
-        System.out.println("Expected ISA: " +
-                Printer.print(expected.getInverseSuffix()));
-        System.out.println("Actual ISA: " +
-                Printer.print(eSuffUpdated.getInverseSuffix()));
+        // System.out.println("Expected ISA: " +
+        // Printer.print(expected.getInverseSuffix()));
+        // System.out.println("Actual ISA: " +
+        // Printer.print(eSuffUpdated.getInverseSuffix()));
 
         assertArrayEquals(expected.getInverseSuffix(),
                 eSuffUpdated.getInverseSuffix());
