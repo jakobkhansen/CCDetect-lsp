@@ -89,7 +89,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                 saca = new DynamicSACA(fingerprint, eSuff, fingerprint.length + 200);
             }
         } else {
-            dynamicUpdate(edits);
+            dynamicUpdate(fingerprint, edits);
             eSuff = saca.getExtendedSuffixArray(fingerprint);
         }
         timer.stop();
@@ -138,24 +138,20 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         List<EditOperation> edits = new ArrayList<>();
         for (TreesitterDocumentModel document : index) {
             if (document.hasChanged()) {
-                for (Fingerprint f : document.getFingerprint()) {
-                }
-                for (Fingerprint f : document.getOldFingerprints()) {
-                }
                 for (EditOperation edit : document.getEditOperationsFromOldFingerprint()) {
                     edits.add(edit);
                 }
-
             }
         }
         return edits;
     }
 
-    public void dynamicUpdate(List<EditOperation> edits) {
+    public void dynamicUpdate(int[] fingerprint, List<EditOperation> edits) {
         for (EditOperation edit : edits) {
+            LOGGER.info(Printer.print(edit));
             switch (edit.getOperationType()) {
                 case DELETE:
-                    LOGGER.info("Unimplemented operation");
+                    saca.deleteFactor(fingerprint, edit.getPosition(), edit.getChars().size());
                     break;
                 case INSERT:
                     saca.insertFactor(edit.getChars().stream().mapToInt(i -> i).toArray(), edit.getPosition());

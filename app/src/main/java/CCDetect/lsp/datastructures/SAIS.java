@@ -244,23 +244,19 @@ public class SAIS {
         for (int i : text) {
             max = Integer.max(i, max);
         }
-        LOGGER.info("Building suff");
         int[] suffOriginal = buildSuffixArray(text, max + 1);
 
         // Suffix array algorithm for some reason returns 1 element more than input,
         // probably assumes it appends another $ or something
         // TODO refactor so we don't need to do this crap
         int[] suff = new int[suffOriginal.length - 1];
-        LOGGER.info("Got suffix");
         for (int z = 1; z < suffOriginal.length; z++) {
             suff[z - 1] = suffOriginal[z];
         }
 
         int[] inverse = buildInverseSuffixArray(suff);
-        LOGGER.info("Got inverse");
 
         int[] lcp = buildLCPArray(text, suff, inverse);
-        LOGGER.info("Got LCP");
 
         return new ExtendedSuffixArray(suff, inverse, lcp);
     }
