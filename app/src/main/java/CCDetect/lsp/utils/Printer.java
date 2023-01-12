@@ -1,5 +1,7 @@
 package CCDetect.lsp.utils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import com.google.common.base.Strings;
@@ -7,6 +9,7 @@ import com.google.common.base.Strings;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
+import CCDetect.lsp.datastructures.editdistance.EditOperation;
 import CCDetect.lsp.detection.treesitterbased.fingerprint.Fingerprint;
 import CCDetect.lsp.detection.treesitterbased.fingerprint.TreesitterFingerprintGenerator;
 import CCDetect.lsp.detection.treesitterbased.sourcemap.TokenSource;
@@ -129,6 +132,19 @@ public class Printer {
         for (int i = 0; i < sourceMap.size(); i++) {
             out.append(i + ": " + Printer.print(sourceMap.getSource(i)));
         }
+
+        return out.toString();
+    }
+
+    public static String print(EditOperation edit) {
+        StringBuilder out = new StringBuilder("EditOperation(\n");
+        out.append("position: " + edit.getPosition() + "\n");
+        out.append("Type: " + edit.getOperationType() + "\n");
+        out.append("Chars: ");
+        for (int i : edit.getChars()) {
+            out.append(i);
+        }
+        out.append("\n");
 
         return out.toString();
     }

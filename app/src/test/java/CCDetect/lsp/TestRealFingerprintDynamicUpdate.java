@@ -45,7 +45,7 @@ public class TestRealFingerprintDynamicUpdate {
         Timer incrementalTimer = new Timer();
         incrementalTimer.start();
         dynSACA.insertFactor(edit, position);
-        ExtendedSuffixArray dynUpdated = dynSACA.getExtendedSuffixArray();
+        ExtendedSuffixArray dynUpdated = dynSACA.getExtendedSuffixArray(newArray);
         incrementalTimer.stop();
 
         linearTimer.log("Linear time");

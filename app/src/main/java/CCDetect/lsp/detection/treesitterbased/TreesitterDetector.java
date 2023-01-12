@@ -14,6 +14,7 @@ import CCDetect.lsp.CodeClone;
 import CCDetect.lsp.datastructures.DynamicSACA;
 import CCDetect.lsp.datastructures.ExtendedSuffixArray;
 import CCDetect.lsp.datastructures.SAIS;
+import CCDetect.lsp.datastructures.editdistance.EditOperation;
 import CCDetect.lsp.detection.CloneDetector;
 import CCDetect.lsp.detection.treesitterbased.fingerprint.Fingerprint;
 import CCDetect.lsp.detection.treesitterbased.fingerprint.TreesitterFingerprintGenerator;
@@ -48,6 +49,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
     ExtendedSuffixArray eSuff;
     int tokenCount = 0;
     Configuration config = Configuration.getInstance();
+    DynamicSACA saca;
 
     @Override
     public List<CodeClone> getClones() {
@@ -64,12 +66,56 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         clones = new ArrayList<>();
 
         buildFingerprints(index);
+        List<EditOperation> edits = getDocumentEdits(index);
+
+        for (TreesitterDocumentModel document : index) {
+            document.setChanged(false);
+        }
+        int[] fingerprint = getFullFingerprint(index);
 
         if (sourceMap == null) {
             sourceMap = new BinarySearchSourceMap(index);
         }
 
         // Build fingerprint
+
+        // Build suffix, inverse, lcp
+        NotificationHandler.startNotification("clones", "Finding clones");
+        Timer timer = new Timer();
+        timer.start();
+        if (eSuff == null || !config.isDynamicDetection()) {
+            eSuff = new SAIS().buildExtendedSuffixArray(fingerprint);
+            if (config.isDynamicDetection()) {
+                saca = new DynamicSACA(fingerprint, eSuff, fingerprint.length + 200);
+            }
+        } else {
+            dynamicUpdate(edits);
+            eSuff = saca.getExtendedSuffixArray(fingerprint);
+        }
+        timer.stop();
+        timer.log("Time to build suffix array, inverse and lcp");
+
+        // Only for logging
+        // LOGGER.info("Fingerprint: " + Printer.print(fingerprint));
+        // LOGGER.info("Suffix: " + Printer.print(eSuff.getSuffix()));
+        // LOGGER.info("Inverse: " + Printer.print(eSuff.getInverseSuffix()));
+        // LOGGER.info("LCP: " + Printer.print(eSuff.getLcp()));
+
+        int[] cloneIndices = extractCloneIndicesFromSA();
+        // LOGGER.info("Clone indices: " + Printer.print(cloneIndices));
+
+        Map<Integer, CodeClone> cloneMap = getClones(cloneIndices);
+
+        for (CodeClone clone : cloneMap.values()) {
+            clones.add(clone);
+        }
+
+        timerIndexChange.stop();
+        timerIndexChange.log("indexDidChange time");
+        NotificationHandler.endNotification("clones", clones.size() + " clones found");
+    }
+
+    public int[] getFullFingerprint(DocumentIndex<TreesitterDocumentModel> index) {
         int[] fingerprint = new int[tokenCount + 1];
         int i = 0;
         for (TreesitterDocumentModel doc : index) {
@@ -85,39 +131,42 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         // 0 terminal
         fingerprint[i] = 0;
 
-        // Build suffix, inverse, lcp
-        NotificationHandler.startNotification("clones", "Finding clones");
-        Timer timer = new Timer();
-        timer.start();
-        if (eSuff == null || !config.isDynamicDetection()) {
-            eSuff = new SAIS().buildExtendedSuffixArray(fingerprint);
-        } else {
-            // DynamicSACA saca = new DynamicSACA();
-            // saca.insertFactor(esuff, oldText, newText, start, end);
+        return fingerprint;
+    }
+
+    public List<EditOperation> getDocumentEdits(DocumentIndex<TreesitterDocumentModel> index) {
+        List<EditOperation> edits = new ArrayList<>();
+        for (TreesitterDocumentModel document : index) {
+            if (document.hasChanged()) {
+                for (Fingerprint f : document.getFingerprint()) {
+                }
+                for (Fingerprint f : document.getOldFingerprints()) {
+                }
+                for (EditOperation edit : document.getEditOperationsFromOldFingerprint()) {
+                    edits.add(edit);
+                }
+
+            }
         }
-        timer.stop();
-        timer.log("Time to build suffix array, inverse and lcp");
+        return edits;
+    }
 
-        // Only for logging
-        // int[] indices = new int[fingerprint.length];
-        // LOGGER.info("Indices: " + Printer.print(indices));
-        // LOGGER.info("Fingerprint: " + Printer.print(fingerprint));
-        // LOGGER.info("Suffix: " + Printer.print(eSuff.getSuffix()));
-        // LOGGER.info("Inverse: " + Printer.print(eSuff.getInverseSuffix()));
-        // LOGGER.info("LCP: " + Printer.print(eSuff.getLcp()));
-        //
-        int[] cloneIndices = extractCloneIndicesFromSA();
-        LOGGER.info("Clone indices: " + Printer.print(cloneIndices));
-
-        Map<Integer, CodeClone> cloneMap = getClones(cloneIndices);
-
-        for (CodeClone clone : cloneMap.values()) {
-            clones.add(clone);
+    public void dynamicUpdate(List<EditOperation> edits) {
+        for (EditOperation edit : edits) {
+            switch (edit.getOperationType()) {
+                case DELETE:
+                    LOGGER.info("Unimplemented operation");
+                    break;
+                case INSERT:
+                    saca.insertFactor(edit.getChars().stream().mapToInt(i -> i).toArray(), edit.getPosition());
+                    break;
+                case SUBSTITUTE:
+                    LOGGER.info("Unimplemented operation");
+                    break;
+                default:
+                    break;
+            }
         }
-
-        timerIndexChange.stop();
-        timerIndexChange.log("indexDidChange time");
-        NotificationHandler.endNotification("clones", clones.size() + " clones found");
     }
 
     private Map<Integer, CodeClone> getClones(int[] cloneIndices) {
@@ -139,6 +188,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                     new CodeClone(first.getUri(), firstRange));
             CodeClone secondClone = cloneMap.getOrDefault(secondIndex,
                     new CodeClone(second.getUri(), secondRange));
+
             if (cloneSize > firstClone.getCloneSize()) {
                 firstClone.setRange(firstRange);
                 firstClone.setCloneSize(cloneSize);
@@ -253,7 +303,6 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
 
             }
             // Document has been validated, it is no longer invalid
-            document.setChanged(false);
 
             // Free document resources if it is not open
             if (!document.isOpen()) {
