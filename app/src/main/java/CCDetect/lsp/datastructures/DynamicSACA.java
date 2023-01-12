@@ -187,6 +187,7 @@ public class DynamicSACA {
 
         // Stage 2, replace in L
         int posFirstModified = isa[position + length];
+        LOGGER.info("posFirstModified: " + posFirstModified);
 
         int previousCS = getLFDynamic(posFirstModified, l, oldSize);
         int pointOfDeletion = getLFDynamic(isa[position + length], l, oldSize);
@@ -244,6 +245,12 @@ public class DynamicSACA {
         }
         LOGGER.info("SA after deletions: " + Printer.print(sa, newSize));
         LOGGER.info("ISA after deletions: " + Printer.print(isa, newSize));
+        LOGGER.info("L after moveRow" + Printer.print(l, newSize));
+
+        // Substitute last character TODO replace delete+insert with substitute
+        pointOfDeletion = posFirstModified;
+        delete(l, pointOfDeletion, newSize);
+        insert(l, pointOfDeletion, deletedLetter);
 
         // Stage 4
         int pos = previousCS;
@@ -259,6 +266,7 @@ public class DynamicSACA {
         }
         LOGGER.info("SA after moveRow: " + Printer.print(sa, newSize));
         LOGGER.info("ISA after moveRow: " + Printer.print(isa, newSize));
+        LOGGER.info("L after moveRow: " + Printer.print(l, newSize));
     }
 
     // Returns L in an array with custom extra size
