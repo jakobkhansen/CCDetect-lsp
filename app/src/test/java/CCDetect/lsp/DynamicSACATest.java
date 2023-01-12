@@ -153,6 +153,7 @@ public class DynamicSACATest {
     @Test
     public void deleteSmallFactor() {
         testDynamicSuffixDeleteFactor("abc", 1, 2);
+        testDynamicSuffixDeleteFactor("abcd", 1, 2);
     }
 
     public void testDynamicSuffixDeleteFactor(String input, int position, int length) {
