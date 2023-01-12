@@ -88,65 +88,6 @@ public class DynamicSACA {
         return new ExtendedSuffixArray(smallSA, smallISA, lcp);
     }
 
-    public ExtendedSuffixArray insertSingleChar(ExtendedSuffixArray suff, int[] oldText, int[] newText, int position) {
-        int[] oldSA = suff.getSuffix();
-        int[] oldISA = suff.getInverseSuffix();
-        int[] newSA = new int[oldSA.length + 1];
-        int[] newISA = new int[oldISA.length + 1];
-        int[] l = calculateL(oldSA, oldText, newSA.length);
-
-        // Stage 1, copy elements which are not changed
-        for (int i = 0; i < oldSA.length; i++) {
-            newSA[i] = suff.getSuffix()[i];
-            newISA[newSA[i]] = i;
-        }
-
-        int originalPos = getLFDynamic(oldISA[position], l, l.length - 1);
-
-        // Stage 2, update L
-        int storedLetter = l[oldISA[position]];
-        l[oldISA[position]] = newText[position];
-
-        // Get the point where the new row will be inserted
-        int pointOfInsertion = getLFDynamic(oldISA[position], l, l.length - 1);
-        // Correct position since storedLetter could have an effect on LF
-        pointOfInsertion += storedLetter <= newText[position] ? 1 : 0;
-
-        // Stage 3, insert new row, increasing SA at all values larger than the location
-        // its inserted
-
-        // Insert new row in L
-        insert(l, pointOfInsertion, storedLetter);
-
-        // Increment all values in SA greater than or equal to position
-        for (int i = position; i < oldISA.length; i++) {
-            newSA[oldISA[i]]++;
-        }
-
-        // Increment all values in ISA greater than or equal to LF(ISA[position])
-        for (int i = pointOfInsertion; i < oldSA.length; i++) {
-            newISA[oldSA[i]]++;
-        }
-
-        // Insert new row in SA
-        insert(newSA, pointOfInsertion, position);
-
-        // Insert new row in ISA
-        insert(newISA, position, pointOfInsertion);
-
-        // Stage 4
-        int pos = originalPos + (originalPos >= pointOfInsertion ? 1 : 0);
-        int expectedPos = getLFDynamic(pointOfInsertion, l, l.length);
-        while (pos != expectedPos) {
-            int newPos = getLFDynamic(pos, l, l.length);
-            moveRow(pos, expectedPos, newSA, newISA, l);
-            pos = newPos;
-            expectedPos = getLFDynamic(expectedPos, l, l.length);
-        }
-
-        return new ExtendedSuffixArray(newSA, newISA, new SAIS().buildLCPArray(newText, newSA, newISA));
-    }
-
     // Inserts a factor into the suffix array at position [start, end] (inclusive)
     public void insertFactor(int[] newText, int position) {
         int oldSize = actualSize;
