@@ -81,10 +81,6 @@ public class DynamicSACA {
             smallISA[i] = isa[i];
             smallLCP[i] = lcp[i];
         }
-        LOGGER.info("actualSize " + actualSize);
-        LOGGER.info("fingerprint size " + fingerprint.length);
-        LOGGER.info("sa " + Printer.print(smallSA));
-        LOGGER.info("isa " + Printer.print(smallISA));
 
         // Placeholder LCP array since we aren't dynamically updating yet
         SAIS sais = new SAIS();
@@ -183,33 +179,35 @@ public class DynamicSACA {
         int oldSize = actualSize;
         int newSize = actualSize - length;
         updateSizes(newSize);
-        LOGGER.info("old L " + Printer.print(l, oldSize));
+        System.out.println("old L " + Printer.print(l, oldSize));
+        System.out.println("old SA " + Printer.print(sa, oldSize));
+        System.out.println("old ISA " + Printer.print(isa, oldSize));
 
         // Stage 2, replace in L
         int posFirstModified = isa[position + length];
-        LOGGER.info("posFirstModified: " + posFirstModified);
-
-        int previousCS = getLFDynamic(posFirstModified, l, oldSize);
-        int pointOfDeletion = getLFDynamic(isa[position + length], l, oldSize);
-        pointOfDeletion -= oldText[position] == l[posFirstModified] ? 1 : 0;
-
+        System.out.println("posFirstModified: " + posFirstModified);
         int deletedLetter = l[posFirstModified];
-        l[posFirstModified] = oldText[position - 1];
-        LOGGER.info(
-                "Replaced " + deletedLetter + " with " + l[posFirstModified] + " at position "
-                        + posFirstModified);
-        LOGGER.info("L after substitute " + Printer.print(l, oldSize));
+        System.out.println("letter substituted= " + deletedLetter);
+
+        int pointOfDeletion = getLFDynamic(posFirstModified, l, oldSize);
+
+        System.out.println("POS initial: " + pointOfDeletion);
 
         // Rank is one off since we have T[i-1] inserted twice atm
-        LOGGER.info("POS initial: " + pointOfDeletion);
 
         // Stage 3, Delete rows in L
-        for (int i = 0; i < length; i++) {
+        for (int i = 0; i < length - 1; i++) {
 
             int l_length = oldSize - i - 1;
+            int tmp_rank = getRank(l, pointOfDeletion, l_length);
+            int currentLetter = l[pointOfDeletion];
+            System.out.println("tmp_rank " + tmp_rank);
             delete(l, pointOfDeletion, l_length);
 
-            LOGGER.info("L after deletion " + Printer.print(l, l_length));
+            // Update posFirstModified if they have moved because of deletion
+            posFirstModified -= pointOfDeletion <= posFirstModified ? 1 : 0;
+
+            System.out.println("L after deletion " + Printer.print(l, l_length));
 
             // Increment all values in SA greater than or equal to position
             for (int j = 0; j < l_length; j++) {
@@ -226,14 +224,10 @@ public class DynamicSACA {
             // Insert new row in ISA
             delete(isa, position, l_length);
 
-            // Decrement previousCS and/or posFirstModified if we inserted before them
-            previousCS -= pointOfDeletion <= previousCS ? 1 : 0;
-            posFirstModified -= pointOfDeletion <= posFirstModified ? 1 : 0;
-
             // int oldPOS = pointOfInsertion;
-            pointOfDeletion = getLFDynamic(pointOfDeletion, l, l_length);
-            // Again rank is one off potentially
-            pointOfDeletion -= oldText[position] == l[posFirstModified] ? 1 : 0;
+            pointOfDeletion = tmp_rank + getCharsBefore(l, currentLetter, l_length);
+            // Rank is one off potentially
+            pointOfDeletion -= deletedLetter < currentLetter ? 1 : 0;
 
             // Rank is one off if the character is the same and inserted after the stored
             // char
@@ -241,32 +235,58 @@ public class DynamicSACA {
             // pointOfInsertion++;
             // }
 
-            LOGGER.info("POS: " + pointOfDeletion);
+            System.out.println("POS: " + pointOfDeletion);
         }
-        LOGGER.info("SA after deletions: " + Printer.print(sa, newSize));
-        LOGGER.info("ISA after deletions: " + Printer.print(isa, newSize));
-        LOGGER.info("L after moveRow" + Printer.print(l, newSize));
+        int currentLetter = l[pointOfDeletion];
+        int tmp_rank = getRank(l, pointOfDeletion, newSize);
+        System.out.println("tmp_rank " + tmp_rank);
+        System.out.println("Deleting " + l[pointOfDeletion] + " at position " + pointOfDeletion);
+        delete(l, pointOfDeletion, newSize);
+        posFirstModified -= pointOfDeletion <= posFirstModified ? 1 : 0;
+        // Increment all values in SA greater than or equal to position
+        for (int j = 0; j < newSize; j++) {
+            sa[j] -= sa[j] >= position ? 1 : 0;
+        }
+
+        delete(sa, pointOfDeletion, newSize);
+
+        // Increment all values in ISA greater than or equal to LF(ISA[position])
+        for (int j = 0; j < newSize; j++) {
+            isa[j] -= isa[j] >= pointOfDeletion ? 1 : 0;
+        }
+
+        // Insert new row in ISA
+        delete(isa, position, newSize);
+
+        int previousCS = tmp_rank + getCharsBefore(l, currentLetter, newSize);
+        previousCS -= deletedLetter < currentLetter ? 1 : 0;
+        System.out.println("previousCS " + previousCS);
 
         // Substitute last character TODO replace delete+insert with substitute
         pointOfDeletion = posFirstModified;
+        System.out.println("Substitution by " + currentLetter + " at position " + pointOfDeletion);
         delete(l, pointOfDeletion, newSize);
-        insert(l, pointOfDeletion, deletedLetter);
+        insert(l, pointOfDeletion, currentLetter);
+        System.out.println("SA after deletions: " + Printer.print(sa, newSize));
+        System.out.println("ISA after deletions: " + Printer.print(isa, newSize));
+        System.out.println("L after deletions" + Printer.print(l, newSize));
+        pointOfDeletion = getLFDynamic(pointOfDeletion, l, newSize);
 
         // Stage 4
         int pos = previousCS;
-        int expectedPos = getLFDynamic(pointOfDeletion, l, newSize);
+        int expectedPos = pointOfDeletion;
 
-        LOGGER.info("pos " + pos);
-        LOGGER.info("expectedPos " + expectedPos);
+        System.out.println("pos " + pos);
+        System.out.println("expectedPos " + expectedPos);
         while (pos != expectedPos) {
             int newPos = getLFDynamic(pos, l, newSize);
             moveRow(pos, expectedPos, sa, isa, l);
             pos = newPos;
             expectedPos = getLFDynamic(expectedPos, l, newSize);
         }
-        LOGGER.info("SA after moveRow: " + Printer.print(sa, newSize));
-        LOGGER.info("ISA after moveRow: " + Printer.print(isa, newSize));
-        LOGGER.info("L after moveRow: " + Printer.print(l, newSize));
+        System.out.println("SA after moveRow: " + Printer.print(sa, newSize));
+        System.out.println("ISA after moveRow: " + Printer.print(isa, newSize));
+        System.out.println("L after moveRow: " + Printer.print(l, newSize));
     }
 
     // Returns L in an array with custom extra size
@@ -291,16 +311,26 @@ public class DynamicSACA {
 
         Timer timer = new Timer();
         timer.start();
+        int charsBefore = getCharsBefore(l, l[index], size);
+        int rank = getRank(l, index, size);
+        timer.stop();
+        return charsBefore + rank;
+    }
+
+    private static int getCharsBefore(int[] l, int ch, int size) {
         int charsBefore = 0;
         for (int i = 0; i < size; i++) {
-            charsBefore += l[i] < l[index] ? 1 : 0;
+            charsBefore += l[i] < ch ? 1 : 0;
         }
+        return charsBefore;
+    }
+
+    public static int getRank(int[] l, int index, int size) {
         int rank = 0;
         for (int i = 0; i < index; i++) {
             rank += l[i] == l[index] ? 1 : 0;
         }
-        timer.stop();
-        return charsBefore + rank;
+        return rank;
     }
 
     private void moveRow(int i, int j, int[] newSA, int[] newISA, int[] l) {
@@ -330,7 +360,6 @@ public class DynamicSACA {
     }
 
     private void delete(int[] arr, int index, int size) {
-        LOGGER.info("Deleting char " + arr[index] + " at position " + index);
         for (int i = index; i < size; i++) {
             arr[i] = arr[i + 1];
         }

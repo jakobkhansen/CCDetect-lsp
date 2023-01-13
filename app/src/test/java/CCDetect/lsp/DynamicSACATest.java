@@ -95,21 +95,7 @@ public class DynamicSACATest {
         ExtendedSuffixArray eSuffUpdated = dynSACA.getExtendedSuffixArray(resultArray);
         incrementalTimer.stop();
 
-        // linearTimer.log("Linear time");
-        // incrementalTimer.log("Incremental time");
-
-        // int[] l = DynamicSACA.calculateL(expected.getSuffix(), resultArray,
-        // expected.getSuffix().length);
-        // System.out.println("Expected L " + Printer.print(l));
-        //
-        // System.out.println("Expected SA: " + Printer.print(expected.getSuffix()));
-        // System.out.println("Actual SA: " + Printer.print(eSuffUpdated.getSuffix()));
         assertArrayEquals(expected.getSuffix(), eSuffUpdated.getSuffix());
-
-        // System.out.println("Expected ISA: " +
-        // Printer.print(expected.getInverseSuffix()));
-        // System.out.println("Actual ISA: " +
-        // Printer.print(eSuffUpdated.getInverseSuffix()));
 
         assertArrayEquals(expected.getInverseSuffix(),
                 eSuffUpdated.getInverseSuffix());
@@ -154,6 +140,12 @@ public class DynamicSACATest {
     public void deleteSmallFactor() {
         testDynamicSuffixDeleteFactor("abc", 1, 2);
         testDynamicSuffixDeleteFactor("abcd", 1, 2);
+        testDynamicSuffixDeleteFactor("abcde", 1, 2);
+        testDynamicSuffixDeleteFactor("abcde", 1, 3);
+        testDynamicSuffixDeleteFactor("abcde", 1, 4);
+        testDynamicSuffixDeleteFactor("ba", 1, 1);
+        testDynamicSuffixDeleteFactor("aslkdjsaldkj", 0, 4);
+
     }
 
     public void testDynamicSuffixDeleteFactor(String input, int position, int length) {
@@ -161,9 +153,8 @@ public class DynamicSACATest {
         int[] originalArray = stringToIntArrayWithTerminator(input);
         ExtendedSuffixArray eSuffOriginal = sais.buildExtendedSuffixArray(originalArray);
         int[] resultArray = stringToIntArrayWithTerminator(getStringWithDelete(input, position, length));
-        LOGGER.info("Result array " + Printer.print(resultArray));
-        System.out.println(Printer.print(originalArray));
-        System.out.println(Printer.print(resultArray));
+        System.out.println("Original text " + Printer.print(originalArray));
+        System.out.println("New text " + Printer.print(resultArray));
 
         Timer linearTimer = new Timer();
         linearTimer.start();
@@ -172,7 +163,7 @@ public class DynamicSACATest {
 
         int[] l = DynamicSACA.calculateL(expected.getSuffix(), resultArray,
                 expected.getSuffix().length);
-        LOGGER.info("Expected L " + Printer.print(l));
+        System.out.println("Expected L " + Printer.print(l));
 
         DynamicSACA dynSACA = new DynamicSACA(originalArray, eSuffOriginal, eSuffOriginal.size() + 100);
         Timer incrementalTimer = new Timer();
