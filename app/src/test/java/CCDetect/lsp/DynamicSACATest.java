@@ -41,7 +41,6 @@ public class DynamicSACATest {
             }
         }
         assertTrue(found);
-        System.out.println(current);
         for (int i = inputArr.length - 1; i >= 0; i--) {
             assertEquals(inputArr[i], l[current]);
             current = DynamicSACA.getLFDynamic(current, l, l.length);
@@ -177,15 +176,6 @@ public class DynamicSACATest {
         ExtendedSuffixArray eSuffUpdated = dynSACA.getExtendedSuffixArray(resultArray);
         incrementalTimer.stop();
 
-        int[] l = DynamicSACA.calculateL(expected.getSuffix(), resultArray,
-                expected.getSuffix().length);
-
-        System.out.println("Expected L " + Printer.print(l));
-        // System.out.println("Expected SA " + Printer.print(expected.getSuffix()));
-        // System.out.println("Expected ISA " +
-        // Printer.print(expected.getInverseSuffix()));
-        System.out.println();
-
         assertArrayEquals(expected.getSuffix(), eSuffUpdated.getSuffix());
 
         assertArrayEquals(expected.getInverseSuffix(),
@@ -195,7 +185,6 @@ public class DynamicSACATest {
     public void testDeleteAllFactors(String input) {
         for (int i = 0; i <= input.length(); i++) {
             for (int j = 1; j <= input.length() - i; j++) {
-                System.out.println("position: " + i + ", size: " + j);
                 testDynamicSuffixDeleteFactor(input, i, j);
             }
         }
