@@ -172,14 +172,12 @@ public class DynamicSACA {
         int oldSize = actualSize;
         int newSize = actualSize - length;
         updateSizes(newSize);
-        System.out.println("Old L: " + Printer.print(l, oldSize));
 
         // Stage 2, replace in L (but not actually)
         int posFirstModified = isa[position + length];
         int deletedLetter = l[posFirstModified];
 
         int pointOfDeletion = getLFDynamic(posFirstModified, l, oldSize);
-        System.out.println("POS initial: " + pointOfDeletion);
 
         // Stage 3, Delete rows in L
         for (int i = 0; i < length - 1; i++) {
@@ -217,8 +215,6 @@ public class DynamicSACA {
             tmp_rank--;
         }
 
-        System.out.println("tmp_rank " + tmp_rank);
-
         delete(l, pointOfDeletion, newSize);
         posFirstModified -= pointOfDeletion <= posFirstModified ? 1 : 0;
 
@@ -230,27 +226,19 @@ public class DynamicSACA {
 
         delete(sa, pointOfDeletion, newSize);
         delete(isa, position, newSize);
-        System.out.println("L after deletes: " + Printer.print(l, newSize));
 
         int previousCS = tmp_rank + getCharsBefore(l, currentLetter, newSize);
-        System.out.println("previousCS before decrement " + previousCS);
         previousCS -= deletedLetter < currentLetter ? 1 : 0;
-        System.out.println("previousCS " + previousCS);
 
         // Substitute last character
         pointOfDeletion = posFirstModified;
         l[pointOfDeletion] = currentLetter;
-        System.out.println("L after substitute: " + Printer.print(l, newSize));
-        System.out.println("POS after substitute " + pointOfDeletion);
 
         pointOfDeletion = getLFDynamic(pointOfDeletion, l, newSize);
-        System.out.println("POS: " + pointOfDeletion);
 
         // Stage 4
         int pos = previousCS;
         int expectedPos = pointOfDeletion;
-        System.out.println("pos " + pos);
-        System.out.println("expectedPos " + expectedPos);
 
         while (pos != expectedPos) {
             int newPos = getLFDynamic(pos, l, newSize);
@@ -258,9 +246,6 @@ public class DynamicSACA {
             pos = newPos;
             expectedPos = getLFDynamic(expectedPos, l, newSize);
         }
-        // System.out.println("Final SA: " + Printer.print(sa, newSize));
-        // System.out.println("Final ISA: " + Printer.print(isa, newSize));
-        System.out.println("Final L: " + Printer.print(l, newSize));
     }
 
     // Returns L in an array with custom extra size
