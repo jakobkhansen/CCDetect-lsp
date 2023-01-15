@@ -172,7 +172,7 @@ public class DynamicSACATest {
         DynamicSACA dynSACA = new DynamicSACA(originalArray, eSuffOriginal, eSuffOriginal.size() + 100);
         Timer incrementalTimer = new Timer();
         incrementalTimer.start();
-        dynSACA.deleteFactor(originalArray, position, length);
+        dynSACA.deleteFactor(position, length);
         ExtendedSuffixArray eSuffUpdated = dynSACA.getExtendedSuffixArray(resultArray);
         incrementalTimer.stop();
 

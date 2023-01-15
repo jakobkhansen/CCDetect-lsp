@@ -168,7 +168,7 @@ public class DynamicSACA {
         }
     }
 
-    public void deleteFactor(int[] oldText, int position, int length) {
+    public void deleteFactor(int position, int length) {
         int oldSize = actualSize;
         int newSize = actualSize - length;
         updateSizes(newSize);
