@@ -151,13 +151,14 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             LOGGER.info(Printer.print(edit));
             switch (edit.getOperationType()) {
                 case DELETE:
-                    saca.deleteFactor(fingerprint, edit.getPosition(), edit.getChars().size());
+                    saca.deleteFactor(edit.getPosition(), edit.getChars().size());
                     break;
                 case INSERT:
                     saca.insertFactor(edit.getChars().stream().mapToInt(i -> i).toArray(), edit.getPosition());
                     break;
                 case SUBSTITUTE:
-                    LOGGER.info("Unimplemented operation");
+                    saca.deleteFactor(edit.getPosition(), edit.getChars().size());
+                    saca.insertFactor(edit.getChars().stream().mapToInt(i -> i).toArray(), edit.getPosition());
                     break;
                 default:
                     break;
