@@ -145,7 +145,18 @@ public class DynamicSACATest {
         testDynamicSuffixDeleteFactor("abcde", 1, 4);
         testDynamicSuffixDeleteFactor("ba", 1, 1);
         testDynamicSuffixDeleteFactor("aslkdjsaldkj", 0, 4);
+        testDynamicSuffixDeleteFactor("abb", 2, 1);
 
+    }
+
+    @Test
+    public void deleteAllFactorsInString() {
+        testDeleteAllFactors("abc");
+        testDeleteAllFactors("abb");
+        testDeleteAllFactors("pneumonoultramicroscopicsilicovolcanoconiosis");
+        testDeleteAllFactors("floccinaucinihilipilification");
+        testDeleteAllFactors("incomprehensibility");
+        testDeleteAllFactors("xenotransplantation");
     }
 
     public void testDynamicSuffixDeleteFactor(String input, int position, int length) {
@@ -153,17 +164,11 @@ public class DynamicSACATest {
         int[] originalArray = stringToIntArrayWithTerminator(input);
         ExtendedSuffixArray eSuffOriginal = sais.buildExtendedSuffixArray(originalArray);
         int[] resultArray = stringToIntArrayWithTerminator(getStringWithDelete(input, position, length));
-        System.out.println("Original text " + Printer.print(originalArray));
-        System.out.println("New text " + Printer.print(resultArray));
 
         Timer linearTimer = new Timer();
         linearTimer.start();
         ExtendedSuffixArray expected = sais.buildExtendedSuffixArray(resultArray);
         linearTimer.stop();
-
-        int[] l = DynamicSACA.calculateL(expected.getSuffix(), resultArray,
-                expected.getSuffix().length);
-        System.out.println("Expected L " + Printer.print(l));
 
         DynamicSACA dynSACA = new DynamicSACA(originalArray, eSuffOriginal, eSuffOriginal.size() + 100);
         Timer incrementalTimer = new Timer();
@@ -172,6 +177,28 @@ public class DynamicSACATest {
         ExtendedSuffixArray eSuffUpdated = dynSACA.getExtendedSuffixArray(resultArray);
         incrementalTimer.stop();
 
+        int[] l = DynamicSACA.calculateL(expected.getSuffix(), resultArray,
+                expected.getSuffix().length);
+
+        System.out.println("Expected L " + Printer.print(l));
+        // System.out.println("Expected SA " + Printer.print(expected.getSuffix()));
+        // System.out.println("Expected ISA " +
+        // Printer.print(expected.getInverseSuffix()));
+        System.out.println();
+
+        assertArrayEquals(expected.getSuffix(), eSuffUpdated.getSuffix());
+
+        assertArrayEquals(expected.getInverseSuffix(),
+                eSuffUpdated.getInverseSuffix());
+    }
+
+    public void testDeleteAllFactors(String input) {
+        for (int i = 0; i <= input.length(); i++) {
+            for (int j = 1; j <= input.length() - i; j++) {
+                System.out.println("position: " + i + ", size: " + j);
+                testDynamicSuffixDeleteFactor(input, i, j);
+            }
+        }
     }
 
     public int[] stringToIntArrayWithTerminator(String input) {
