@@ -78,7 +78,7 @@ public class DynamicSACATest {
         int[] originalArray = stringToIntArrayWithTerminator(input);
         ExtendedSuffixArray eSuffBanana = sais.buildExtendedSuffixArray(originalArray);
         int[] editArray = stringToIntArray(edit);
-        int[] resultArray = stringToIntArrayWithTerminator(getStringWithEdit(input, edit, position));
+        int[] resultArray = stringToIntArrayWithTerminator(getStringWithInsert(input, edit, position));
 
         // Build expected result suffix array
         Timer linearTimer = new Timer();
@@ -190,6 +190,44 @@ public class DynamicSACATest {
         }
     }
 
+    @Test
+    public void testSubstituteSmallFactor() {
+        // testDynamicSuffixSubstituteFactor("abcd", "ef", 1);
+    }
+
+    public void testDynamicSuffixSubstituteFactor(String input, String substitute, int position) {
+        // Build arrays
+        SAIS sais = new SAIS();
+        int[] originalArray = stringToIntArrayWithTerminator(input);
+        ExtendedSuffixArray eSuffBanana = sais.buildExtendedSuffixArray(originalArray);
+        int[] substituteArray = stringToIntArray(substitute);
+        System.out.println(getStringWithSubstitute(input, substitute, position));
+        int[] resultArray = stringToIntArrayWithTerminator(getStringWithSubstitute(input, substitute, position));
+
+        // Build expected result suffix array
+        Timer linearTimer = new Timer();
+        linearTimer.start();
+        ExtendedSuffixArray expected = sais.buildExtendedSuffixArray(resultArray);
+        linearTimer.stop();
+        int[] expected_l = DynamicSACA.calculateL(expected.getSuffix(), resultArray, resultArray.length);
+
+        // Dynamically update original
+        Timer incrementalTimer = new Timer();
+        incrementalTimer.start();
+        DynamicSACA dynSACA = new DynamicSACA(originalArray, eSuffBanana, eSuffBanana.size() + 100);
+        dynSACA.substituteFactor(substituteArray, position);
+        System.out.println("Expected SA: " + Printer.print(expected.getSuffix(), expected.size()));
+        System.out.println("Expected ISA: " + Printer.print(expected.getInverseSuffix(), expected.size()));
+        System.out.println("Expected L: " + Printer.print(expected_l, expected.size()));
+        ExtendedSuffixArray eSuffUpdated = dynSACA.getExtendedSuffixArray(resultArray);
+        incrementalTimer.stop();
+
+        assertArrayEquals(expected.getSuffix(), eSuffUpdated.getSuffix());
+
+        assertArrayEquals(expected.getInverseSuffix(),
+                eSuffUpdated.getInverseSuffix());
+    }
+
     public int[] stringToIntArrayWithTerminator(String input) {
         return IntStream.concat(input.chars().map(c -> {
             return (int) c - ('a' - 1);
@@ -202,11 +240,15 @@ public class DynamicSACATest {
         }).toArray();
     }
 
-    public String getStringWithEdit(String input, String edit, int position) {
+    public String getStringWithInsert(String input, String edit, int position) {
         return input.substring(0, position) + edit + input.substring(position);
     }
 
     public String getStringWithDelete(String input, int position, int length) {
         return input.substring(0, position) + input.substring(position + length);
+    }
+
+    public String getStringWithSubstitute(String input, String substitute, int position) {
+        return input.substring(0, position) + substitute + input.substring(position + substitute.length());
     }
 }

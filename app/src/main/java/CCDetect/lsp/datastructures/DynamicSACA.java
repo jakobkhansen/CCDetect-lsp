@@ -162,7 +162,7 @@ public class DynamicSACA {
 
         while (pos != expectedPos) {
             int newPos = getLFDynamic(pos, l, newSize);
-            moveRow(pos, expectedPos, sa, isa, l);
+            moveRow(pos, expectedPos);
             pos = newPos;
             expectedPos = getLFDynamic(expectedPos, l, newSize);
         }
@@ -242,10 +242,71 @@ public class DynamicSACA {
 
         while (pos != expectedPos) {
             int newPos = getLFDynamic(pos, l, newSize);
-            moveRow(pos, expectedPos, sa, isa, l);
+            moveRow(pos, expectedPos);
             pos = newPos;
             expectedPos = getLFDynamic(expectedPos, l, newSize);
         }
+    }
+
+    // Substitutes T[position..substitute.length] with substitute
+    public void substituteFactor(int[] substitute, int position) {
+        int end = substitute.length - 1;
+
+        // Stage 2, replace in L
+        int posFirstModified = isa[position + substitute.length];
+        int previousCS = getLFDynamic(posFirstModified, l, actualSize);
+
+        // int storedLetter = l[isa[position]];
+        System.out.println("L: " + Printer.print(l, actualSize));
+
+        int previousPoint = posFirstModified;
+        int pointOfSubstitution = getLFDynamic(posFirstModified, l, actualSize);
+
+        System.out.println("posFirstModified " + posFirstModified);
+        System.out.println("previousPoint " + previousPoint);
+        System.out.println("POS initial: " + pointOfSubstitution);
+
+        // Stage 3, Insert new rows in L
+        for (int i = end; i > 0; i--) {
+
+            System.out.println("POS " + pointOfSubstitution);
+            System.out
+                    .println("Substituted " + l[pointOfSubstitution] + " with " + substitute[i]
+                            + " at "
+                            + pointOfSubstitution);
+            l[pointOfSubstitution] = substitute[i];
+            previousPoint = getLFDynamic(previousPoint, l, actualSize);
+            System.out.println("L: " + Printer.print(l, actualSize));
+            System.out.println("Moving " + pointOfSubstitution + " to " + previousPoint);
+            moveRow(pointOfSubstitution, previousPoint);
+            if (pointOfSubstitution <= previousCS && previousCS <= previousPoint) {
+                previousCS--;
+            }
+            if (pointOfSubstitution >= previousCS && previousCS >= previousPoint) {
+                previousCS++;
+            }
+            System.out.println("L: " + Printer.print(l, actualSize));
+
+            pointOfSubstitution = getLFDynamic(previousPoint, l, actualSize);
+        }
+
+        // Inserting final character that we substituted before
+        // Stage 4
+        int pos = previousCS;
+        int expectedPos = getLFDynamic(pointOfSubstitution, l, actualSize);
+        System.out.println("pos: " + pos);
+        System.out.println("expectedPos: " + expectedPos);
+
+        while (pos != expectedPos) {
+            int newPos = getLFDynamic(pos, l, actualSize);
+            moveRow(pos, expectedPos);
+            pos = newPos;
+            expectedPos = getLFDynamic(expectedPos, l, actualSize);
+        }
+        System.out.println("Final L: " + Printer.print(l, actualSize));
+        System.out.println("Final SA: " + Printer.print(l, actualSize));
+        System.out.println("Final ISA: " + Printer.print(l, actualSize));
+
     }
 
     // Returns L in an array with custom extra size
@@ -293,23 +354,23 @@ public class DynamicSACA {
         return rank;
     }
 
-    private void moveRow(int i, int j, int[] newSA, int[] newISA, int[] l) {
+    private void moveRow(int i, int j) {
         move(l, i, j);
 
         // Update ISA
         if (i < j) {
             for (int index = i + 1; index <= j; index++) {
-                newISA[newSA[index]]--;
+                isa[sa[index]]--;
             }
         } else {
             for (int index = j; index < i; index++) {
-                newISA[newSA[index]]++;
+                isa[sa[index]]++;
             }
         }
-        newISA[newSA[i]] = j;
+        isa[sa[i]] = j;
 
         // Update SA
-        move(newSA, i, j);
+        move(sa, i, j);
     }
 
     private void insert(int[] arr, int index, int element) {
