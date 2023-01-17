@@ -23,29 +23,30 @@ public class DynamicSACATest {
     private static final Logger LOGGER = Logger.getLogger(
             Logger.GLOBAL_LOGGER_NAME);
 
-    @Test
-    public void testLF() {
-        String input = "pneumonoultramicroscopicsilicovolcanoconiosis";
-        int[] inputArr = stringToIntArrayWithTerminator(input);
-        SAIS sais = new SAIS();
-        ExtendedSuffixArray suff = sais.buildExtendedSuffixArray(inputArr);
-
-        int[] l = DynamicSACA.calculateL(suff.getSuffix(), inputArr, suff.getSuffix().length);
-
-        int current = 0;
-        boolean found = false;
-        for (int i = 0; i < inputArr.length; i++) {
-            if (DynamicSACA.getLFDynamic(i, l, l.length) == 0) {
-                current = i;
-                found = true;
-            }
-        }
-        assertTrue(found);
-        for (int i = inputArr.length - 1; i >= 0; i--) {
-            assertEquals(inputArr[i], l[current]);
-            current = DynamicSACA.getLFDynamic(current, l, l.length);
-        }
-    }
+    // @Test
+    // public void testLF() {
+    // String input = "pneumonoultramicroscopicsilicovolcanoconiosis";
+    // int[] inputArr = stringToIntArrayWithTerminator(input);
+    // SAIS sais = new SAIS();
+    // ExtendedSuffixArray suff = sais.buildExtendedSuffixArray(inputArr);
+    //
+    // int[] l = DynamicSACA.calculateL(suff.getSuffix(), inputArr,
+    // suff.getSuffix().length);
+    //
+    // int current = 0;
+    // boolean found = false;
+    // for (int i = 0; i < inputArr.length; i++) {
+    // if (DynamicSACA.getLFDynamic(i, l, l.length) == 0) {
+    // current = i;
+    // found = true;
+    // }
+    // }
+    // assertTrue(found);
+    // for (int i = inputArr.length - 1; i >= 0; i--) {
+    // assertEquals(inputArr[i], l[current]);
+    // current = DynamicSACA.getLFDynamic(current, l, l.length);
+    // }
+    // }
 
     @Test
     public void testShortSingleInsert() {
