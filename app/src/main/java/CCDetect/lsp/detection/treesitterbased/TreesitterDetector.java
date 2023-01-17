@@ -101,6 +101,8 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         // LOGGER.info("Inverse: " + Printer.print(eSuff.getInverseSuffix()));
         // LOGGER.info("LCP: " + Printer.print(eSuff.getLcp()));
 
+        Timer extractClonesTimer = new Timer();
+        extractClonesTimer.start();
         int[] cloneIndices = extractCloneIndicesFromSA();
         // LOGGER.info("Clone indices: " + Printer.print(cloneIndices));
 
@@ -109,6 +111,8 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         for (CodeClone clone : cloneMap.values()) {
             clones.add(clone);
         }
+        extractClonesTimer.stop();
+        extractClonesTimer.log("Time to extract clones");
 
         timerIndexChange.stop();
         timerIndexChange.log("indexDidChange time");

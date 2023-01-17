@@ -1,5 +1,6 @@
 package CCDetect.lsp.datastructures;
 
+import java.io.CharConversionException;
 import java.util.logging.Logger;
 
 import CCDetect.lsp.utils.Printer;
@@ -18,6 +19,7 @@ public class DynamicSACA {
     int[] sa;
     int[] isa;
     int[] lcp;
+    CharacterCount charCounts;
     int arraySize = 0;
     int actualSize = 0;
 
@@ -29,6 +31,7 @@ public class DynamicSACA {
         sa = new int[arraySize];
         isa = new int[arraySize];
         lcp = new int[arraySize];
+        charCounts = new CharacterCount(initialText);
 
         for (int i = 0; i < initialText.length; i++) {
             sa[i] = initialSA[i];
@@ -84,7 +87,11 @@ public class DynamicSACA {
 
         // Placeholder LCP array since we aren't dynamically updating yet
         SAIS sais = new SAIS();
+        Timer lcptimer = new Timer();
+        lcptimer.start();
         int[] lcp = sais.buildLCPArray(fingerprint, smallSA, smallISA);
+        lcptimer.stop();
+        lcptimer.log("Time to build LCP array from scratch");
         return new ExtendedSuffixArray(smallSA, smallISA, lcp);
     }
 
@@ -100,7 +107,7 @@ public class DynamicSACA {
         int previousCS = getLFDynamic(posFirstModified, l, oldSize);
 
         int storedLetter = l[isa[position]];
-        l[isa[position]] = newText[end];
+        substituteInL(newText[end], isa[position]);
 
         int pointOfInsertion = getLFDynamic(isa[position], l, oldSize);
         // Number of smaller characters is one off if the char we have stored is less
@@ -110,7 +117,7 @@ public class DynamicSACA {
         // Stage 3, Insert new rows in L
         for (int i = end - 1; i >= 0; i--) {
 
-            insert(l, pointOfInsertion, newText[i]);
+            insertInL(newText[i], pointOfInsertion);
 
             int l_length = newSize - (i + 1);
 
@@ -143,7 +150,7 @@ public class DynamicSACA {
         }
         // Inserting final character that we substituted before
 
-        insert(l, pointOfInsertion, storedLetter);
+        insertInL(storedLetter, pointOfInsertion);
         previousCS += pointOfInsertion <= previousCS ? 1 : 0;
         posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;
 
@@ -190,7 +197,7 @@ public class DynamicSACA {
             }
             int currentLetter = l[pointOfDeletion];
 
-            delete(l, pointOfDeletion, l_length);
+            deleteInL(pointOfDeletion, l_length);
 
             // Update posFirstModified if it has moved because of deletion
             posFirstModified -= pointOfDeletion <= posFirstModified ? 1 : 0;
@@ -205,7 +212,7 @@ public class DynamicSACA {
             delete(sa, pointOfDeletion, l_length);
             delete(isa, position, l_length);
 
-            pointOfDeletion = tmp_rank + getCharsBefore(l, currentLetter, l_length);
+            pointOfDeletion = tmp_rank + getCharsBefore(currentLetter);
             // Rank is one off potentially since T[i-1] is twice in L at this point
             pointOfDeletion -= deletedLetter < currentLetter ? 1 : 0;
         }
@@ -215,7 +222,7 @@ public class DynamicSACA {
             tmp_rank--;
         }
 
-        delete(l, pointOfDeletion, newSize);
+        deleteInL(pointOfDeletion, newSize);
         posFirstModified -= pointOfDeletion <= posFirstModified ? 1 : 0;
 
         // Decrement all values in SA greater than or equal to position
@@ -227,12 +234,12 @@ public class DynamicSACA {
         delete(sa, pointOfDeletion, newSize);
         delete(isa, position, newSize);
 
-        int previousCS = tmp_rank + getCharsBefore(l, currentLetter, newSize);
+        int previousCS = tmp_rank + getCharsBefore(currentLetter);
         previousCS -= deletedLetter < currentLetter ? 1 : 0;
 
         // Substitute last character
         pointOfDeletion = posFirstModified;
-        l[pointOfDeletion] = currentLetter;
+        substituteInL(currentLetter, pointOfDeletion);
 
         pointOfDeletion = getLFDynamic(pointOfDeletion, l, newSize);
 
@@ -266,29 +273,34 @@ public class DynamicSACA {
         l = calculateL(sa, text, text.length);
     }
 
-    public static int getLFDynamic(int index, int[] l, int size) {
+    public int getLFDynamic(int index, int[] l, int size) {
 
-        Timer timer = new Timer();
-        timer.start();
-        int charsBefore = getCharsBefore(l, l[index], size);
+        int charsBefore = getCharsBefore(l[index]);
+        Timer rankTimer = new Timer();
+        rankTimer.start();
         int rank = getRank(l, index, size);
-        timer.stop();
+        rankTimer.stop();
         return charsBefore + rank;
     }
 
-    private static int getCharsBefore(int[] l, int ch, int size) {
-        int charsBefore = 0;
-        for (int i = 0; i < size; i++) {
-            charsBefore += l[i] < ch ? 1 : 0;
-        }
-        return charsBefore;
+    private int getCharsBefore(int ch) {
+        Timer charsBeforeTimer = new Timer();
+        charsBeforeTimer.start();
+        int result = charCounts.getNumberOfSmallerChars(ch);
+        charsBeforeTimer.stop();
+        charsBeforeTimer.log("Chars before timer");
+        return result;
     }
 
     public static int getRank(int[] l, int index, int size) {
+        Timer rankTimer = new Timer();
+        rankTimer.start();
         int rank = 0;
         for (int i = 0; i < index; i++) {
             rank += l[i] == l[index] ? 1 : 0;
         }
+        rankTimer.stop();
+        rankTimer.log("Rank timer");
 
         return rank;
     }
@@ -351,5 +363,21 @@ public class DynamicSACA {
         for (int i = 0; i < size; i++) {
             arr[i] -= arr[i] >= element ? 1 : 0;
         }
+    }
+
+    private void insertInL(int ch, int position) {
+        charCounts.addChar(ch);
+        insert(l, position, ch);
+    }
+
+    private void deleteInL(int position, int size) {
+        charCounts.deleteChar(l[position]);
+        delete(l, position, size);
+    }
+
+    private void substituteInL(int ch, int position) {
+        charCounts.deleteChar(l[position]);
+        l[position] = ch;
+        charCounts.addChar(l[position]);
     }
 }
