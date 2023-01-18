@@ -220,7 +220,7 @@ public class SAIS {
     }
 
     public int[] buildLCPArray(int[] T, int[] L, int[] R) {
-        int n = L.length;
+        int n = T.length;
         int[] lcp = new int[n];
 
         int l = 0;

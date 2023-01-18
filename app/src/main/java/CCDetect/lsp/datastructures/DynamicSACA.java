@@ -1,9 +1,7 @@
 package CCDetect.lsp.datastructures;
 
-import java.io.CharConversionException;
 import java.util.logging.Logger;
 
-import CCDetect.lsp.utils.Printer;
 import CCDetect.lsp.utils.Timer;
 
 /**
@@ -19,7 +17,7 @@ public class DynamicSACA {
     int[] sa;
     int[] isa;
     int[] lcp;
-    CharacterCount charCounts;
+    SmallerCharacterCounts charCounts;
     int arraySize = 0;
     int actualSize = 0;
 
@@ -31,7 +29,7 @@ public class DynamicSACA {
         sa = new int[arraySize];
         isa = new int[arraySize];
         lcp = new int[arraySize];
-        charCounts = new CharacterCount(initialText);
+        charCounts = new SmallerCharacterCounts(initialText);
 
         for (int i = 0; i < initialText.length; i++) {
             sa[i] = initialSA[i];
@@ -56,6 +54,7 @@ public class DynamicSACA {
     }
 
     public void resizeArrays(int newSize) {
+        LOGGER.info("Resizing dynamic arrays");
         int oldSize = actualSize;
         int[] newSA = new int[newSize];
         int[] newISA = new int[newSize];
@@ -74,7 +73,7 @@ public class DynamicSACA {
         l = newL;
     }
 
-    public ExtendedSuffixArray getExtendedSuffixArray(int[] fingerprint) {
+    public ExtendedSuffixArray getSmallExtendedSuffixArray(int[] fingerprint) {
         int[] smallSA = new int[actualSize];
         int[] smallISA = new int[actualSize];
         int[] smallLCP = new int[actualSize];
@@ -93,6 +92,12 @@ public class DynamicSACA {
         lcptimer.stop();
         lcptimer.log("Time to build LCP array from scratch");
         return new ExtendedSuffixArray(smallSA, smallISA, lcp);
+    }
+
+    public ExtendedSuffixArray getExtendedSuffixArray(int[] fingerprint) {
+        SAIS sais = new SAIS();
+        int[] newLCP = sais.buildLCPArray(fingerprint, sa, isa);
+        return new ExtendedSuffixArray(sa, isa, newLCP, actualSize);
     }
 
     // Inserts a factor into the suffix array at position [start, end] (inclusive)
@@ -276,10 +281,7 @@ public class DynamicSACA {
     public int getLFDynamic(int index, int[] l, int size) {
 
         int charsBefore = getCharsBefore(l[index]);
-        Timer rankTimer = new Timer();
-        rankTimer.start();
         int rank = getRank(l, index, size);
-        rankTimer.stop();
         return charsBefore + rank;
     }
 
@@ -288,7 +290,7 @@ public class DynamicSACA {
         charsBeforeTimer.start();
         int result = charCounts.getNumberOfSmallerChars(ch);
         charsBeforeTimer.stop();
-        charsBeforeTimer.log("Chars before timer");
+        // charsBeforeTimer.log("Chars before timer");
         return result;
     }
 
@@ -300,7 +302,7 @@ public class DynamicSACA {
             rank += l[i] == l[index] ? 1 : 0;
         }
         rankTimer.stop();
-        rankTimer.log("Rank timer");
+        // rankTimer.log("Rank timer");
 
         return rank;
     }

@@ -92,7 +92,7 @@ public class DynamicSACATest {
         incrementalTimer.start();
         DynamicSACA dynSACA = new DynamicSACA(originalArray, eSuffBanana, eSuffBanana.size() + 100);
         dynSACA.insertFactor(editArray, position);
-        ExtendedSuffixArray eSuffUpdated = dynSACA.getExtendedSuffixArray(resultArray);
+        ExtendedSuffixArray eSuffUpdated = dynSACA.getSmallExtendedSuffixArray(resultArray);
         incrementalTimer.stop();
 
         assertArrayEquals(expected.getSuffix(), eSuffUpdated.getSuffix());
@@ -174,7 +174,7 @@ public class DynamicSACATest {
         Timer incrementalTimer = new Timer();
         incrementalTimer.start();
         dynSACA.deleteFactor(position, length);
-        ExtendedSuffixArray eSuffUpdated = dynSACA.getExtendedSuffixArray(resultArray);
+        ExtendedSuffixArray eSuffUpdated = dynSACA.getSmallExtendedSuffixArray(resultArray);
         incrementalTimer.stop();
 
         assertArrayEquals(expected.getSuffix(), eSuffUpdated.getSuffix());
