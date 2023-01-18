@@ -142,7 +142,7 @@ public class Printer {
         out.append("Type: " + edit.getOperationType() + "\n");
         out.append("Chars: ");
         for (int i : edit.getChars()) {
-            out.append(i);
+            out.append(i + " ");
         }
         out.append("\n");
 

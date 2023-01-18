@@ -8,11 +8,20 @@ public class ExtendedSuffixArray {
     private int[] suffix;
     private int[] inverseSuffix;
     private int[] lcp;
+    private int size;
 
     public ExtendedSuffixArray(int[] suffix, int[] inverseSuffix, int[] lcp) {
         this.suffix = suffix;
         this.inverseSuffix = inverseSuffix;
         this.lcp = lcp;
+        this.size = suffix.length;
+    }
+
+    public ExtendedSuffixArray(int[] suffix, int[] inverseSuffix, int[] lcp, int size) {
+        this.suffix = suffix;
+        this.inverseSuffix = inverseSuffix;
+        this.lcp = lcp;
+        this.size = suffix.length;
     }
 
     public int[] getSuffix() {
@@ -44,6 +53,6 @@ public class ExtendedSuffixArray {
     }
 
     public int size() {
-        return suffix.length;
+        return size;
     }
 }

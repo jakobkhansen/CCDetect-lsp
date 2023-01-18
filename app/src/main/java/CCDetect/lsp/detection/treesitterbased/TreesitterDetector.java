@@ -80,19 +80,23 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         // Build fingerprint
 
         // Build suffix, inverse, lcp
+        LOGGER.info("Building suffix array");
         NotificationHandler.startNotification("clones", "Finding clones");
         Timer timer = new Timer();
         timer.start();
         if (eSuff == null || !config.isDynamicDetection()) {
             eSuff = new SAIS().buildExtendedSuffixArray(fingerprint);
+            timer.stop();
             if (config.isDynamicDetection()) {
+                LOGGER.info("Building dynamic structures");
                 saca = new DynamicSACA(fingerprint, eSuff, fingerprint.length + 200);
+                LOGGER.info("Built dynamic structures");
             }
         } else {
             dynamicUpdate(fingerprint, edits);
             eSuff = saca.getExtendedSuffixArray(fingerprint);
+            timer.stop();
         }
-        timer.stop();
         timer.log("Time to build suffix array, inverse and lcp");
 
         // Only for logging
@@ -104,7 +108,8 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         Timer extractClonesTimer = new Timer();
         extractClonesTimer.start();
         int[] cloneIndices = extractCloneIndicesFromSA();
-        // LOGGER.info("Clone indices: " + Printer.print(cloneIndices));
+
+        LOGGER.info("Clone indices: " + Printer.print(cloneIndices));
 
         Map<Integer, CodeClone> cloneMap = getClones(cloneIndices);
 
