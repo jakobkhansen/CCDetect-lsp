@@ -179,8 +179,6 @@ public class TreesitterDocumentModel extends DocumentModel {
         }
         int[] fullOldFingerprint = fullOldFingerprintList.stream().mapToInt(i -> i).toArray();
         int[] fullNewFingerprint = fullNewFingerprintList.stream().mapToInt(i -> i).toArray();
-        LOGGER.info("Old fingerprint: " + Printer.print(fullOldFingerprint));
-        LOGGER.info("New fingerprint: " + Printer.print(fullNewFingerprint));
 
         // HirschbergsAlgorithm algorithm = new HirschbergsAlgorithm(fullOldFingerprint,
         // fullNewFingerprint);

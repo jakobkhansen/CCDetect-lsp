@@ -13,12 +13,13 @@ public class Configuration {
 
     private static Configuration instance;
     // Create some sort of map for getting initialization options
-    private String language;
-    private String fragment_query;
-    private String[] ignore_nodes;
-    private String[] extra_nodes;
-    private boolean dynamic_detection;
-    private int clone_token_threshold;
+    private String language = "java";
+    private String fragment_query = "(method_declaration) @method";
+    private int clone_token_threshold = 100;
+    private String[] ignore_nodes = new String[0];
+    private String[] extra_nodes = new String[0];
+    private boolean dynamic_detection = true;
+    private boolean update_on_save = true;
 
     public static void createInstanceFromJson(String json) {
         instance = JSONUtility.toModel(json, Configuration.class);
@@ -111,12 +112,8 @@ public class Configuration {
         this.dynamic_detection = dynamic_detection;
     }
 
-    public int getClone_token_threshold() {
-        return clone_token_threshold;
-    }
-
-    public void setClone_token_threshold(int clone_token_threshold) {
-        this.clone_token_threshold = clone_token_threshold;
+    public boolean shouldUpdateOnSave() {
+        return update_on_save;
     }
 
 }

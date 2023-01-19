@@ -18,6 +18,8 @@ import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.TextDocumentService;
 
+import com.google.common.util.concurrent.RateLimiter;
+
 import CCDetect.lsp.CodeClone;
 import CCDetect.lsp.codeactions.CodeActionProvider;
 import CCDetect.lsp.detection.CloneDetector;
@@ -39,6 +41,7 @@ public class CCTextDocumentService implements TextDocumentService {
     private final static Logger FILE_LOGGER = Logger.getLogger("CCFileStateLogger");
     private DocumentIndex<TreesitterDocumentModel> index;
     private CloneDetector<TreesitterDocumentModel> detector;
+    private RateLimiter limiter = RateLimiter.create(1);
 
     public void initialize(String rootUri) {
         Timer timer = new Timer();
@@ -117,6 +120,12 @@ public class CCTextDocumentService implements TextDocumentService {
             index.updateDocument(uri, change.getRange(), change.getText());
         }
 
+        if (!Configuration.getInstance().shouldUpdateOnSave()) {
+            limiter.acquire();
+            findClones();
+            updateDiagnostics();
+        }
+
         timer.stop();
         timer.log("didChange total time");
     }
@@ -136,8 +145,11 @@ public class CCTextDocumentService implements TextDocumentService {
         Timer timer = new Timer();
         timer.start();
 
-        findClones();
-        updateDiagnostics();
+        if (Configuration.getInstance().shouldUpdateOnSave()) {
+            limiter.acquire();
+            findClones();
+            updateDiagnostics();
+        }
 
         timer.stop();
         timer.log("didSave total time");
