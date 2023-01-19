@@ -22,4 +22,18 @@ public class TestEditOperationsCalculator {
         assertEquals(EditOperationType.INSERT, operations.get(0).getOperationType());
         assertEquals(5, operations.get(0).getPosition());
     }
+
+    @Test
+    public void testSimpleSubstitute() {
+        int[] s1 = { 1, 2, 3, 4, 5 };
+        int[] s2 = { 1, 2, 2, 1, 5 };
+
+        List<EditOperation> operations = EditOperationsCalculator.findEditOperations(s1, s2);
+
+        assertEquals(1, operations.size());
+        assertEquals(EditOperationType.SUBSTITUTE, operations.get(0).getOperationType());
+        System.out.println(operations.get(0).getPosition());
+        assertEquals(2, operations.get(0).getPosition());
+        assertEquals(2, operations.get(0).getChars().size());
+    }
 }

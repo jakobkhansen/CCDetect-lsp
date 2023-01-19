@@ -65,8 +65,8 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         timerIndexChange.start();
         clones = new ArrayList<>();
 
-        buildFingerprints(index);
         List<EditOperation> edits = getDocumentEdits(index);
+        buildFingerprints(index);
 
         for (TreesitterDocumentModel document : index) {
             document.setChanged(false);

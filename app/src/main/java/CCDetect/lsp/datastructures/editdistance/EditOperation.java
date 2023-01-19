@@ -36,4 +36,11 @@ public class EditOperation {
         this.chars = chars;
     }
 
+    public void incrementPosition() {
+        this.position++;
+    }
+
+    public void decrementPosition() {
+        this.position--;
+    }
 };
