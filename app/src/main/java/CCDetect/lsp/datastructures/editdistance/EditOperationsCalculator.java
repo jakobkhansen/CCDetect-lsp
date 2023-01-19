@@ -51,6 +51,7 @@ public class EditOperationsCalculator {
                     // Continue last operation or create new
                     if (currentOperationType == EditOperationType.SUBSTITUTE && lastOperationIndex == x) {
                         currentOperation.getChars().add(0, s2[y - 1]);
+                        currentOperation.decrementPosition();
                     } else {
                         currentOperation = new EditOperation(EditOperationType.SUBSTITUTE, x - 1, x - 1);
                         currentOperation.getChars().add(0, s2[y - 1]);
