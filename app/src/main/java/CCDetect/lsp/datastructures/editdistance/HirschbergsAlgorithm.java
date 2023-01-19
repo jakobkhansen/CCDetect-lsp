@@ -3,6 +3,7 @@ package CCDetect.lsp.datastructures.editdistance;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Logger;
 
 import CCDetect.lsp.utils.Printer;
 
@@ -11,7 +12,12 @@ import CCDetect.lsp.utils.Printer;
  */
 public class HirschbergsAlgorithm {
 
+    private static final Logger LOGGER = Logger.getLogger(
+            Logger.GLOBAL_LOGGER_NAME);
+
     int[] s1, s2;
+    int startOffset;
+    int endOffset;
 
     class Pair {
         public int x, y;
@@ -30,6 +36,8 @@ public class HirschbergsAlgorithm {
     public HirschbergsAlgorithm(int[] s1, int[] s2) {
         this.s1 = s1;
         this.s2 = s2;
+        startOffset = getEqualCharactersStart();
+        endOffset = getEqualCharactersEnd();
     }
 
     public void putCache(HashMap<Integer, HashMap<Integer, Integer>> cache, int i, int j, int value) {
@@ -49,12 +57,46 @@ public class HirschbergsAlgorithm {
 
     public List<Pair> getEditPositions() {
         List<Pair> positions = new ArrayList<>();
+        int[] newS1 = new int[s1.length - (startOffset + endOffset)];
+        int[] newS2 = new int[s2.length - (startOffset + endOffset)];
+        for (int i = 0; i < newS1.length; i++) {
+            newS1[i] = s1[i + startOffset];
+        }
+        for (int i = 0; i < newS2.length; i++) {
+            newS2[i] = s2[i + startOffset];
+        }
 
+        this.s1 = newS1;
+        this.s2 = newS2;
+        LOGGER.info("hirscbergs running");
         positions.add(new Pair(0, 0));
-        positions.addAll(hirschbergs_rec(0, s1.length, 0, s2.length));
+        positions.addAll(hirschbergs_rec(0, newS1.length, 0, newS2.length));
         positions.add(new Pair(s1.length, s2.length));
 
         return positions;
+    }
+
+    public int getEqualCharactersStart() {
+        for (int i = 0; i < Math.min(s1.length, s2.length); i++) {
+            if (i >= s1.length || i >= s2.length || s1[i] != s2[i]) {
+                return i;
+            }
+        }
+        return s1.length;
+    }
+
+    public int getEqualCharactersEnd() {
+        int s1Index = s1.length - 1;
+        int s2Index = s2.length - 1;
+
+        for (int i = 0; i < Math.min(s1.length, s2.length); i++) {
+            if (s1Index <= 0 || s2Index <= 0 || s1[s1Index] != s2[s2Index]) {
+                return i;
+            }
+            s1Index--;
+            s2Index--;
+        }
+        return 0;
     }
 
     private List<Pair> hirschbergs_rec(int row_start, int row_end, int column_start, int column_end) {
@@ -274,7 +316,9 @@ public class HirschbergsAlgorithm {
                 }
                 x--;
             }
-
+        }
+        for (EditOperation operation : operations) {
+            operation.setPosition(operation.getPosition() + startOffset);
         }
 
         return operations;

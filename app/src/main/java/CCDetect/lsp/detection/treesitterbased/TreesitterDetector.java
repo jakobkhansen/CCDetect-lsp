@@ -65,12 +65,8 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         timerIndexChange.start();
         clones = new ArrayList<>();
 
-        List<EditOperation> edits = getDocumentEdits(index);
         buildFingerprints(index);
 
-        for (TreesitterDocumentModel document : index) {
-            document.setChanged(false);
-        }
         int[] fingerprint = getFullFingerprint(index);
 
         if (sourceMap == null) {
@@ -93,9 +89,20 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                 LOGGER.info("Built dynamic structures");
             }
         } else {
+
+            LOGGER.info("Getting edits");
+            Timer textEditTimer = new Timer();
+            textEditTimer.start();
+            List<EditOperation> edits = getDocumentEdits(index);
+            textEditTimer.stop();
+            textEditTimer.log("Time to get text edits");
+
             dynamicUpdate(fingerprint, edits);
             eSuff = saca.getExtendedSuffixArray(fingerprint);
             timer.stop();
+        }
+        for (TreesitterDocumentModel document : index) {
+            document.setChanged(false);
         }
         timer.log("Time to build suffix array, inverse and lcp");
 
