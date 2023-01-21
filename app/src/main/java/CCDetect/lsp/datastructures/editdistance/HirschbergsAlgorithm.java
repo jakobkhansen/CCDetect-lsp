@@ -36,29 +36,38 @@ public class HirschbergsAlgorithm {
     public HirschbergsAlgorithm(int[] s1, int[] s2) {
         this.s1 = s1;
         this.s2 = s2;
-        startOffset = getEqualCharactersStart();
-        endOffset = getEqualCharactersEnd();
+        startOffset = getEqualCharactersStart(s1, s2);
+        endOffset = getEqualCharactersEnd(s1, s2, startOffset);
     }
 
-    public void putCache(HashMap<Integer, HashMap<Integer, Integer>> cache, int i, int j, int value) {
-        if (!cache.containsKey(i)) {
-            cache.put(i, new HashMap<>());
+    public boolean cacheContains(int[][] cache, int i, int j) {
+        return i >= 0 && i < cache.length && j >= 0 && j < cache[0].length;
+    }
+
+    public static int getEqualCharactersStart(int[] s1, int[] s2) {
+        for (int i = 0; i < Math.min(s1.length, s2.length); i++) {
+            if (i >= s1.length || i >= s2.length || s1[i] != s2[i]) {
+                return i;
+            }
         }
-        cache.get(i).put(j, value);
+        return s1.length;
     }
 
-    public boolean containsCache(HashMap<Integer, HashMap<Integer, Integer>> cache, int i, int j) {
-        return cache.containsKey(i) && cache.get(i).containsKey(j);
-    }
+    public static int getEqualCharactersEnd(int[] s1, int[] s2, int startOffset) {
+        int s1Index = s1.length - 1;
+        int s2Index = s2.length - 1;
 
-    public int getCache(HashMap<Integer, HashMap<Integer, Integer>> cache, int i, int j) {
-        return cache.get(i).get(j);
+        while (s1Index >= startOffset && s2Index >= startOffset && s1[s1Index] == s2[s2Index]) {
+            s1Index--;
+            s2Index--;
+        }
+        return s1.length - s1Index - 1;
     }
 
     public List<Pair> getEditPositions() {
-        List<Pair> positions = new ArrayList<>();
-        int[] newS1 = new int[s1.length - (startOffset + endOffset)];
-        int[] newS2 = new int[s2.length - (startOffset + endOffset)];
+        int commonElements = (startOffset + endOffset);
+        int[] newS1 = new int[s1.length - commonElements];
+        int[] newS2 = new int[s2.length - commonElements];
         for (int i = 0; i < newS1.length; i++) {
             newS1[i] = s1[i + startOffset];
         }
@@ -68,35 +77,18 @@ public class HirschbergsAlgorithm {
 
         this.s1 = newS1;
         this.s2 = newS2;
-        LOGGER.info("hirscbergs running");
+
+        List<Pair> positions = new ArrayList<>();
+
+        if (s1.length == 0 && s2.length == 0) {
+            return positions;
+        }
+
         positions.add(new Pair(0, 0));
         positions.addAll(hirschbergs_rec(0, newS1.length, 0, newS2.length));
         positions.add(new Pair(s1.length, s2.length));
 
         return positions;
-    }
-
-    public int getEqualCharactersStart() {
-        for (int i = 0; i < Math.min(s1.length, s2.length); i++) {
-            if (i >= s1.length || i >= s2.length || s1[i] != s2[i]) {
-                return i;
-            }
-        }
-        return s1.length;
-    }
-
-    public int getEqualCharactersEnd() {
-        int s1Index = s1.length - 1;
-        int s2Index = s2.length - 1;
-
-        for (int i = 0; i < Math.min(s1.length, s2.length); i++) {
-            if (s1Index <= 0 || s2Index <= 0 || s1[s1Index] != s2[s2Index]) {
-                return i;
-            }
-            s1Index--;
-            s2Index--;
-        }
-        return 0;
     }
 
     private List<Pair> hirschbergs_rec(int row_start, int row_end, int column_start, int column_end) {
@@ -149,21 +141,31 @@ public class HirschbergsAlgorithm {
     }
 
     public List<Pair> wagner_fischer_small(int row_start, int row_end, int column_start, int column_end) {
-        HashMap<Integer, HashMap<Integer, Integer>> cache = new HashMap<>();
-        for (int i = row_start; i <= row_end; i++) {
-            putCache(cache, i, column_start, i - row_start);
+        int num_rows = row_end - row_start + 1;
+        int num_cols = column_end - column_start + 1;
+        int[][] cache = new int[num_rows][num_cols];
+        for (int i = 0; i < num_rows; i++) {
+            cache[i][0] = i;
         }
-        for (int i = column_start; i <= column_end; i++) {
-            putCache(cache, row_start, i, i - column_start);
+        for (int i = 0; i < num_cols; i++) {
+            cache[0][i] = i;
+        }
+        // 5 6 3 6
+        for (int i = 0; i < num_rows; i++) {
+            for (int j = 0; j < num_cols; j++) {
+            }
         }
         for (int i = row_start + 1; i <= row_end; i++) {
             for (int j = column_start + 1; j <= column_end; j++) {
+                int cache_row = i - row_start;
+                int cache_col = j - column_start;
+
                 if (s1[i - 1] == s2[j - 1]) {
-                    putCache(cache, i, j, getCache(cache, i - 1, j - 1));
+                    cache[cache_row][cache_col] = cache[cache_row - 1][cache_col - 1];
                 } else {
-                    int minVal = Math.min(getCache(cache, i - 1, j - 1),
-                            Math.min(getCache(cache, i - 1, j), getCache(cache, i, j - 1)));
-                    putCache(cache, i, j, minVal + 1);
+                    int minVal = Math.min(cache[cache_row - 1][cache_col - 1],
+                            Math.min(cache[cache_row - 1][cache_col], cache[cache_row][cache_col - 1]));
+                    cache[cache_row][cache_col] = minVal + 1;
                 }
             }
         }
@@ -174,17 +176,29 @@ public class HirschbergsAlgorithm {
         while (current.x > row_start || current.y > column_start) {
             int x = current.x;
             int y = current.y;
+            int cacheX = x - row_start;
+            int cacheY = y - column_start;
 
-            int subVal = containsCache(cache, x - 1, y - 1) ? getCache(cache, x - 1, y - 1) : Integer.MAX_VALUE;
-            int insertVal = containsCache(cache, x, y - 1) ? getCache(cache, x, y - 1) : Integer.MAX_VALUE;
-            int delVal = containsCache(cache, x - 1, y) ? getCache(cache, x - 1, y) : Integer.MAX_VALUE;
+            int subVal = cacheContains(cache, cacheX - 1, cacheY - 1) ? cache[cacheX - 1][cacheY - 1]
+                    : Integer.MAX_VALUE;
+            int insertVal = cacheContains(cache, cacheX, cacheY - 1) ? cache[cacheX][cacheY - 1] : Integer.MAX_VALUE;
+            int delVal = cacheContains(cache, cacheX - 1, cacheY) ? cache[cacheX - 1][cacheY] : Integer.MAX_VALUE;
+
             Pair nextPair = null;
-            if (subVal <= insertVal && subVal <= delVal) {
-                nextPair = new Pair(x - 1, y - 1);
-            } else if (insertVal <= subVal && insertVal <= delVal) {
+            // if (subVal <= insertVal && subVal <= delVal) {
+            // nextPair = new Pair(x - 1, y - 1);
+            // } else if (insertVal <= subVal && insertVal <= delVal) {
+            // nextPair = new Pair(x, y - 1);
+            // } else {
+            // nextPair = new Pair(x - 1, y);
+            // }
+
+            if (insertVal <= subVal && delVal <= subVal) {
                 nextPair = new Pair(x, y - 1);
-            } else {
+            } else if (delVal <= insertVal && delVal <= subVal) {
                 nextPair = new Pair(x - 1, y);
+            } else {
+                nextPair = new Pair(x - 1, y - 1);
             }
             current = nextPair;
             if (current.x > row_start || current.y > column_start) {
@@ -197,66 +211,64 @@ public class HirschbergsAlgorithm {
     }
 
     public int[] needlemanwunsch_score(int row_start, int row_end, int column_start, int column_end) {
-        HashMap<Integer, HashMap<Integer, Integer>> cache = new HashMap<>();
+        int row_length = column_end - column_start + 1;
+        int[][] cache = new int[2][row_length];
         for (int i = column_start; i <= column_end; i++) {
-            putCache(cache, 0, i, i - column_start);
+            cache[0][i - column_start] = i - column_start;
         }
         for (int i = row_start + 1; i < row_end; i++) {
-            putCache(cache, 1, column_start, getCache(cache, 0, column_start) + 1);
+            cache[1][0] = cache[0][0] + 1;
             for (int j = column_start + 1; j <= column_end; j++) {
+                int cache_col = j - column_start;
 
-                int subVal = getCache(cache, 0, j - 1);
-                subVal -= s1[i - 1] == s2[j - 1] ? 1 : 0;
+                int subVal = cache[0][cache_col - 1];
+                subVal -= s1[i - 1] == s2[cache_col - 1] ? 1 : 0;
 
-                int delVal = getCache(cache, 0, j);
-                int insertVal = getCache(cache, 1, j - 1);
+                int delVal = cache[0][cache_col];
+                int insertVal = cache[1][cache_col - 1];
 
-                putCache(cache, 1, j, Math.min(subVal, Math.min(delVal, insertVal)) + 1);
+                cache[1][cache_col] = Math.min(subVal, Math.min(delVal, insertVal)) + 1;
             }
-            for (int k = column_start; k < column_end; k++) {
-                putCache(cache, 0, k, getCache(cache, 1, k));
+            for (int k = 0; k < row_length; k++) {
+                cache[0][k] = cache[1][k];
             }
         }
-        int[] lastRow = new int[column_end - column_start + 1];
-        for (int i = 0; i <= column_end - column_start; i++) {
-            lastRow[i] = getCache(cache, 1, column_start + i);
-        }
-        return lastRow;
+        return cache[1];
     }
 
     public int[] needlemanwunsch_score_reverse(int row_start, int row_end, int column_start, int column_end) {
-        HashMap<Integer, HashMap<Integer, Integer>> cache = new HashMap<>();
+        int row_length = column_end - column_start + 1;
+        int[][] cache = new int[2][row_length];
         for (int i = column_end; i >= column_start; i--) {
-            putCache(cache, 0, i, column_end - i);
+            cache[0][i - column_start] = column_end - i;
         }
         for (int i = row_end - 1; i >= row_start; i--) {
-            putCache(cache, 1, column_end, getCache(cache, 0, column_end) + 1);
+            cache[1][0] = cache[0][0] + 1;
             for (int j = column_end - 1; j >= column_start; j--) {
+                int cache_col = j - column_start;
 
-                int subVal = getCache(cache, 0, j + 1);
+                int subVal = cache[0][cache_col + 1];
                 subVal -= s1[i] == s2[j] ? 1 : 0;
 
-                int delVal = getCache(cache, 0, j);
-                int insertVal = getCache(cache, 1, j + 1);
+                int delVal = cache[0][cache_col];
+                int insertVal = cache[0][cache_col + 1];
 
-                putCache(cache, 1, j, Math.min(subVal, Math.min(delVal, insertVal)) + 1);
+                cache[1][cache_col] = Math.min(subVal, Math.min(delVal, insertVal)) + 1;
             }
-            for (int k = column_end; k >= column_start; k--) {
-                putCache(cache, 0, k, getCache(cache, 1, k));
+            for (int k = 0; k < row_length; k++) {
+                cache[0][k] = cache[1][k];
             }
         }
-        int[] lastRow = new int[column_end - column_start + 1];
-        for (int i = 0; i <= column_end - column_start; i++) {
-            lastRow[i] = getCache(cache, 1, column_start + i);
-        }
-        return lastRow;
+        return cache[1];
     }
 
     public List<EditOperation> getOperations() {
         List<Pair> positions = getEditPositions();
+        for (Pair p : positions) {
+        }
 
         List<EditOperation> operations = new ArrayList<>();
-        if (positions.size() <= 2) {
+        if (positions.size() < 2) {
             return operations;
         }
 
@@ -280,11 +292,11 @@ public class HirschbergsAlgorithm {
                         lastOperationIndex = x - 1;
                         currentOperation.decrementPosition();
                     } else {
-                        currentOperation = new EditOperation(EditOperationType.SUBSTITUTE, x - 1, x - 1);
+                        currentOperation = new EditOperation(EditOperationType.SUBSTITUTE, x - 1);
                         currentOperation.getChars().add(0, s2[y - 1]);
                         currentOperationType = EditOperationType.SUBSTITUTE;
                         lastOperationIndex = x - 1;
-                        operations.add(0, currentOperation);
+                        operations.add(currentOperation);
                     }
                 }
                 x--;
@@ -295,11 +307,11 @@ public class HirschbergsAlgorithm {
                 if (currentOperationType == EditOperationType.INSERT && lastOperationIndex == x) {
                     currentOperation.getChars().add(0, s2[y - 1]);
                 } else {
-                    currentOperation = new EditOperation(EditOperationType.INSERT, x, x);
+                    currentOperation = new EditOperation(EditOperationType.INSERT, x);
                     currentOperation.getChars().add(0, s2[y - 1]);
                     currentOperationType = EditOperationType.INSERT;
                     lastOperationIndex = x;
-                    operations.add(0, currentOperation);
+                    operations.add(currentOperation);
                 }
                 y--;
             } else {
@@ -308,11 +320,11 @@ public class HirschbergsAlgorithm {
                     currentOperation.decrementPosition();
                     lastOperationIndex = x - 1;
                 } else {
-                    currentOperation = new EditOperation(EditOperationType.DELETE, x - 1, x - 1);
+                    currentOperation = new EditOperation(EditOperationType.DELETE, x - 1);
                     currentOperation.getChars().add(0, s1[x - 1]);
                     currentOperationType = EditOperationType.DELETE;
                     lastOperationIndex = x - 1;
-                    operations.add(0, currentOperation);
+                    operations.add(currentOperation);
                 }
                 x--;
             }

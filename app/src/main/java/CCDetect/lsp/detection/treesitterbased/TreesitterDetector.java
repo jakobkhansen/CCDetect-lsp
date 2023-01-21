@@ -63,7 +63,6 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
 
         Timer timerIndexChange = new Timer();
         timerIndexChange.start();
-        clones = new ArrayList<>();
 
         buildFingerprints(index);
 
@@ -97,6 +96,12 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             textEditTimer.stop();
             textEditTimer.log("Time to get text edits");
 
+            if (edits.size() == 0) {
+                LOGGER.info("No edits found");
+                NotificationHandler.endNotification("clones", clones.size() + " clones found");
+                return;
+            }
+
             dynamicUpdate(fingerprint, edits);
             eSuff = saca.getExtendedSuffixArray(fingerprint);
             timer.stop();
@@ -106,11 +111,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         }
         timer.log("Time to build suffix array, inverse and lcp");
 
-        // Only for logging
-        // LOGGER.info("Fingerprint: " + Printer.print(fingerprint));
-        // LOGGER.info("Suffix: " + Printer.print(eSuff.getSuffix()));
-        // LOGGER.info("Inverse: " + Printer.print(eSuff.getInverseSuffix()));
-        // LOGGER.info("LCP: " + Printer.print(eSuff.getLcp()));
+        clones = new ArrayList<>();
 
         Timer extractClonesTimer = new Timer();
         extractClonesTimer.start();

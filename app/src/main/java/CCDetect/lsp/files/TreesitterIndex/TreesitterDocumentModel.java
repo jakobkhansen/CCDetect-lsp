@@ -9,7 +9,6 @@ import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
 import CCDetect.lsp.datastructures.editdistance.EditOperation;
-import CCDetect.lsp.datastructures.editdistance.EditOperationsCalculator;
 import CCDetect.lsp.datastructures.editdistance.HirschbergsAlgorithm;
 import CCDetect.lsp.detection.treesitterbased.fingerprint.Fingerprint;
 import CCDetect.lsp.files.DocumentModel;
@@ -179,12 +178,15 @@ public class TreesitterDocumentModel extends DocumentModel {
         }
         int[] fullOldFingerprint = fullOldFingerprintList.stream().mapToInt(i -> i).toArray();
         int[] fullNewFingerprint = fullNewFingerprintList.stream().mapToInt(i -> i).toArray();
+        LOGGER.info("Old: " + Printer.print(fullOldFingerprint));
+        LOGGER.info("New: " + Printer.print(fullNewFingerprint));
 
-        // HirschbergsAlgorithm algorithm = new HirschbergsAlgorithm(fullOldFingerprint,
-        // fullNewFingerprint);
-        // List<EditOperation> operations = algorithm.getOperations();
-        List<EditOperation> operations = EditOperationsCalculator.findEditOperations(fullOldFingerprint,
+        HirschbergsAlgorithm algorithm = new HirschbergsAlgorithm(fullOldFingerprint,
                 fullNewFingerprint);
+        List<EditOperation> operations = algorithm.getOperations();
+        // List<EditOperation> operations =
+        // EditOperationsCalculator.findEditOperations(fullOldFingerprint,
+        // fullNewFingerprint);
 
         // Update positions of all operations based on the fingerprints offset
         for (EditOperation operation : operations) {
