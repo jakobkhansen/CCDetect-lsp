@@ -7,7 +7,7 @@ public class EditOperation {
     private int position;
     private ArrayList<Integer> chars = new ArrayList<>();
 
-    public EditOperation(EditOperationType operationType, int start, int end) {
+    public EditOperation(EditOperationType operationType, int start) {
         this.operationType = operationType;
         this.position = start;
     }
