@@ -111,11 +111,29 @@ public class WaveletMatrix {
         return intValue;
     }
 
-    public int rank(int level, int index, boolean bool) {
+    private int rank(int level, int index, boolean bool) {
         int res = 0;
         for (int i = 0; i < index; i++) {
             res += matrix[level].get(i) == bool ? 1 : 0;
         }
         return res;
+    }
+
+    public int rank(int index) {
+        int level = 0;
+        int i = index;
+        int p = 0;
+        while (level < matrix.length) {
+            boolean curr_val = matrix[level].get(i);
+
+            p = rank(level, p, curr_val);
+            i = rank(level, i, curr_val);
+            if (curr_val) {
+                p += numZeroes[level];
+                i += numZeroes[level];
+            }
+            level++;
+        }
+        return i - p;
     }
 }
