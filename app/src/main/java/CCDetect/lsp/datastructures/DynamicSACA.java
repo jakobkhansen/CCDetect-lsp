@@ -2,6 +2,8 @@ package CCDetect.lsp.datastructures;
 
 import java.util.logging.Logger;
 
+import CCDetect.lsp.datastructures.rankselect.WaveletMatrix;
+import CCDetect.lsp.utils.Printer;
 import CCDetect.lsp.utils.Timer;
 
 /**
@@ -18,6 +20,7 @@ public class DynamicSACA {
     int[] isa;
     int[] lcp;
     SmallerCharacterCounts charCounts;
+    WaveletMatrix waveletMatrix;
     int arraySize = 0;
     int actualSize = 0;
 
@@ -36,7 +39,8 @@ public class DynamicSACA {
             isa[i] = initialISA[i];
             lcp[i] = initialLCP[i];
         }
-        l = calculateL(initialSA, initialText, initialSize);
+        l = calculateL(initialSA, initialText, initialText.length);
+        waveletMatrix = new WaveletMatrix(l, initialSize);
     }
 
     public DynamicSACA(int[] initialText, ExtendedSuffixArray initialESuff, int initialSize) {
@@ -88,10 +92,10 @@ public class DynamicSACA {
         SAIS sais = new SAIS();
         Timer lcptimer = new Timer();
         lcptimer.start();
-        int[] lcp = sais.buildLCPArray(fingerprint, smallSA, smallISA);
+        // int[] lcp = sais.buildLCPArray(fingerprint, smallSA, smallISA);
         lcptimer.stop();
         lcptimer.log("Time to build LCP array from scratch");
-        return new ExtendedSuffixArray(smallSA, smallISA, lcp);
+        return new ExtendedSuffixArray(smallSA, smallISA, smallLCP);
     }
 
     public ExtendedSuffixArray getExtendedSuffixArray(int[] fingerprint) {
@@ -109,12 +113,12 @@ public class DynamicSACA {
 
         // Stage 2, replace in L
         int posFirstModified = isa[position];
-        int previousCS = getLFDynamic(posFirstModified, l, oldSize);
+        int previousCS = getLFDynamic(posFirstModified);
 
-        int storedLetter = l[isa[position]];
+        int storedLetter = waveletMatrix.access(isa[position]);
         substituteInL(newText[end], isa[position]);
 
-        int pointOfInsertion = getLFDynamic(isa[position], l, oldSize);
+        int pointOfInsertion = getLFDynamic(isa[position]);
         // Number of smaller characters is one off if the char we have stored is less
         // than the one we inserted
         pointOfInsertion += storedLetter < newText[end] ? 1 : 0;
@@ -142,7 +146,7 @@ public class DynamicSACA {
             insert(isa, position, pointOfInsertion);
 
             int oldPOS = pointOfInsertion;
-            pointOfInsertion = getLFDynamic(pointOfInsertion, l, l_length);
+            pointOfInsertion = getLFDynamic(pointOfInsertion);
             // Again number of smaller characters is one off potentially
             pointOfInsertion += storedLetter < newText[i] ? 1 : 0;
 
@@ -170,13 +174,13 @@ public class DynamicSACA {
 
         // Stage 4
         int pos = previousCS;
-        int expectedPos = getLFDynamic(pointOfInsertion, l, newSize);
+        int expectedPos = getLFDynamic(pointOfInsertion);
 
         while (pos != expectedPos) {
-            int newPos = getLFDynamic(pos, l, newSize);
+            int newPos = getLFDynamic(pos);
             moveRow(pos, expectedPos, sa, isa, l);
             pos = newPos;
-            expectedPos = getLFDynamic(expectedPos, l, newSize);
+            expectedPos = getLFDynamic(expectedPos);
         }
     }
 
@@ -187,22 +191,22 @@ public class DynamicSACA {
 
         // Stage 2, replace in L (but not actually)
         int posFirstModified = isa[position + length];
-        int deletedLetter = l[posFirstModified];
+        int deletedLetter = waveletMatrix.access(posFirstModified);
 
-        int pointOfDeletion = getLFDynamic(posFirstModified, l, oldSize);
+        int pointOfDeletion = getLFDynamic(posFirstModified);
 
         // Stage 3, Delete rows in L
         for (int i = 0; i < length - 1; i++) {
             int l_length = oldSize - i - 1;
 
-            int tmp_rank = getRank(l, pointOfDeletion, l_length);
+            int currentLetter = waveletMatrix.access(pointOfDeletion);
+            int tmp_rank = getWaveletRank(pointOfDeletion);
             // Rank could be one off since T[i-1] is in L twice at this point
-            if (posFirstModified < pointOfDeletion && deletedLetter == l[pointOfDeletion]) {
+            if (posFirstModified < pointOfDeletion && deletedLetter == currentLetter) {
                 tmp_rank--;
             }
-            int currentLetter = l[pointOfDeletion];
 
-            deleteInL(pointOfDeletion, l_length);
+            deleteInL(pointOfDeletion);
 
             // Update posFirstModified if it has moved because of deletion
             posFirstModified -= pointOfDeletion <= posFirstModified ? 1 : 0;
@@ -221,13 +225,13 @@ public class DynamicSACA {
             // Rank is one off potentially since T[i-1] is twice in L at this point
             pointOfDeletion -= deletedLetter < currentLetter ? 1 : 0;
         }
-        int currentLetter = l[pointOfDeletion];
-        int tmp_rank = getRank(l, pointOfDeletion, newSize);
+        int currentLetter = waveletMatrix.access(pointOfDeletion);
+        int tmp_rank = getWaveletRank(pointOfDeletion);
         if (posFirstModified < pointOfDeletion && deletedLetter == currentLetter) {
             tmp_rank--;
         }
 
-        deleteInL(pointOfDeletion, newSize);
+        deleteInL(pointOfDeletion);
         posFirstModified -= pointOfDeletion <= posFirstModified ? 1 : 0;
 
         // Decrement all values in SA greater than or equal to position
@@ -246,17 +250,17 @@ public class DynamicSACA {
         pointOfDeletion = posFirstModified;
         substituteInL(currentLetter, pointOfDeletion);
 
-        pointOfDeletion = getLFDynamic(pointOfDeletion, l, newSize);
+        pointOfDeletion = getLFDynamic(pointOfDeletion);
 
         // Stage 4
         int pos = previousCS;
         int expectedPos = pointOfDeletion;
 
         while (pos != expectedPos) {
-            int newPos = getLFDynamic(pos, l, newSize);
+            int newPos = getLFDynamic(pos);
             moveRow(pos, expectedPos, sa, isa, l);
             pos = newPos;
-            expectedPos = getLFDynamic(expectedPos, l, newSize);
+            expectedPos = getLFDynamic(expectedPos);
         }
     }
 
@@ -278,10 +282,10 @@ public class DynamicSACA {
         l = calculateL(sa, text, text.length);
     }
 
-    public int getLFDynamic(int index, int[] l, int size) {
+    public int getLFDynamic(int index) {
 
-        int charsBefore = getCharsBefore(l[index]);
-        int rank = getRank(l, index, size);
+        int charsBefore = getCharsBefore(waveletMatrix.access(index));
+        int rank = getWaveletRank(index);
         return charsBefore + rank;
     }
 
@@ -307,8 +311,14 @@ public class DynamicSACA {
         return rank;
     }
 
+    public int getWaveletRank(int position) {
+        return waveletMatrix.rank(position);
+    }
+
     private void moveRow(int i, int j, int[] newSA, int[] newISA, int[] l) {
-        move(l, i, j);
+        int lValue = waveletMatrix.access(i);
+        waveletMatrix.delete(i);
+        waveletMatrix.insert(j, lValue);
 
         // Update ISA
         if (i < j) {
@@ -369,17 +379,18 @@ public class DynamicSACA {
 
     private void insertInL(int ch, int position) {
         charCounts.addChar(ch);
-        insert(l, position, ch);
+        waveletMatrix.insert(position, ch);
     }
 
-    private void deleteInL(int position, int size) {
+    private void deleteInL(int position) {
         charCounts.deleteChar(l[position]);
-        delete(l, position, size);
+        waveletMatrix.delete(position);
     }
 
     private void substituteInL(int ch, int position) {
-        charCounts.deleteChar(l[position]);
-        l[position] = ch;
-        charCounts.addChar(l[position]);
+        charCounts.deleteChar(waveletMatrix.access(position));
+        waveletMatrix.delete(position);
+        waveletMatrix.insert(position, ch);
+        charCounts.addChar(waveletMatrix.access(position));
     }
 }

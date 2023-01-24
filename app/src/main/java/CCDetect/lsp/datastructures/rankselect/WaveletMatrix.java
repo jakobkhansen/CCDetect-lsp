@@ -1,5 +1,7 @@
 package CCDetect.lsp.datastructures.rankselect;
 
+import CCDetect.lsp.utils.Printer;
+
 public class WaveletMatrix {
     DynamicBitSet[] matrix;
     int inputSize;
@@ -19,6 +21,22 @@ public class WaveletMatrix {
         fillMatrix(input, 0);
     }
 
+    public void rebuildMatrix(int numBitsUsed, int newSize) {
+        int[] oldInput = new int[inputSize];
+        for (int i = 0; i < inputSize; i++) {
+            oldInput[i] = access(i);
+        }
+        this.numBitsUsed = numBitsUsed;
+        this.bitSetSize = newSize;
+        matrix = new DynamicBitSet[numBitsUsed];
+        for (int i = 0; i < numBitsUsed; i++) {
+            matrix[i] = new DynamicBitSet(oldInput.length, newSize);
+        }
+
+        fillMatrix(oldInput, 0);
+
+    }
+
     // TODO make this iterative for performance
     public void fillMatrix(int[] input, int level) {
         if (level >= numBitsUsed) {
@@ -26,7 +44,6 @@ public class WaveletMatrix {
         }
 
         int currentBit = (numBitsUsed - 1) - level;
-        System.out.println("curr bit " + currentBit);
         for (int i = 0; i < input.length; i++) {
             matrix[level].set(i, getBitBool(input[i], currentBit));
         }
@@ -122,8 +139,15 @@ public class WaveletMatrix {
     }
 
     public void insert(int index, int value) {
+        System.out.println("Inserting in L " + value + " at index " + index);
         int level = 0;
         int currIndex = index;
+        int numBits = 32 - Integer.numberOfLeadingZeros(value);
+        if (numBits > numBitsUsed) {
+            System.out.println("new numBits + " + numBits);
+            rebuildMatrix(numBits, bitSetSize + 100);
+        }
+        System.out.println("Matrix size: " + matrix.length);
         while (level < matrix.length) {
             int currentBit = numBitsUsed - level - 1;
             matrix[level].insert(currIndex, getBitBool(value, currentBit));
@@ -133,5 +157,27 @@ public class WaveletMatrix {
             }
             level++;
         }
+        inputSize++;
+    }
+
+    public void delete(int index) {
+        int level = 0;
+        int currIndex = index;
+        while (level < matrix.length) {
+            int nextIndex = matrix[level].rank(currIndex, matrix[level].get(currIndex));
+            nextIndex += matrix[level].get(currIndex) ? matrix[level].getNumZeroes() : 0;
+            matrix[level].delete(currIndex);
+            currIndex = nextIndex;
+            level++;
+        }
+        inputSize--;
+    }
+
+    public int[] toInputArray() {
+        int[] out = new int[inputSize];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = access(i);
+        }
+        return out;
     }
 }

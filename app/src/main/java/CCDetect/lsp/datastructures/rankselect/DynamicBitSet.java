@@ -39,6 +39,13 @@ public class DynamicBitSet {
         set(index, value);
     }
 
+    public void delete(int index) {
+        for (int i = index; i <= realSize; i++) {
+            set(i, get(i + 1));
+        }
+        realSize--;
+    }
+
     public int size() {
         return realSize;
     }

@@ -17,7 +17,6 @@ public class TestWaveletMatrix {
     public void testAccess() {
         int[] input = { 4, 7, 6, 5, 3, 2, 1, 0, 1, 4, 1, 7 };
         WaveletMatrix matrix = new WaveletMatrix(input, 10);
-        System.out.println(Printer.print(matrix));
         for (int i = 0; i < input.length; i++) {
             assertEquals(input[i], matrix.access(i));
         }
@@ -27,7 +26,6 @@ public class TestWaveletMatrix {
     public void testAccessSmall() {
         int[] input = { 1, 2, 3 };
         WaveletMatrix matrix = new WaveletMatrix(input, 10);
-        System.out.println(Printer.print(matrix));
         for (int i = 0; i < input.length; i++) {
             assertEquals(input[i], matrix.access(i));
         }
@@ -48,9 +46,7 @@ public class TestWaveletMatrix {
         int[] input = { 2, 0, 1 };
         WaveletMatrix matrix = new WaveletMatrix(input, 20);
 
-        System.out.println(Printer.print(matrix));
         matrix.insert(1, 2);
-        System.out.println(Printer.print(matrix));
 
         assertEquals(2, matrix.access(0));
         assertEquals(2, matrix.access(1));
@@ -63,11 +59,64 @@ public class TestWaveletMatrix {
         int[] input = { 2, 0, 1, 5 };
         int[] newInput = { 4, 2, 0, 1, 5 };
         WaveletMatrix matrix = new WaveletMatrix(input, 20);
-        System.out.println("Before");
-        System.out.println(Printer.print(matrix));
         matrix.insert(0, 4);
-        System.out.println("After: " + Printer.print(matrix));
-        System.out.println("Expected: " + Printer.print(new WaveletMatrix(newInput, 20)));
+
+        for (int i = 0; i < newInput.length; i++) {
+            assertEquals(newInput[i], matrix.access(i));
+        }
+    }
+
+    @Test
+    public void testWaveletInsertNewBit() {
+        int[] input = { 2, 0, 1 };
+        int[] newInput = { 2, 0, 1, 5 };
+        WaveletMatrix matrix = new WaveletMatrix(input, 20);
+        matrix.insert(3, 5);
+
+        for (int i = 0; i < newInput.length; i++) {
+            assertEquals(newInput[i], matrix.access(i));
+        }
+    }
+
+    @Test
+    public void testWaveletDelete() {
+        int[] input = { 2, 0, 1 };
+        int[] newInput = { 2, 1 };
+        WaveletMatrix matrix = new WaveletMatrix(input, 20);
+        matrix.delete(1);
+
+        for (int i = 0; i < newInput.length; i++) {
+            assertEquals(newInput[i], matrix.access(i));
+        }
+    }
+
+    @Test
+    public void testWaveletDeleteEdges() {
+        int[] input = { 2, 0, 1, 4 };
+        int[] middle = { 2, 0, 1 };
+        int[] end = { 0, 1 };
+        WaveletMatrix matrix = new WaveletMatrix(input, 20);
+        System.out.println("before: " + Printer.print(matrix));
+        matrix.delete(3);
+        System.out.println("middle: " + Printer.print(matrix));
+        System.out.println("expected middle: " + Printer.print(new WaveletMatrix(middle, 20)));
+
+        System.out.println(Printer.print(matrix.toInputArray()));
+        for (int i = 0; i < middle.length; i++) {
+            assertEquals(middle[i], matrix.access(i));
+        }
+        matrix.delete(0);
+        for (int i = 0; i < end.length; i++) {
+            assertEquals(end[i], matrix.access(i));
+        }
+    }
+
+    @Test
+    public void testWaveletInsertEdgecase() {
+        int[] input = { 3, 4, 0 };
+        int[] newInput = { 3, 2, 4, 0 };
+        WaveletMatrix matrix = new WaveletMatrix(input, 20);
+        matrix.insert(1, 2);
 
         for (int i = 0; i < newInput.length; i++) {
             assertEquals(newInput[i], matrix.access(i));
