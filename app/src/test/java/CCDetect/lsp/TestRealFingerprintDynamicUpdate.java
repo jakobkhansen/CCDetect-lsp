@@ -41,11 +41,11 @@ public class TestRealFingerprintDynamicUpdate {
         ExtendedSuffixArray expected = sais.buildExtendedSuffixArray(newArray);
         linearTimer.stop();
 
-        DynamicSACA dynSACA = new DynamicSACA(oldFingerprint, old, oldFingerprint.length);
+        DynamicSACA dynSACA = new DynamicSACA(oldFingerprint, old, oldFingerprint.length + 100);
         Timer incrementalTimer = new Timer();
         incrementalTimer.start();
         dynSACA.insertFactor(edit, position);
-        ExtendedSuffixArray dynUpdated = dynSACA.getExtendedSuffixArray(newArray);
+        ExtendedSuffixArray dynUpdated = dynSACA.getSmallExtendedSuffixArray(newArray);
         incrementalTimer.stop();
 
         linearTimer.log("Linear time");
@@ -61,12 +61,12 @@ public class TestRealFingerprintDynamicUpdate {
     // TODO reimplement tests
     @Test
     public void testCCDetectFingerprint() throws Exception {
-        // testFile("src/test/resources/Fingerprints/ccdetect.txt");
+        testFile("src/test/resources/Fingerprints/ccdetect.txt");
     }
 
     @Test
     public void testWorldWindFingerprint() throws Exception {
-        // testFile("src/test/resources/Fingerprints/worldwind.txt");
+        testFile("src/test/resources/Fingerprints/worldwind.txt");
     }
 
     @Test

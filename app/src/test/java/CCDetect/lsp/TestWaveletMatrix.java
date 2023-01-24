@@ -96,12 +96,8 @@ public class TestWaveletMatrix {
         int[] middle = { 2, 0, 1 };
         int[] end = { 0, 1 };
         WaveletMatrix matrix = new WaveletMatrix(input, 20);
-        System.out.println("before: " + Printer.print(matrix));
         matrix.delete(3);
-        System.out.println("middle: " + Printer.print(matrix));
-        System.out.println("expected middle: " + Printer.print(new WaveletMatrix(middle, 20)));
 
-        System.out.println(Printer.print(matrix.toInputArray()));
         for (int i = 0; i < middle.length; i++) {
             assertEquals(middle[i], matrix.access(i));
         }

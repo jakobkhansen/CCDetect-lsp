@@ -92,10 +92,10 @@ public class DynamicSACA {
         SAIS sais = new SAIS();
         Timer lcptimer = new Timer();
         lcptimer.start();
-        // int[] lcp = sais.buildLCPArray(fingerprint, smallSA, smallISA);
+        int[] lcp = sais.buildLCPArray(fingerprint, smallSA, smallISA);
         lcptimer.stop();
         lcptimer.log("Time to build LCP array from scratch");
-        return new ExtendedSuffixArray(smallSA, smallISA, smallLCP);
+        return new ExtendedSuffixArray(smallSA, smallISA, lcp);
     }
 
     public ExtendedSuffixArray getExtendedSuffixArray(int[] fingerprint) {
@@ -106,7 +106,6 @@ public class DynamicSACA {
 
     // Inserts a factor into the suffix array at position [start, end] (inclusive)
     public void insertFactor(int[] newText, int position) {
-        int oldSize = actualSize;
         int newSize = actualSize + newText.length;
         updateSizes(newSize);
         int end = newText.length - 1;
@@ -383,14 +382,14 @@ public class DynamicSACA {
     }
 
     private void deleteInL(int position) {
-        charCounts.deleteChar(l[position]);
+        charCounts.deleteChar(waveletMatrix.access(position));
         waveletMatrix.delete(position);
     }
 
     private void substituteInL(int ch, int position) {
         charCounts.deleteChar(waveletMatrix.access(position));
+        charCounts.addChar(ch);
         waveletMatrix.delete(position);
         waveletMatrix.insert(position, ch);
-        charCounts.addChar(waveletMatrix.access(position));
     }
 }
