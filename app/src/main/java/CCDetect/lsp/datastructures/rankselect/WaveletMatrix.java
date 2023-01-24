@@ -22,6 +22,7 @@ public class WaveletMatrix {
     }
 
     public void rebuildMatrix(int numBitsUsed, int newSize) {
+
         int[] oldInput = new int[inputSize];
         for (int i = 0; i < inputSize; i++) {
             oldInput[i] = access(i);
@@ -77,9 +78,11 @@ public class WaveletMatrix {
         int maxBits = 32 - Integer.numberOfLeadingZeros(input[0]);
         for (int i = 0; i < input.length; i++) {
             int numBits = 32 - Integer.numberOfLeadingZeros(input[i]);
+            if (numBits > maxBits) {
+            }
             maxBits = maxBits < numBits ? numBits : maxBits;
+
         }
-        System.out.println("maxBits " + maxBits);
         return maxBits;
     }
 
@@ -139,15 +142,12 @@ public class WaveletMatrix {
     }
 
     public void insert(int index, int value) {
-        System.out.println("Inserting in L " + value + " at index " + index);
         int level = 0;
         int currIndex = index;
         int numBits = 32 - Integer.numberOfLeadingZeros(value);
         if (numBits > numBitsUsed) {
-            System.out.println("new numBits + " + numBits);
             rebuildMatrix(numBits, bitSetSize + 100);
         }
-        System.out.println("Matrix size: " + matrix.length);
         while (level < matrix.length) {
             int currentBit = numBitsUsed - level - 1;
             matrix[level].insert(currIndex, getBitBool(value, currentBit));

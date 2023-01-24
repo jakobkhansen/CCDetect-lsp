@@ -87,7 +87,6 @@ public class DynamicSACATest {
         linearTimer.start();
         ExtendedSuffixArray expected = sais.buildExtendedSuffixArray(resultArray);
         linearTimer.stop();
-        System.out.println("Expected SA: " + Printer.print(expected.getSuffix()));
 
         // Dynamically update original
         Timer incrementalTimer = new Timer();
@@ -95,7 +94,6 @@ public class DynamicSACATest {
         DynamicSACA dynSACA = new DynamicSACA(originalArray, eSuffBanana, eSuffBanana.size() + 100);
         dynSACA.insertFactor(editArray, position);
         ExtendedSuffixArray eSuffUpdated = dynSACA.getSmallExtendedSuffixArray(resultArray);
-        System.out.println("Actual SA: " + Printer.print(eSuffUpdated.getSuffix()));
         incrementalTimer.stop();
 
         assertArrayEquals(expected.getSuffix(), eSuffUpdated.getSuffix());
@@ -147,7 +145,7 @@ public class DynamicSACATest {
         testDynamicSuffixDeleteFactor("abcde", 1, 3);
         testDynamicSuffixDeleteFactor("abcde", 1, 4);
         testDynamicSuffixDeleteFactor("ba", 1, 1);
-        // testDynamicSuffixDeleteFactor("aslkdjsaldkj", 0, 4);
+        testDynamicSuffixDeleteFactor("jsaldkj", 0, 4);
         testDynamicSuffixDeleteFactor("abb", 2, 1);
 
     }
@@ -156,10 +154,10 @@ public class DynamicSACATest {
     public void deleteAllFactorsInString() {
         testDeleteAllFactors("abc");
         testDeleteAllFactors("abb");
-        // testDeleteAllFactors("pneumonoultramicroscopicsilicovolcanoconiosis");
-        // testDeleteAllFactors("floccinaucinihilipilification");
-        // testDeleteAllFactors("incomprehensibility");
-        // testDeleteAllFactors("xenotransplantation");
+        testDeleteAllFactors("pneumonoultramicroscopicsilicovolcanoconiosis");
+        testDeleteAllFactors("floccinaucinihilipilification");
+        testDeleteAllFactors("incomprehensibility");
+        testDeleteAllFactors("xenotransplantation");
     }
 
     public void testDynamicSuffixDeleteFactor(String input, int position, int length) {
