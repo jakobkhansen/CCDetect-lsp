@@ -1,51 +1,42 @@
 package CCDetect.lsp.datastructures.rankselect;
 
-import java.util.BitSet;
-
-import CCDetect.lsp.utils.Printer;
-
 public class WaveletMatrix {
-    BitSet[] matrix;
-    int[] numZeroes;
+    DynamicBitSet[] matrix;
     int inputSize;
     int bitSetSize;
+    int numBitsUsed;
 
     public WaveletMatrix(int[] input, int initialSize) {
         this.inputSize = input.length;
         this.bitSetSize = initialSize;
 
-        int height = numberOfBitsUsed(input);
-        matrix = new BitSet[height];
-        numZeroes = new int[height];
-        for (int i = 0; i < height; i++) {
-            matrix[i] = new BitSet(initialSize);
+        numBitsUsed = numberOfBitsUsed(input);
+        matrix = new DynamicBitSet[numBitsUsed];
+        for (int i = 0; i < numBitsUsed; i++) {
+            matrix[i] = new DynamicBitSet(input.length, initialSize);
         }
 
-        int numBits = numberOfBitsUsed(input) - 1;
-        fillMatrix(input, 0, numBits);
+        fillMatrix(input, 0);
     }
 
-    public void fillMatrix(int[] input, int level, int numBits) {
-        if (level > numBits) {
+    // TODO make this iterative for performance
+    public void fillMatrix(int[] input, int level) {
+        if (level >= numBitsUsed) {
             return;
         }
 
-        int currentBit = numBits - level;
+        int currentBit = (numBitsUsed - 1) - level;
+        System.out.println("curr bit " + currentBit);
         for (int i = 0; i < input.length; i++) {
             matrix[level].set(i, getBitBool(input[i], currentBit));
         }
 
         input = sortByBits(input, currentBit);
-        int numZeroesInLevel = 0;
-        while (!getBitBool(input[numZeroesInLevel], currentBit)) {
-            numZeroesInLevel++;
-        }
-        numZeroes[level] = numZeroesInLevel;
 
-        fillMatrix(input, level + 1, numBits);
+        fillMatrix(input, level + 1);
     }
 
-    public BitSet[] getMatrix() {
+    public DynamicBitSet[] getMatrix() {
         return matrix;
     }
 
@@ -71,6 +62,7 @@ public class WaveletMatrix {
             int numBits = 32 - Integer.numberOfLeadingZeros(input[i]);
             maxBits = maxBits < numBits ? numBits : maxBits;
         }
+        System.out.println("maxBits " + maxBits);
         return maxBits;
     }
 
@@ -95,9 +87,9 @@ public class WaveletMatrix {
         int[] bitPositions = new int[matrix.length];
         while (level < matrix.length) {
             bitPositions[level] = current;
-            int pos = rank(level, current, matrix[level].get(current));
+            int pos = matrix[level].rank(current, matrix[level].get(current));
             if (matrix[level].get(current)) {
-                pos += numZeroes[level];
+                pos += matrix[level].getNumZeroes();
             }
             current = pos;
             level++;
@@ -111,14 +103,6 @@ public class WaveletMatrix {
         return intValue;
     }
 
-    private int rank(int level, int index, boolean bool) {
-        int res = 0;
-        for (int i = 0; i < index; i++) {
-            res += matrix[level].get(i) == bool ? 1 : 0;
-        }
-        return res;
-    }
-
     public int rank(int index) {
         int level = 0;
         int i = index;
@@ -126,14 +110,28 @@ public class WaveletMatrix {
         while (level < matrix.length) {
             boolean curr_val = matrix[level].get(i);
 
-            p = rank(level, p, curr_val);
-            i = rank(level, i, curr_val);
+            p = matrix[level].rank(p, curr_val);
+            i = matrix[level].rank(i, curr_val);
             if (curr_val) {
-                p += numZeroes[level];
-                i += numZeroes[level];
+                p += matrix[level].getNumZeroes();
+                i += matrix[level].getNumZeroes();
             }
             level++;
         }
         return i - p;
+    }
+
+    public void insert(int index, int value) {
+        int level = 0;
+        int currIndex = index;
+        while (level < matrix.length) {
+            int currentBit = numBitsUsed - level - 1;
+            matrix[level].insert(currIndex, getBitBool(value, currentBit));
+            currIndex = matrix[level].rank(currIndex, getBitBool(value, currentBit));
+            if (getBitBool(value, currentBit)) {
+                currIndex += matrix[level].getNumZeroes();
+            }
+            level++;
+        }
     }
 }
