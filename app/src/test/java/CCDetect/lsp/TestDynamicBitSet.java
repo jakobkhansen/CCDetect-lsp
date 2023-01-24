@@ -35,4 +35,22 @@ public class TestDynamicBitSet {
         assertEquals(false, set.get(2));
         assertEquals(true, set.get(4));
     }
+
+    @Test
+    public void TestDynBitSetDelete() {
+        DynamicBitSet set = new DynamicBitSet(10, 100);
+        set.set(1);
+        set.set(2);
+        set.set(3);
+        set.set(9);
+        set.delete(2);
+        assertEquals(true, set.get(2));
+        assertEquals(false, set.get(4));
+        System.out.println(Printer.print(set));
+        set.delete(0);
+        System.out.println(Printer.print(set));
+        set.delete(2);
+        System.out.println(Printer.print(set));
+
+    }
 }
