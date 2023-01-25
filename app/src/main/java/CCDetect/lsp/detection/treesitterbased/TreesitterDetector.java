@@ -102,7 +102,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                 return;
             }
 
-            dynamicUpdate(fingerprint, edits);
+            dynamicUpdate(edits);
             eSuff = saca.getExtendedSuffixArray(fingerprint);
             timer.stop();
         }
@@ -167,7 +167,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         return edits;
     }
 
-    public void dynamicUpdate(int[] fingerprint, List<EditOperation> edits) {
+    public void dynamicUpdate(List<EditOperation> edits) {
         for (EditOperation edit : edits) {
             LOGGER.info(Printer.print(edit));
             switch (edit.getOperationType()) {
