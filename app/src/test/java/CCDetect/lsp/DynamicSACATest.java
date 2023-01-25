@@ -154,12 +154,12 @@ public class DynamicSACATest {
 
     @Test
     public void deleteAllFactorsInString() {
-        // testDeleteAllFactors("abc");
-        // testDeleteAllFactors("abb");
-        // testDeleteAllFactors("pneumonoultramicroscopicsilicovolcanoconiosis");
-        // testDeleteAllFactors("floccinaucinihilipilification");
-        // testDeleteAllFactors("incomprehensibility");
-        // testDeleteAllFactors("xenotransplantation");
+        testDeleteAllFactors("abc");
+        testDeleteAllFactors("abb");
+        testDeleteAllFactors("pneumonoultramicroscopicsilicovolcanoconiosis");
+        testDeleteAllFactors("floccinaucinihilipilification");
+        testDeleteAllFactors("incomprehensibility");
+        testDeleteAllFactors("xenotransplantation");
     }
 
     public void testDynamicSuffixDeleteFactor(String input, int position, int length) {
