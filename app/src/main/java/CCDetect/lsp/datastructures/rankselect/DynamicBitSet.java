@@ -39,11 +39,13 @@ public class DynamicBitSet {
         set(index, value);
     }
 
-    public void delete(int index) {
+    public boolean delete(int index) {
+        boolean retVal = set.get(index);
         for (int i = index; i <= realSize; i++) {
             set(i, get(i + 1));
         }
         realSize--;
+        return retVal;
     }
 
     public int size() {
@@ -61,6 +63,10 @@ public class DynamicBitSet {
 
     public int getNumZeroes() {
         return realSize - set.cardinality();
+    }
+
+    public int getNumOnes() {
+        return set.cardinality();
     }
 
     private int availableSpace() {

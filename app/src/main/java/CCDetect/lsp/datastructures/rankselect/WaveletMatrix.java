@@ -3,7 +3,7 @@ package CCDetect.lsp.datastructures.rankselect;
 import CCDetect.lsp.utils.Printer;
 
 public class WaveletMatrix {
-    DynamicBitSet[] matrix;
+    DynamicTreeBitSet[] matrix;
     int inputSize;
     int bitSetSize;
     int numBitsUsed;
@@ -13,9 +13,9 @@ public class WaveletMatrix {
         this.bitSetSize = initialSize;
 
         numBitsUsed = numberOfBitsUsed(input);
-        matrix = new DynamicBitSet[numBitsUsed];
+        matrix = new DynamicTreeBitSet[numBitsUsed];
         for (int i = 0; i < numBitsUsed; i++) {
-            matrix[i] = new DynamicBitSet(input.length, initialSize);
+            matrix[i] = new DynamicTreeBitSet(input.length);
         }
 
         fillMatrix(input, 0);
@@ -29,9 +29,9 @@ public class WaveletMatrix {
         }
         this.numBitsUsed = numBitsUsed;
         this.bitSetSize = newSize;
-        matrix = new DynamicBitSet[numBitsUsed];
+        matrix = new DynamicTreeBitSet[numBitsUsed];
         for (int i = 0; i < numBitsUsed; i++) {
-            matrix[i] = new DynamicBitSet(oldInput.length, newSize);
+            matrix[i] = new DynamicTreeBitSet(oldInput.length);
         }
 
         fillMatrix(oldInput, 0);
@@ -54,7 +54,7 @@ public class WaveletMatrix {
         fillMatrix(input, level + 1);
     }
 
-    public DynamicBitSet[] getMatrix() {
+    public DynamicTreeBitSet[] getMatrix() {
         return matrix;
     }
 

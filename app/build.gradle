@@ -13,6 +13,7 @@ plugins {
     id 'c'
 }
 
+
 repositories {
     // Use Maven Central for resolving dependencies.
     mavenCentral()
@@ -46,6 +47,7 @@ dependencies {
 application {
     // Define the main class for the application.
     mainClass = 'CCDetect.lsp.App'
+    applicationDefaultJvmArgs = ["-XX:+PreserveFramePointer"]
 }
 
 test {

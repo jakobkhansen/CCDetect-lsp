@@ -12,6 +12,7 @@ import org.eclipse.lsp4j.Range;
 
 import CCDetect.lsp.datastructures.editdistance.EditOperation;
 import CCDetect.lsp.datastructures.rankselect.DynamicBitSet;
+import CCDetect.lsp.datastructures.rankselect.DynamicTreeBitSet;
 import CCDetect.lsp.datastructures.rankselect.WaveletMatrix;
 import CCDetect.lsp.detection.treesitterbased.fingerprint.Fingerprint;
 import CCDetect.lsp.detection.treesitterbased.fingerprint.TreesitterFingerprintGenerator;
@@ -188,11 +189,15 @@ public class Printer {
     public static String print(WaveletMatrix wm) {
         StringBuilder out = new StringBuilder("WaveletMatrix( \n");
         for (int i = 0; i < wm.getMatrix().length; i++) {
-            out.append(print(wm.getMatrix()[i]));
+            out.append(print(wm.getMatrix()[i].toBitSet()));
             out.append("\n");
         }
         out.append(")");
 
         return out.toString();
+    }
+
+    public static String print(DynamicTreeBitSet bitSet) {
+        return bitSet.getRoot().toString();
     }
 }
