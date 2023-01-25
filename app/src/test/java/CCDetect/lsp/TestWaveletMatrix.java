@@ -26,6 +26,7 @@ public class TestWaveletMatrix {
     public void testAccessSmall() {
         int[] input = { 1, 2, 3 };
         WaveletMatrix matrix = new WaveletMatrix(input, 10);
+        System.out.println(Printer.print(matrix));
         for (int i = 0; i < input.length; i++) {
             assertEquals(input[i], matrix.access(i));
         }
@@ -45,8 +46,10 @@ public class TestWaveletMatrix {
     public void testWaveletInsert() {
         int[] input = { 2, 0, 1 };
         WaveletMatrix matrix = new WaveletMatrix(input, 20);
+        System.out.println(Printer.print(matrix));
 
         matrix.insert(1, 2);
+        System.out.println(Printer.print(matrix));
 
         assertEquals(2, matrix.access(0));
         assertEquals(2, matrix.access(1));
@@ -113,6 +116,19 @@ public class TestWaveletMatrix {
         int[] newInput = { 3, 2, 4, 0 };
         WaveletMatrix matrix = new WaveletMatrix(input, 20);
         matrix.insert(1, 2);
+
+        for (int i = 0; i < newInput.length; i++) {
+            assertEquals(newInput[i], matrix.access(i));
+        }
+    }
+
+    @Test
+    public void testWaveletInsertEdge() {
+        int[] input = { 3, 0 };
+        int[] newInput = { 3, 0, 1 };
+        WaveletMatrix matrix = new WaveletMatrix(input, 20);
+        System.out.println("wavelet before " + Printer.print(matrix));
+        matrix.insert(2, 1);
 
         for (int i = 0; i < newInput.length; i++) {
             assertEquals(newInput[i], matrix.access(i));

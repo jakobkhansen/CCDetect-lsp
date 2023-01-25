@@ -71,7 +71,7 @@ public class TestRealFingerprintDynamicUpdate {
 
     @Test
     public void testWorldWindFingerprintFactor() throws Exception {
-        // testFile("src/test/resources/Fingerprints/worldwind_factor.txt");
+        testFile("src/test/resources/Fingerprints/worldwind_factor.txt");
     }
 
     public ExtendedSuffixArray buildOldSuffix(Iterator<String> iter) throws Exception {
