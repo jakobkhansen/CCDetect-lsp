@@ -18,7 +18,6 @@ public class DynamicSACA {
     int[] l;
     int[] sa;
     int[] isa;
-    int[] lcp;
     SmallerCharacterCounts charCounts;
     WaveletMatrix waveletMatrix;
     int arraySize = 0;
@@ -31,13 +30,11 @@ public class DynamicSACA {
         actualSize = initialText.length;
         sa = new int[arraySize];
         isa = new int[arraySize];
-        lcp = new int[arraySize];
         charCounts = new SmallerCharacterCounts(initialText);
 
         for (int i = 0; i < initialText.length; i++) {
             sa[i] = initialSA[i];
             isa[i] = initialISA[i];
-            lcp[i] = initialLCP[i];
         }
         l = calculateL(initialSA, initialText, initialText.length);
         waveletMatrix = new WaveletMatrix(l, initialSize);
@@ -62,30 +59,25 @@ public class DynamicSACA {
         int oldSize = actualSize;
         int[] newSA = new int[newSize];
         int[] newISA = new int[newSize];
-        int[] newLCP = new int[newSize];
         int[] newL = new int[newSize];
 
         for (int i = 0; i < oldSize; i++) {
             newSA[i] = sa[i];
             newISA[i] = isa[i];
-            newLCP[i] = lcp[i];
             newL[i] = l[i];
         }
         sa = newSA;
         isa = newISA;
-        lcp = newLCP;
         l = newL;
     }
 
     public ExtendedSuffixArray getSmallExtendedSuffixArray(int[] fingerprint) {
         int[] smallSA = new int[actualSize];
         int[] smallISA = new int[actualSize];
-        int[] smallLCP = new int[actualSize];
 
         for (int i = 0; i < actualSize; i++) {
             smallSA[i] = sa[i];
             smallISA[i] = isa[i];
-            smallLCP[i] = lcp[i];
         }
 
         // Placeholder LCP array since we aren't dynamically updating yet
