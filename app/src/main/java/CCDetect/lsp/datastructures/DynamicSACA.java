@@ -15,7 +15,6 @@ public class DynamicSACA {
 
     int EXTRA_SIZE_INCREASE = 200;
 
-    int[] l;
     int[] sa;
     int[] isa;
     SmallerCharacterCounts charCounts;
@@ -36,7 +35,7 @@ public class DynamicSACA {
             sa[i] = initialSA[i];
             isa[i] = initialISA[i];
         }
-        l = calculateL(initialSA, initialText, initialText.length);
+        int[] l = calculateL(initialSA, initialText, initialText.length);
         waveletMatrix = new WaveletMatrix(l, initialSize);
     }
 
@@ -59,16 +58,13 @@ public class DynamicSACA {
         int oldSize = actualSize;
         int[] newSA = new int[newSize];
         int[] newISA = new int[newSize];
-        int[] newL = new int[newSize];
 
         for (int i = 0; i < oldSize; i++) {
             newSA[i] = sa[i];
             newISA[i] = isa[i];
-            newL[i] = l[i];
         }
         sa = newSA;
         isa = newISA;
-        l = newL;
     }
 
     public ExtendedSuffixArray getSmallExtendedSuffixArray(int[] fingerprint) {
@@ -92,7 +88,11 @@ public class DynamicSACA {
 
     public ExtendedSuffixArray getExtendedSuffixArray(int[] fingerprint) {
         SAIS sais = new SAIS();
+        Timer lcptimer = new Timer();
+        lcptimer.start();
         int[] newLCP = sais.buildLCPArray(fingerprint, sa, isa);
+        lcptimer.stop();
+        lcptimer.log("Time to build LCP array from scratch");
         return new ExtendedSuffixArray(sa, isa, newLCP, actualSize);
     }
 
@@ -125,13 +125,24 @@ public class DynamicSACA {
             previousCS += pointOfInsertion <= previousCS ? 1 : 0;
             posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;
 
+            int[] positionsToIncrementInISA = new int[l_length - pointOfInsertion - 1];
+            for (int j = pointOfInsertion; j < l_length - 1; j++) {
+                positionsToIncrementInISA[j - pointOfInsertion] = sa[j];
+            }
+
             // Increment all values in SA greater than or equal to position
-            incrementGreaterThan(sa, position, l_length);
+            // incrementGreaterThan(sa, position, l_length);
+            for (int j = position; j < l_length - 1; j++) {
+                sa[isa[j]]++;
+            }
 
             insert(sa, pointOfInsertion, position);
 
             // Increment all values in ISA greater than or equal to LF(ISA[position])
-            incrementGreaterThan(isa, pointOfInsertion, l_length);
+            // incrementGreaterThan(isa, pointOfInsertion, l_length);
+            for (int posToIncrement : positionsToIncrementInISA) {
+                isa[posToIncrement]++;
+            }
 
             // Insert new row in ISA
             insert(isa, position, pointOfInsertion);
@@ -154,13 +165,24 @@ public class DynamicSACA {
         previousCS += pointOfInsertion <= previousCS ? 1 : 0;
         posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;
 
-        // Update SA
-        incrementGreaterThan(sa, position, newSize);
+        int[] positionsToIncrementInISA = new int[newSize - pointOfInsertion - 1];
+        for (int j = pointOfInsertion; j < newSize - 1; j++) {
+            positionsToIncrementInISA[j - pointOfInsertion] = sa[j];
+        }
 
-        // Updates ISA
-        incrementGreaterThan(isa, pointOfInsertion, newSize);
+        // Increment all values in SA greater than or equal to position
+        for (int j = position; j < newSize - 1; j++) {
+            sa[isa[j]]++;
+        }
 
         insert(sa, pointOfInsertion, position);
+
+        // Increment all values in ISA greater than or equal to LF(ISA[position])
+        for (int posToIncrement : positionsToIncrementInISA) {
+            isa[posToIncrement]++;
+        }
+
+        // Insert new row in ISA
         insert(isa, position, pointOfInsertion);
 
         // Stage 4
@@ -169,7 +191,7 @@ public class DynamicSACA {
 
         while (pos != expectedPos) {
             int newPos = getLFDynamic(pos);
-            moveRow(pos, expectedPos, sa, isa, l);
+            moveRow(pos, expectedPos, sa, isa);
             pos = newPos;
             expectedPos = getLFDynamic(expectedPos);
         }
@@ -249,7 +271,7 @@ public class DynamicSACA {
 
         while (pos != expectedPos) {
             int newPos = getLFDynamic(pos);
-            moveRow(pos, expectedPos, sa, isa, l);
+            moveRow(pos, expectedPos, sa, isa);
             pos = newPos;
             expectedPos = getLFDynamic(expectedPos);
         }
@@ -269,10 +291,6 @@ public class DynamicSACA {
         return l;
     }
 
-    public void setL(int[] sa, int[] text) {
-        l = calculateL(sa, text, text.length);
-    }
-
     public int getLFDynamic(int index) {
 
         int charsBefore = getCharsBefore(waveletMatrix.access(index));
@@ -281,32 +299,14 @@ public class DynamicSACA {
     }
 
     private int getCharsBefore(int ch) {
-        Timer charsBeforeTimer = new Timer();
-        charsBeforeTimer.start();
-        int result = charCounts.getNumberOfSmallerChars(ch);
-        charsBeforeTimer.stop();
-        // charsBeforeTimer.log("Chars before timer");
-        return result;
-    }
-
-    public static int getRank(int[] l, int index, int size) {
-        Timer rankTimer = new Timer();
-        rankTimer.start();
-        int rank = 0;
-        for (int i = 0; i < index; i++) {
-            rank += l[i] == l[index] ? 1 : 0;
-        }
-        rankTimer.stop();
-        // rankTimer.log("Rank timer");
-
-        return rank;
+        return charCounts.getNumberOfSmallerChars(ch);
     }
 
     public int getWaveletRank(int position) {
         return waveletMatrix.rank(position);
     }
 
-    private void moveRow(int i, int j, int[] newSA, int[] newISA, int[] l) {
+    private void moveRow(int i, int j, int[] newSA, int[] newISA) {
         int lValue = waveletMatrix.access(i);
         waveletMatrix.delete(i);
         waveletMatrix.insert(j, lValue);
@@ -354,12 +354,6 @@ public class DynamicSACA {
         }
         // Mo
         arr[j] = item;
-    }
-
-    private void incrementGreaterThan(int[] arr, int element, int size) {
-        for (int i = 0; i < size; i++) {
-            arr[i] += arr[i] >= element ? 1 : 0;
-        }
     }
 
     private void decrementGreaterThan(int[] arr, int element, int size) {

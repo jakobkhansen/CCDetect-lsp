@@ -82,6 +82,7 @@ public class DynamicSACATest {
         int[] editArray = stringToIntArray(edit);
         int[] resultArray = stringToIntArrayWithTerminator(getStringWithEdit(input, edit, position));
 
+        System.out.println("Input array: " + Printer.print(originalArray));
         // Build expected result suffix array
         Timer linearTimer = new Timer();
         linearTimer.start();
