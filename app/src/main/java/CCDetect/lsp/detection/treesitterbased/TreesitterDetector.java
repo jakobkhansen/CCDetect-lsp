@@ -133,6 +133,8 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
     }
 
     public int[] getFullFingerprint(DocumentIndex<TreesitterDocumentModel> index) {
+        Timer timer = new Timer();
+        timer.start();
         int[] fingerprint = new int[tokenCount + 1];
         int i = 0;
         for (TreesitterDocumentModel doc : index) {
@@ -147,6 +149,8 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         }
         // 0 terminal
         fingerprint[i] = 0;
+        timer.stop();
+        timer.log("Time to concat full fingerprint");
 
         return fingerprint;
     }
