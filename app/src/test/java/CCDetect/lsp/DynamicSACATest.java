@@ -12,6 +12,8 @@ import org.junit.Test;
 import CCDetect.lsp.datastructures.DynamicSACA;
 import CCDetect.lsp.datastructures.ExtendedSuffixArray;
 import CCDetect.lsp.datastructures.SAIS;
+import CCDetect.lsp.datastructures.editdistance.EditOperation;
+import CCDetect.lsp.datastructures.editdistance.EditOperationType;
 import CCDetect.lsp.utils.Printer;
 import CCDetect.lsp.utils.Timer;
 
@@ -94,7 +96,7 @@ public class DynamicSACATest {
         Timer incrementalTimer = new Timer();
         incrementalTimer.start();
         DynamicSACA dynSACA = new DynamicSACA(originalArray, eSuffBanana, eSuffBanana.size() + 100);
-        dynSACA.insertFactor(editArray, position);
+        dynSACA.insertFactor(new EditOperation(EditOperationType.INSERT, position, editArray));
         ExtendedSuffixArray eSuffUpdated = dynSACA.getSmallExtendedSuffixArray(resultArray);
         incrementalTimer.stop();
         System.out.println("Actual SA: " + Printer.print(eSuffUpdated.getSuffix()));
@@ -177,7 +179,7 @@ public class DynamicSACATest {
         DynamicSACA dynSACA = new DynamicSACA(originalArray, eSuffOriginal, eSuffOriginal.size() + 100);
         Timer incrementalTimer = new Timer();
         incrementalTimer.start();
-        dynSACA.deleteFactor(position, length);
+        dynSACA.deleteFactor(new EditOperation(EditOperationType.DELETE, position, new int[length]));
         ExtendedSuffixArray eSuffUpdated = dynSACA.getSmallExtendedSuffixArray(resultArray);
         incrementalTimer.stop();
 
@@ -185,6 +187,11 @@ public class DynamicSACATest {
 
         assertArrayEquals(expected.getInverseSuffix(),
                 eSuffUpdated.getInverseSuffix());
+    }
+
+    @Test
+    public void testLCP() {
+
     }
 
     public void testDeleteAllFactors(String input) {

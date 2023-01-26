@@ -106,6 +106,28 @@ public class TreesitterDocumentModel extends DocumentModel {
         return tokenCount;
     }
 
+    public int[] getFullFingerprint() {
+        return concatFingerprints(fingerprints);
+    }
+
+    public int[] getFullOldFingerprint() {
+        return concatFingerprints(oldFingerprints);
+    }
+
+    private int[] concatFingerprints(List<Fingerprint> fingerprints) {
+        List<Integer> fullFingerprintList = new ArrayList<>();
+
+        for (Fingerprint f : fingerprints) {
+            for (int i : f.getFingerprint()) {
+                fullFingerprintList.add(i);
+            }
+        }
+        int[] fullFingerprint = fullFingerprintList.stream().mapToInt(i -> i).toArray();
+
+        return fullFingerprint;
+
+    }
+
     // TODO refactor this and ensure correct
     public void updateDocument(Range range, String updatedContent) {
 
@@ -163,23 +185,8 @@ public class TreesitterDocumentModel extends DocumentModel {
     }
 
     public List<EditOperation> getEditOperationsFromOldFingerprint() {
-        List<Integer> fullOldFingerprintList = new ArrayList<>();
-        List<Integer> fullNewFingerprintList = new ArrayList<>();
-        for (Fingerprint f : oldFingerprints) {
-            for (int i : f.getFingerprint()) {
-                fullOldFingerprintList.add(i);
-            }
-        }
-
-        for (Fingerprint f : fingerprints) {
-            for (int i : f.getFingerprint()) {
-                fullNewFingerprintList.add(i);
-            }
-        }
-        int[] fullOldFingerprint = fullOldFingerprintList.stream().mapToInt(i -> i).toArray();
-        int[] fullNewFingerprint = fullNewFingerprintList.stream().mapToInt(i -> i).toArray();
-        LOGGER.info("Old: " + Printer.print(fullOldFingerprint));
-        LOGGER.info("New: " + Printer.print(fullNewFingerprint));
+        int[] fullOldFingerprint = getFullOldFingerprint();
+        int[] fullNewFingerprint = getFullFingerprint();
 
         HirschbergsAlgorithm algorithm = new HirschbergsAlgorithm(fullOldFingerprint,
                 fullNewFingerprint);
@@ -191,6 +198,7 @@ public class TreesitterDocumentModel extends DocumentModel {
         // Update positions of all operations based on the fingerprints offset
         for (EditOperation operation : operations) {
             operation.setPosition(operation.getPosition() + fingerprintStart);
+            operation.setDocument(this);
         }
 
         return operations;

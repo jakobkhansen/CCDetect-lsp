@@ -15,6 +15,8 @@ import org.junit.Test;
 import CCDetect.lsp.datastructures.DynamicSACA;
 import CCDetect.lsp.datastructures.ExtendedSuffixArray;
 import CCDetect.lsp.datastructures.SAIS;
+import CCDetect.lsp.datastructures.editdistance.EditOperation;
+import CCDetect.lsp.datastructures.editdistance.EditOperationType;
 import CCDetect.lsp.utils.Printer;
 import CCDetect.lsp.utils.Timer;
 
@@ -44,7 +46,7 @@ public class TestRealFingerprintDynamicUpdate {
         DynamicSACA dynSACA = new DynamicSACA(oldFingerprint, old, oldFingerprint.length + 100);
         Timer incrementalTimer = new Timer();
         incrementalTimer.start();
-        dynSACA.insertFactor(edit, position);
+        dynSACA.insertFactor(new EditOperation(EditOperationType.INSERT, position, edit));
         ExtendedSuffixArray dynUpdated = dynSACA.getSmallExtendedSuffixArray(newArray);
         incrementalTimer.stop();
 
@@ -61,12 +63,12 @@ public class TestRealFingerprintDynamicUpdate {
     // TODO reimplement tests
     @Test
     public void testCCDetectFingerprint() throws Exception {
-        // testFile("src/test/resources/Fingerprints/ccdetect.txt");
+        testFile("src/test/resources/Fingerprints/ccdetect.txt");
     }
 
     @Test
     public void testWorldWindFingerprint() throws Exception {
-        // testFile("src/test/resources/Fingerprints/worldwind.txt");
+        testFile("src/test/resources/Fingerprints/worldwind.txt");
     }
 
     @Test

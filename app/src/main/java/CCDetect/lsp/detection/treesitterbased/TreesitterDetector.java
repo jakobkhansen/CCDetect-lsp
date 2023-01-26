@@ -102,7 +102,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                 return;
             }
 
-            dynamicUpdate(edits);
+            dynamicUpdate(edits, fingerprint);
             eSuff = saca.getExtendedSuffixArray(fingerprint);
             timer.stop();
         }
@@ -167,19 +167,19 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         return edits;
     }
 
-    public void dynamicUpdate(List<EditOperation> edits) {
+    public void dynamicUpdate(List<EditOperation> edits, int[] fingerprint) {
         for (EditOperation edit : edits) {
             LOGGER.info(Printer.print(edit));
             switch (edit.getOperationType()) {
                 case DELETE:
-                    saca.deleteFactor(edit.getPosition(), edit.getChars().size());
+                    saca.deleteFactor(edit);
                     break;
                 case INSERT:
-                    saca.insertFactor(edit.getChars().stream().mapToInt(i -> i).toArray(), edit.getPosition());
+                    saca.insertFactor(edit);
                     break;
                 case SUBSTITUTE:
-                    saca.deleteFactor(edit.getPosition(), edit.getChars().size());
-                    saca.insertFactor(edit.getChars().stream().mapToInt(i -> i).toArray(), edit.getPosition());
+                    saca.deleteFactor(edit);
+                    saca.insertFactor(edit);
                     break;
                 default:
                     break;
