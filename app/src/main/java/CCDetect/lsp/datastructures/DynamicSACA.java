@@ -21,7 +21,7 @@ public class DynamicSACA {
     int[] sa;
     int[] isa;
     int[] lcp;
-    SmallerCharacterCounts charCounts;
+    CharacterCount charCounts;
     WaveletMatrix waveletMatrix;
     int arraySize = 0;
     int actualSize = 0;
@@ -34,7 +34,7 @@ public class DynamicSACA {
         sa = new int[arraySize];
         isa = new int[arraySize];
         lcp = new int[arraySize];
-        charCounts = new SmallerCharacterCounts(initialText);
+        charCounts = new CharacterCount(initialText);
 
         for (int i = 0; i < initialText.length; i++) {
             sa[i] = initialSA[i];
