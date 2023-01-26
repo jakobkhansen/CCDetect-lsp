@@ -1,15 +1,27 @@
 package CCDetect.lsp.datastructures.editdistance;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentModel;
 
 public class EditOperation {
     private EditOperationType operationType;
     private int position;
-    private ArrayList<Integer> chars = new ArrayList<>();
+    private List<Integer> chars = new ArrayList<>();
+    private TreesitterDocumentModel document;
 
     public EditOperation(EditOperationType operationType, int start) {
         this.operationType = operationType;
         this.position = start;
+    }
+
+    public EditOperation(EditOperationType operationType, int start, int[] chars) {
+        this.operationType = operationType;
+        this.position = start;
+        this.chars = Arrays.stream(chars).boxed().collect(Collectors.toList());
     }
 
     public EditOperationType getOperationType() {
@@ -20,6 +32,14 @@ public class EditOperation {
         this.operationType = operationType;
     }
 
+    public TreesitterDocumentModel getDocument() {
+        return document;
+    }
+
+    public void setDocument(TreesitterDocumentModel document) {
+        this.document = document;
+    }
+
     public int getPosition() {
         return position;
     }
@@ -28,7 +48,7 @@ public class EditOperation {
         this.position = start;
     }
 
-    public ArrayList<Integer> getChars() {
+    public List<Integer> getChars() {
         return chars;
     }
 

@@ -2,6 +2,7 @@ package CCDetect.lsp.datastructures;
 
 import java.util.logging.Logger;
 
+import CCDetect.lsp.datastructures.editdistance.EditOperation;
 import CCDetect.lsp.datastructures.rankselect.WaveletMatrix;
 import CCDetect.lsp.utils.Printer;
 import CCDetect.lsp.utils.Timer;
@@ -17,6 +18,7 @@ public class DynamicSACA {
 
     int[] sa;
     int[] isa;
+    int[] lcp;
     SmallerCharacterCounts charCounts;
     WaveletMatrix waveletMatrix;
     int arraySize = 0;
@@ -29,11 +31,13 @@ public class DynamicSACA {
         actualSize = initialText.length;
         sa = new int[arraySize];
         isa = new int[arraySize];
+        lcp = new int[arraySize];
         charCounts = new SmallerCharacterCounts(initialText);
 
         for (int i = 0; i < initialText.length; i++) {
             sa[i] = initialSA[i];
             isa[i] = initialISA[i];
+            lcp[i] = initialLCP[i];
         }
         int[] l = calculateL(initialSA, initialText, initialText.length);
         waveletMatrix = new WaveletMatrix(l, initialSize);
@@ -97,7 +101,10 @@ public class DynamicSACA {
     }
 
     // Inserts a factor into the suffix array at position [start, end] (inclusive)
-    public void insertFactor(int[] newText, int position) {
+    public void insertFactor(EditOperation edit) {
+        int[] newText = edit.getChars().stream().mapToInt(i -> i).toArray();
+        int position = edit.getPosition();
+
         int newSize = actualSize + newText.length;
         updateSizes(newSize);
         int end = newText.length - 1;
@@ -118,6 +125,7 @@ public class DynamicSACA {
         for (int i = end - 1; i >= 0; i--) {
 
             insertInL(newText[i], pointOfInsertion);
+            insertInLCP(newText[i], pointOfInsertion, edit);
 
             int l_length = newSize - (i + 1);
 
@@ -197,7 +205,10 @@ public class DynamicSACA {
         }
     }
 
-    public void deleteFactor(int position, int length) {
+    public void deleteFactor(EditOperation edit) {
+        int position = edit.getPosition();
+        int length = edit.getChars().size();
+
         int oldSize = actualSize;
         int newSize = actualSize - length;
         updateSizes(newSize);
@@ -377,5 +388,25 @@ public class DynamicSACA {
         charCounts.addChar(ch);
         waveletMatrix.delete(position);
         waveletMatrix.insert(position, ch);
+    }
+
+    private void insertInLCP(int ch, int position, EditOperation edit) {
+        // Need the relevant document fingerprint in order to determine the new lcp
+        // value
+        if (edit.getDocument() == null) {
+            return;
+        }
+
+        int[] documentFingerprint = edit.getDocument().getFullFingerprint();
+        int fingerprintStart = edit.getDocument().getFingerprintStart();
+        int newLCPValue;
+        if (position == fingerprintStart) {
+            newLCPValue = 0;
+        } else {
+            for (int i = 0; i < documentFingerprint.length; i++) {
+
+            }
+        }
+
     }
 }
