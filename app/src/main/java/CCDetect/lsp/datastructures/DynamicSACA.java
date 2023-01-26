@@ -4,6 +4,8 @@ import java.util.logging.Logger;
 
 import CCDetect.lsp.datastructures.editdistance.EditOperation;
 import CCDetect.lsp.datastructures.rankselect.WaveletMatrix;
+import CCDetect.lsp.detection.treesitterbased.fingerprint.Fingerprint;
+import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentModel;
 import CCDetect.lsp.utils.Printer;
 import CCDetect.lsp.utils.Timer;
 
@@ -125,7 +127,6 @@ public class DynamicSACA {
         for (int i = end - 1; i >= 0; i--) {
 
             insertInL(newText[i], pointOfInsertion);
-            insertInLCP(newText[i], pointOfInsertion, edit);
 
             int l_length = newSize - (i + 1);
 
@@ -390,23 +391,4 @@ public class DynamicSACA {
         waveletMatrix.insert(position, ch);
     }
 
-    private void insertInLCP(int ch, int position, EditOperation edit) {
-        // Need the relevant document fingerprint in order to determine the new lcp
-        // value
-        if (edit.getDocument() == null) {
-            return;
-        }
-
-        int[] documentFingerprint = edit.getDocument().getFullFingerprint();
-        int fingerprintStart = edit.getDocument().getFingerprintStart();
-        int newLCPValue;
-        if (position == fingerprintStart) {
-            newLCPValue = 0;
-        } else {
-            for (int i = 0; i < documentFingerprint.length; i++) {
-
-            }
-        }
-
-    }
 }

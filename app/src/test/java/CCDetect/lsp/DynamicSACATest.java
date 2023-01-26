@@ -189,11 +189,6 @@ public class DynamicSACATest {
                 eSuffUpdated.getInverseSuffix());
     }
 
-    @Test
-    public void testLCP() {
-
-    }
-
     public void testDeleteAllFactors(String input) {
         for (int i = 0; i <= input.length(); i++) {
             for (int j = 1; j <= input.length() - i; j++) {
