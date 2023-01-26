@@ -134,26 +134,14 @@ public class DynamicSACA {
             previousCS += pointOfInsertion <= previousCS ? 1 : 0;
             posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;
 
-            int[] positionsToIncrementInISA = new int[l_length - pointOfInsertion - 1];
-            for (int j = pointOfInsertion; j < l_length - 1; j++) {
-                positionsToIncrementInISA[j - pointOfInsertion] = sa[j];
-            }
-
             // Increment all values in SA greater than or equal to position
-            // incrementGreaterThan(sa, position, l_length);
-            for (int j = position; j < l_length - 1; j++) {
-                sa[isa[j]]++;
-            }
-
-            insert(sa, pointOfInsertion, position);
+            incrementGreaterThan(sa, position, l_length - 1);
 
             // Increment all values in ISA greater than or equal to LF(ISA[position])
-            // incrementGreaterThan(isa, pointOfInsertion, l_length);
-            for (int posToIncrement : positionsToIncrementInISA) {
-                isa[posToIncrement]++;
-            }
+            incrementGreaterThan(isa, pointOfInsertion, l_length - 1);
 
-            // Insert new row in ISA
+            // Insert new rows
+            insert(sa, pointOfInsertion, position);
             insert(isa, position, pointOfInsertion);
 
             int oldPOS = pointOfInsertion;
@@ -180,16 +168,12 @@ public class DynamicSACA {
         }
 
         // Increment all values in SA greater than or equal to position
-        for (int j = position; j < newSize - 1; j++) {
-            sa[isa[j]]++;
-        }
-
-        insert(sa, pointOfInsertion, position);
+        incrementGreaterThan(sa, position, newSize - 1);
 
         // Increment all values in ISA greater than or equal to LF(ISA[position])
-        for (int posToIncrement : positionsToIncrementInISA) {
-            isa[posToIncrement]++;
-        }
+        incrementGreaterThan(isa, pointOfInsertion, newSize - 1);
+
+        insert(sa, pointOfInsertion, position);
 
         // Insert new row in ISA
         insert(isa, position, pointOfInsertion);
@@ -366,6 +350,12 @@ public class DynamicSACA {
         }
         // Mo
         arr[j] = item;
+    }
+
+    private void incrementGreaterThan(int[] arr, int element, int size) {
+        for (int i = 0; i < size; i++) {
+            arr[i] += arr[i] >= element ? 1 : 0;
+        }
     }
 
     private void decrementGreaterThan(int[] arr, int element, int size) {
