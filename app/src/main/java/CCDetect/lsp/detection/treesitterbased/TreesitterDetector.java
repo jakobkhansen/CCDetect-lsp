@@ -77,11 +77,12 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         // Build suffix, inverse, lcp
         LOGGER.info("Building suffix array");
         NotificationHandler.startNotification("clones", "Finding clones");
-        Timer timer = new Timer();
-        timer.start();
         if (eSuff == null || !config.isDynamicDetection()) {
+            Timer timer = new Timer();
+            timer.start();
             eSuff = new SAIS().buildExtendedSuffixArray(fingerprint);
             timer.stop();
+            timer.log("Linear time");
             if (config.isDynamicDetection()) {
                 LOGGER.info("Building dynamic structures");
                 saca = new DynamicSACA(fingerprint, eSuff, fingerprint.length + 200);
@@ -89,12 +90,17 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             }
         } else {
 
-            LOGGER.info("Getting edits");
-            Timer textEditTimer = new Timer();
-            textEditTimer.start();
+            if (config.isEvaluate()) {
+                Timer timer = new Timer();
+                timer.start();
+                ExtendedSuffixArray linearEsuff = new SAIS().buildExtendedSuffixArray(fingerprint);
+                timer.stop();
+                timer.log("Linear time");
+            }
+
+            Timer timer = new Timer();
+            timer.start();
             List<EditOperation> edits = getDocumentEdits(index);
-            textEditTimer.stop();
-            textEditTimer.log("Time to get text edits");
 
             if (edits.size() == 0) {
                 LOGGER.info("No edits found");
@@ -105,11 +111,11 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             dynamicUpdate(edits, fingerprint);
             eSuff = saca.getExtendedSuffixArray(fingerprint);
             timer.stop();
+            timer.log("Incremental time");
         }
         for (TreesitterDocumentModel document : index) {
             document.setChanged(false);
         }
-        timer.log("Time to build suffix array, inverse and lcp");
 
         clones = new ArrayList<>();
 

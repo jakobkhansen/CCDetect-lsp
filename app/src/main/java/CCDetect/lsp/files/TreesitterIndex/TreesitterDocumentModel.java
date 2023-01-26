@@ -198,7 +198,6 @@ public class TreesitterDocumentModel extends DocumentModel {
         // Update positions of all operations based on the fingerprints offset
         for (EditOperation operation : operations) {
             operation.setPosition(operation.getPosition() + fingerprintStart);
-            operation.setDocument(this);
         }
 
         return operations;

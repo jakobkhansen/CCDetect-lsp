@@ -20,6 +20,7 @@ public class Configuration {
     private String[] extra_nodes = new String[0];
     private boolean dynamic_detection = true;
     private boolean update_on_save = true;
+    private boolean evaluate = false;
 
     public static void createInstanceFromJson(String json) {
         instance = JSONUtility.toModel(json, Configuration.class);
@@ -114,6 +115,14 @@ public class Configuration {
 
     public boolean shouldUpdateOnSave() {
         return update_on_save;
+    }
+
+    public boolean isEvaluate() {
+        return evaluate;
+    }
+
+    public void setEvaluate(boolean evaluate) {
+        this.evaluate = evaluate;
     }
 
 }

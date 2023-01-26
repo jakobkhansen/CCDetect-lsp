@@ -11,7 +11,6 @@ public class EditOperation {
     private EditOperationType operationType;
     private int position;
     private List<Integer> chars = new ArrayList<>();
-    private TreesitterDocumentModel document;
 
     public EditOperation(EditOperationType operationType, int start) {
         this.operationType = operationType;
@@ -30,14 +29,6 @@ public class EditOperation {
 
     public void setOperationType(EditOperationType operationType) {
         this.operationType = operationType;
-    }
-
-    public TreesitterDocumentModel getDocument() {
-        return document;
-    }
-
-    public void setDocument(TreesitterDocumentModel document) {
-        this.document = document;
     }
 
     public int getPosition() {
