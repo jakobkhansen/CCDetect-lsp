@@ -18,6 +18,7 @@ public class DynamicSACA {
 
     int EXTRA_SIZE_INCREASE = 200;
 
+    DynamicPermutation permutation;
     int[] sa;
     int[] isa;
     int[] lcp;
@@ -35,6 +36,7 @@ public class DynamicSACA {
         isa = new int[arraySize];
         lcp = new int[arraySize];
         charCounts = new CharacterCount(initialText);
+        permutation = new DynamicPermutation(initialSA);
 
         for (int i = 0; i < initialText.length; i++) {
             sa[i] = initialSA[i];
@@ -102,6 +104,10 @@ public class DynamicSACA {
         return new ExtendedSuffixArray(sa, isa, newLCP, actualSize);
     }
 
+    public DynamicPermutation getPermutation() {
+        return permutation;
+    }
+
     // Inserts a factor into the suffix array at position [start, end] (inclusive)
     public void insertFactor(EditOperation edit) {
         int[] newText = edit.getChars().stream().mapToInt(i -> i).toArray();
@@ -141,6 +147,7 @@ public class DynamicSACA {
             incrementGreaterThan(isa, pointOfInsertion, l_length - 1);
 
             // Insert new rows
+            permutation.insert(pointOfInsertion, position);
             insert(sa, pointOfInsertion, position);
             insert(isa, position, pointOfInsertion);
 
@@ -154,6 +161,8 @@ public class DynamicSACA {
             if (posFirstModified < oldPOS && newText[i] == storedLetter) {
                 pointOfInsertion++;
             }
+            System.out.println("SA loop: " + Printer.print(sa, l_length));
+            System.out.println("Perm loop: " + Printer.print(permutation.toArray()));
 
         }
         // Inserting final character that we substituted before
@@ -173,6 +182,7 @@ public class DynamicSACA {
         // Increment all values in ISA greater than or equal to LF(ISA[position])
         incrementGreaterThan(isa, pointOfInsertion, newSize - 1);
 
+        permutation.insert(pointOfInsertion, position);
         insert(sa, pointOfInsertion, position);
 
         // Insert new row in ISA
@@ -181,10 +191,13 @@ public class DynamicSACA {
         // Stage 4
         int pos = previousCS;
         int expectedPos = getLFDynamic(pointOfInsertion);
+        System.out.println("SA after s3: " + Printer.print(sa, newSize));
+        System.out.println("Perm after s3: " + Printer.print(permutation.toArray()));
 
         while (pos != expectedPos) {
             int newPos = getLFDynamic(pos);
             moveRow(pos, expectedPos, sa, isa);
+            System.out.println("perm: " + Printer.print(permutation.toArray()));
             pos = newPos;
             expectedPos = getLFDynamic(expectedPos);
         }
@@ -303,9 +316,16 @@ public class DynamicSACA {
     }
 
     private void moveRow(int i, int j, int[] newSA, int[] newISA) {
+        System.out.println("moveRow " + i + " " + j);
         int lValue = waveletMatrix.access(i);
         waveletMatrix.delete(i);
         waveletMatrix.insert(j, lValue);
+
+        int permValue = permutation.get(i);
+        System.out.println("permValue: " + permValue);
+        permutation.delete(i);
+        System.out.println("perm after delete: " + Printer.print(permutation.toArray()));
+        permutation.insert(j, permValue);
 
         // Update ISA
         if (i < j) {
