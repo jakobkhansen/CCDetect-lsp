@@ -17,6 +17,9 @@ public class ExtendedSuffixArray {
         this.size = suffix.length;
     }
 
+    public ExtendedSuffixArray() {
+    }
+
     public ExtendedSuffixArray(int[] suffix, int[] inverseSuffix, int[] lcp, int size) {
         this.suffix = suffix;
         this.inverseSuffix = inverseSuffix;

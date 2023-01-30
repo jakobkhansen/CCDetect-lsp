@@ -22,7 +22,7 @@ public class OrderStatisticTree {
         Node link;
 
         // Just for debugging
-        int label = -1;
+        int key = -1;
 
         int height;
         int count = 0;
@@ -30,8 +30,8 @@ public class OrderStatisticTree {
         Node() {
         }
 
-        Node(int label) {
-            this.label = label;
+        Node(int key) {
+            this.key = key;
         }
 
         public Node getLink() {
@@ -56,7 +56,8 @@ public class OrderStatisticTree {
 
         @Override
         public String toString() {
-            String out = "Node(" + "rank: " + rank() + ", label:" + (label != -1 ? label : "");
+            String out = "Node(" + "rank: " + rank() + ", key:" + (key != -1 ? key : "")
+                    + ", link: " + (link != null ? link.key : "");
             if (left != null) {
                 out += "\nLeft: " + left.toString();
             }
@@ -77,7 +78,7 @@ public class OrderStatisticTree {
 
     public Node add(int rank, int label) {
         Node added = add(rank);
-        added.label = label;
+        added.key = label;
         return added;
     }
 
@@ -139,10 +140,10 @@ public class OrderStatisticTree {
         Node node = root;
 
         while (node != null) {
-            if (rank == node.rank()) {
+            if (rank == node.rank() + 1) {
                 break;
             }
-            if (rank <= node.rank()) {
+            if (rank < node.rank() + 1) {
                 node = node.left;
             } else {
                 rank -= node.rank() + 1;
@@ -255,8 +256,17 @@ public class OrderStatisticTree {
 
         if (node.left != null && node.right != null) {
             // 'node' has both children.
+
             Node successor = minimumNode(node.right);
-            successor.getLink().setLink(node);
+            int tmpKey = node.key;
+            node.key = successor.key;
+
+            if (successor.getLink() != null) {
+                successor.getLink().setLink(node);
+                node.setLink(successor.getLink());
+            }
+            node.key = successor.key;
+
             Node child = successor.right;
             Node parent = successor.parent;
 
@@ -282,6 +292,7 @@ public class OrderStatisticTree {
                 hi = hi.parent;
             }
 
+            successor.key = tmpKey;
             return successor;
         }
 

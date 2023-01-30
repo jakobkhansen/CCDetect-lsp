@@ -16,18 +16,11 @@ public class TestDynamicPermutation {
     public void testDynamicPermutationSmall() {
         int[] input = { 0, 1, 2, 3 };
         DynamicPermutation perm = new DynamicPermutation(input);
-        System.out.println("aTree: " + perm.aTree.getRoot());
-        System.out.println("bTree: " + perm.bTree.getRoot());
-        System.out.println("arr: " + Printer.print(perm.toArray()));
         for (int i = 0; i < input.length; i++) {
             assertEquals(input[i], perm.get(i));
         }
-        System.out.println();
         int[] newInput = { 0, 2, 1, 3, 4 };
         perm.insert(1, 2);
-        System.out.println("aTree: " + perm.aTree.getRoot());
-        System.out.println("bTree: " + perm.bTree.getRoot());
-        System.out.println("arr: " + Printer.print(perm.toArray()));
         for (int i = 0; i < newInput.length; i++) {
             assertEquals(newInput[i], perm.get(i));
         }
@@ -37,18 +30,11 @@ public class TestDynamicPermutation {
     public void testDynamicPermutation() {
         int[] input = { 3, 0, 5, 1, 4, 2 };
         DynamicPermutation perm = new DynamicPermutation(input);
-        System.out.println("aTree: " + perm.aTree.getRoot());
-        System.out.println("bTree: " + perm.bTree.getRoot());
-        System.out.println("arr: " + Printer.print(perm.toArray()));
         for (int i = 0; i < input.length; i++) {
             assertEquals(input[i], perm.get(i));
         }
-        System.out.println();
         int[] newInput = { 4, 2, 0, 6, 1, 5, 3 };
         perm.insert(1, 2);
-        System.out.println("aTree: " + perm.aTree.getRoot());
-        System.out.println("bTree: " + perm.bTree.getRoot());
-        System.out.println("arr: " + Printer.print(perm.toArray()));
         for (int i = 0; i < newInput.length; i++) {
             assertEquals(newInput[i], perm.get(i));
         }
@@ -56,7 +42,6 @@ public class TestDynamicPermutation {
         perm.insert(0, 0);
 
         for (int i = 0; i < finalInput.length; i++) {
-            System.out.println(perm.get(i));
             assertEquals(finalInput[i], perm.get(i));
         }
     }
@@ -68,11 +53,7 @@ public class TestDynamicPermutation {
         for (int i = 0; i < input.length; i++) {
             assertEquals(input[i], perm.get(i));
         }
-        System.out.println();
-        System.out.println("Deleting on index 0");
         perm.delete(0);
-        System.out.println("aTree: " + perm.aTree.getRoot());
-        System.out.println("bTree: " + perm.bTree.getRoot());
         int[] newInput = { 0, 4, 1, 3, 2 };
         for (int i = 0; i < newInput.length; i++) {
             assertEquals(newInput[i], perm.get(i));
@@ -120,8 +101,39 @@ public class TestDynamicPermutation {
 
     @Test
     public void testEdgecase() {
-        int[] first = { 8, 5, 1, 3, 0, 6, 2, 7, 4 };
-        int[] newInput = {};
+        int[] initial = { 6, 5, 0, 2, 4, 1, 3 };
+        int[] first = { 7, 6, 0, 3, 5, 2, 1, 4, };
+        int[] second = { 6, 5, 0, 2, 4, 1, 3 };
+
+        DynamicPermutation perm = new DynamicPermutation(initial);
+
+        for (int i = 0; i < initial.length; i++) {
+            assertEquals(initial[i], perm.get(i));
+        }
+        perm.insert(5, 2, 99);
+        for (int i = 0; i < first.length; i++) {
+            assertEquals(first[i], perm.get(i));
+        }
+        perm.delete(6);
+        for (int i = 0; i < second.length; i++) {
+            assertEquals(second[i], perm.get(i));
+        }
+
+    }
+
+    @Test
+    public void testEdgecaseTwo() {
+        int[] first = { 7, 6, 0, 3, 5, 2, 1, 4, };
+
+        int[] second = { 6, 5, 0, 2, 4, 1, 3 };
         DynamicPermutation perm = new DynamicPermutation(first);
+        for (int i = 0; i < first.length; i++) {
+            assertEquals(first[i], perm.get(i));
+        }
+        perm.delete(6);
+        for (int i = 0; i < second.length; i++) {
+            assertEquals(second[i], perm.get(i));
+        }
+
     }
 }

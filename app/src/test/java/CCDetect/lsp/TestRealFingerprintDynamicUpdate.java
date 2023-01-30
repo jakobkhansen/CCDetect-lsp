@@ -47,7 +47,7 @@ public class TestRealFingerprintDynamicUpdate {
         Timer incrementalTimer = new Timer();
         incrementalTimer.start();
         dynSACA.insertFactor(new EditOperation(EditOperationType.INSERT, position, edit));
-        ExtendedSuffixArray dynUpdated = dynSACA.getSmallExtendedSuffixArray(newArray);
+        ExtendedSuffixArray dynUpdated = dynSACA.getESuffFromPermutation(newArray);
         incrementalTimer.stop();
 
         linearTimer.log("Linear time");
@@ -63,17 +63,17 @@ public class TestRealFingerprintDynamicUpdate {
     // TODO reimplement tests
     @Test
     public void testCCDetectFingerprint() throws Exception {
-        // testFile("src/test/resources/Fingerprints/ccdetect.txt");
+        testFile("src/test/resources/Fingerprints/ccdetect.txt");
     }
 
     @Test
     public void testWorldWindFingerprint() throws Exception {
-        // testFile("src/test/resources/Fingerprints/worldwind.txt");
+        testFile("src/test/resources/Fingerprints/worldwind.txt");
     }
 
     @Test
     public void testWorldWindFingerprintFactor() throws Exception {
-        // testFile("src/test/resources/Fingerprints/worldwind_factor.txt");
+        testFile("src/test/resources/Fingerprints/worldwind_factor.txt");
     }
 
     public ExtendedSuffixArray buildOldSuffix(Iterator<String> iter) throws Exception {
