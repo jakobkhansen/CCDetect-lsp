@@ -196,6 +196,38 @@ public class DynamicSACATest {
         }
     }
 
+    @Test
+    public void testLCP() {
+        testDynamicLCPInsertFactor("ab", "a", 0);
+    }
+
+    public void testDynamicLCPInsertFactor(String input, String edit, int position) {
+        // Build arrays
+        SAIS sais = new SAIS();
+        int[] originalArray = stringToIntArrayWithTerminator(input);
+        ExtendedSuffixArray eSuffBanana = sais.buildExtendedSuffixArray(originalArray);
+        int[] editArray = stringToIntArray(edit);
+        int[] resultArray = stringToIntArrayWithTerminator(getStringWithEdit(input, edit, position));
+
+        System.out.println("Input array: " + Printer.print(originalArray));
+        // Build expected result suffix array
+        Timer linearTimer = new Timer();
+        linearTimer.start();
+        ExtendedSuffixArray expected = sais.buildExtendedSuffixArray(resultArray);
+        linearTimer.stop();
+
+        // Dynamically update original
+        Timer incrementalTimer = new Timer();
+        incrementalTimer.start();
+        DynamicSACA dynSACA = new DynamicSACA(originalArray, eSuffBanana, eSuffBanana.size() + 100);
+        dynSACA.insertFactor(new EditOperation(EditOperationType.INSERT, position, editArray));
+        ExtendedSuffixArray eSuffUpdated = dynSACA.getESuffFromPermutation(resultArray);
+        incrementalTimer.stop();
+
+        assertArrayEquals(expected.getLcp(), eSuffUpdated.getLcp());
+
+    }
+
     public int[] stringToIntArrayWithTerminator(String input) {
         return IntStream.concat(input.chars().map(c -> {
             return (int) c - ('a' - 1);

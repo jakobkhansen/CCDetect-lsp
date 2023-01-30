@@ -4,10 +4,6 @@ import java.util.logging.Logger;
 
 import CCDetect.lsp.datastructures.editdistance.EditOperation;
 import CCDetect.lsp.datastructures.rankselect.WaveletMatrix;
-import CCDetect.lsp.detection.treesitterbased.fingerprint.Fingerprint;
-import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentModel;
-import CCDetect.lsp.utils.Printer;
-import CCDetect.lsp.utils.Timer;
 
 /**
  * DynamicSA
@@ -61,7 +57,6 @@ public class DynamicSACA {
         int[] newText = edit.getChars().stream().mapToInt(i -> i).toArray();
         int position = edit.getPosition();
 
-        int newSize = actualSize + newText.length;
         int end = newText.length - 1;
 
         // Stage 2, replace in L
@@ -124,9 +119,6 @@ public class DynamicSACA {
         int position = edit.getPosition();
         int length = edit.getChars().size();
 
-        int oldSize = actualSize;
-        int newSize = actualSize - length;
-
         // Stage 2, replace in L (but not actually)
         int posFirstModified = permutation.getInverse(position + length);
         int deletedLetter = waveletMatrix.access(posFirstModified);
@@ -135,7 +127,6 @@ public class DynamicSACA {
 
         // Stage 3, Delete rows in L
         for (int i = 0; i < length - 1; i++) {
-            int l_length = oldSize - i - 1;
 
             int currentLetter = waveletMatrix.access(pointOfDeletion);
             int tmp_rank = getWaveletRank(pointOfDeletion);
@@ -194,10 +185,6 @@ public class DynamicSACA {
 
         for (int i = 0; i < suff.length; i++) {
             l[i] = text[Math.floorMod(suff[i] - 1, suff.length)];
-        }
-        // For logging purposes, TODO DELETE THIS
-        for (int i = text.length; i < size; i++) {
-            l[i] = -1;
         }
         return l;
     }
