@@ -28,20 +28,13 @@ public class DynamicPermutation {
     }
 
     private void insertInitial(int index, int element) {
-        aTree.add(index, index);
-        bTree.add(element, element);
+        aTree.add(index);
+        bTree.add(element);
     }
 
     public void insert(int index, int element) {
-        Node aNode = aTree.add(index, index);
-        Node bNode = bTree.add(element, element);
-        aNode.setLink(bNode);
-        bNode.setLink(aNode);
-    }
-
-    public void insert(int index, int element, int label) {
-        Node aNode = aTree.add(index, label);
-        Node bNode = bTree.add(element, label);
+        Node aNode = aTree.add(index);
+        Node bNode = bTree.add(element);
         aNode.setLink(bNode);
         bNode.setLink(aNode);
     }
@@ -81,16 +74,30 @@ public class DynamicPermutation {
 
     public int[] toArray() {
         int[] out = new int[aTree.size()];
-        for (int i = 0; i < aTree.size(); i++) {
-            out[i] = get(i);
+        int inorderRank = 0;
+        for (Node node : bTree) {
+            node.inorderRank = inorderRank;
+            inorderRank++;
+        }
+        int index = 0;
+        for (Node node : aTree) {
+            out[index] = node.getLink().inorderRank;
+            index++;
         }
         return out;
     }
 
     public int[] inverseToArray() {
         int[] out = new int[aTree.size()];
-        for (int i = 0; i < aTree.size(); i++) {
-            out[i] = getInverse(i);
+        int inorderRank = 0;
+        for (Node node : aTree) {
+            node.inorderRank = inorderRank;
+            inorderRank++;
+        }
+        int index = 0;
+        for (Node node : bTree) {
+            out[index] = node.getLink().inorderRank;
+            index++;
         }
         return out;
     }

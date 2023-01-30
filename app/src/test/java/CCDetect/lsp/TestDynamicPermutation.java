@@ -110,7 +110,7 @@ public class TestDynamicPermutation {
         for (int i = 0; i < initial.length; i++) {
             assertEquals(initial[i], perm.get(i));
         }
-        perm.insert(5, 2, 99);
+        perm.insert(5, 2);
         for (int i = 0; i < first.length; i++) {
             assertEquals(first[i], perm.get(i));
         }

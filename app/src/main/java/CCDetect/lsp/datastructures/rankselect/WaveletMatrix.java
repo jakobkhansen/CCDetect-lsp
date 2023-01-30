@@ -25,7 +25,7 @@ public class WaveletMatrix {
 
         int[] oldInput = new int[inputSize];
         for (int i = 0; i < inputSize; i++) {
-            oldInput[i] = access(i);
+            oldInput[i] = get(i);
         }
         this.numBitsUsed = numBitsUsed;
         this.bitSetSize = newSize;
@@ -101,7 +101,7 @@ public class WaveletMatrix {
         return out;
     }
 
-    public int access(int index) {
+    public int get(int index) {
         int level = 0;
         int current = index;
         int[] bitPositions = new int[matrix.length];
@@ -176,7 +176,7 @@ public class WaveletMatrix {
     public int[] toInputArray() {
         int[] out = new int[inputSize];
         for (int i = 0; i < out.length; i++) {
-            out[i] = access(i);
+            out[i] = get(i);
         }
         return out;
     }
