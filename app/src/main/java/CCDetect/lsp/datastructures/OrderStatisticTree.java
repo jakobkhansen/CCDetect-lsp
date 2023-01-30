@@ -1,7 +1,10 @@
 package CCDetect.lsp.datastructures;
 
 import java.util.Collection;
+import java.util.ConcurrentModificationException;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 
@@ -12,7 +15,7 @@ import java.util.Set;
  * @version 1.6 (Feb 11, 2016)
  * @param the actual element type.
  */
-public class OrderStatisticTree {
+public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
 
     public static final class Node {
 
@@ -21,8 +24,10 @@ public class OrderStatisticTree {
         Node right;
         Node link;
 
-        // Just for debugging
         int key = -1;
+
+        // Used when building int[] sa;
+        int inorderRank;
 
         int height;
         int count = 0;
@@ -76,9 +81,9 @@ public class OrderStatisticTree {
         return root;
     }
 
-    public Node add(int rank, int label) {
+    public Node addWithKey(int rank, int key) {
         Node added = add(rank);
-        added.key = label;
+        added.key = key;
         return added;
     }
 
@@ -571,4 +576,94 @@ public class OrderStatisticTree {
 
         return leftTreeSize + 1 + rightTreeSize;
     }
+
+    @Override
+    public Iterator<Node> iterator() {
+        // TODO Auto-generated method stub
+        return new TreeIterator();
+    }
+
+    private final class TreeIterator implements Iterator<Node> {
+
+        private Node previousNode;
+        private Node nextNode;
+        private int expectedModCount = modCount;
+
+        TreeIterator() {
+            if (root == null) {
+                nextNode = null;
+            } else {
+                nextNode = minimumNode(root);
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            return nextNode != null;
+        }
+
+        @Override
+        public Node next() {
+            if (nextNode == null) {
+                throw new NoSuchElementException("Iteration exceeded.");
+            }
+
+            checkConcurrentModification();
+            Node datum = nextNode;
+            previousNode = nextNode;
+            nextNode = successorOf(nextNode);
+            return datum;
+        }
+
+        @Override
+        public void remove() {
+            if (previousNode == null) {
+                throw new IllegalStateException(
+                        nextNode == null ? "Not a single call to next(); nothing to remove."
+                                : "Removing the same element twice.");
+            }
+
+            checkConcurrentModification();
+
+            Node x = deleteNode(previousNode);
+            fixAfterModification(x, false);
+
+            if (x == nextNode) {
+                nextNode = previousNode;
+            }
+
+            expectedModCount = ++modCount;
+            size--;
+            previousNode = null;
+        }
+
+        private void checkConcurrentModification() {
+            if (expectedModCount != modCount) {
+                throw new ConcurrentModificationException(
+                        "The set was modified while iterating.");
+            }
+        }
+    }
+
+    private Node successorOf(Node node) {
+        if (node.right != null) {
+            node = node.right;
+
+            while (node.left != null) {
+                node = node.left;
+            }
+
+            return node;
+        }
+
+        Node parent = node.parent;
+
+        while (parent != null && parent.right == node) {
+            node = parent;
+            parent = parent.parent;
+        }
+
+        return parent;
+    }
+
 }

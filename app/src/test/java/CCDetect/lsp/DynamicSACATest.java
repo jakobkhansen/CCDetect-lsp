@@ -224,6 +224,11 @@ public class DynamicSACATest {
         ExtendedSuffixArray eSuffUpdated = dynSACA.getESuffFromPermutation(resultArray);
         incrementalTimer.stop();
 
+        for (int i : dynSACA.getDynLCP().getPositionsToUpdate()) {
+            System.out.println("Position to update: " + i);
+        }
+        System.out.println("dyn lcp: " + Printer.print(dynSACA.getDynLCP().toArray()));
+
         assertArrayEquals(expected.getLcp(), eSuffUpdated.getLcp());
 
     }

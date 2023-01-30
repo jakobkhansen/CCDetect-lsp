@@ -4,6 +4,7 @@ import java.util.logging.Logger;
 
 import CCDetect.lsp.datastructures.editdistance.EditOperation;
 import CCDetect.lsp.datastructures.rankselect.WaveletMatrix;
+import CCDetect.lsp.utils.Printer;
 
 /**
  * DynamicSA
@@ -15,8 +16,11 @@ public class DynamicSACA {
     int EXTRA_SIZE_INCREASE = 200;
 
     DynamicPermutation permutation;
+    DynamicLCP lcp;
+
     CharacterCount charCounts;
     WaveletMatrix waveletMatrix;
+
     int arraySize = 0;
     int actualSize = 0;
 
@@ -27,6 +31,7 @@ public class DynamicSACA {
         actualSize = initialText.length;
         charCounts = new CharacterCount(initialText);
         permutation = new DynamicPermutation(initialSA);
+        lcp = new DynamicLCP(initialLCP);
 
         int[] l = calculateL(initialSA, initialText, initialText.length);
         waveletMatrix = new WaveletMatrix(l, initialSize);
@@ -41,15 +46,16 @@ public class DynamicSACA {
         return permutation;
     }
 
-    public DynamicExtendedSuffixArray getESuffFromPermutation(int[] fingerprint) {
-        int[] lcp = new SAIS().buildLCPArray(fingerprint, permutation);
+    public ExtendedSuffixArray getESuffFromPermutation(int[] fingerprint) {
+        int[] sa = permutation.toArray();
+        int[] isa = permutation.inverseToArray();
+        int[] lcp = new SAIS().buildLCPArray(fingerprint, sa, isa);
 
-        return new DynamicExtendedSuffixArray(permutation, lcp);
+        return new ExtendedSuffixArray(sa, isa, lcp);
     }
 
-    public int[] getLCP(int[] fingerprint) {
-        SAIS sais = new SAIS();
-        return sais.buildLCPArray(fingerprint, permutation);
+    public DynamicLCP getDynLCP() {
+        return lcp;
     }
 
     // Inserts a factor into the suffix array at position [start, end] (inclusive)
@@ -61,12 +67,12 @@ public class DynamicSACA {
 
         // Stage 2, replace in L
         int posFirstModified = permutation.getInverse(position);
-        int previousCS = getLFDynamic(posFirstModified);
+        int previousCS = getLF(posFirstModified);
 
-        int storedLetter = waveletMatrix.access(posFirstModified);
+        int storedLetter = waveletMatrix.get(posFirstModified);
         substituteInL(newText[end], posFirstModified);
 
-        int pointOfInsertion = getLFDynamic(posFirstModified);
+        int pointOfInsertion = getLF(posFirstModified);
         // Number of smaller characters is one off if the char we have stored is less
         // than the one we inserted
         pointOfInsertion += storedLetter < newText[end] ? 1 : 0;
@@ -75,6 +81,7 @@ public class DynamicSACA {
         for (int i = end - 1; i >= 0; i--) {
 
             insertInL(newText[i], pointOfInsertion);
+            lcp.addPositionToUpdate(pointOfInsertion);
 
             // Increment previousCS and/or posFirstModified if we inserted before them
             previousCS += pointOfInsertion <= previousCS ? 1 : 0;
@@ -84,7 +91,7 @@ public class DynamicSACA {
             permutation.insert(pointOfInsertion, position);
 
             int oldPOS = pointOfInsertion;
-            pointOfInsertion = getLFDynamic(pointOfInsertion);
+            pointOfInsertion = getLF(pointOfInsertion);
             // Again number of smaller characters is one off potentially
             pointOfInsertion += storedLetter < newText[i] ? 1 : 0;
 
@@ -98,20 +105,21 @@ public class DynamicSACA {
         // Inserting final character that we substituted before
 
         insertInL(storedLetter, pointOfInsertion);
+        permutation.insert(pointOfInsertion, position);
+        lcp.addPositionToUpdate(pointOfInsertion);
+
         previousCS += pointOfInsertion <= previousCS ? 1 : 0;
         posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;
 
-        permutation.insert(pointOfInsertion, position);
-
         // Stage 4
         int pos = previousCS;
-        int expectedPos = getLFDynamic(pointOfInsertion);
+        int expectedPos = getLF(pointOfInsertion);
 
         while (pos != expectedPos) {
-            int newPos = getLFDynamic(pos);
+            int newPos = getLF(pos);
             moveRow(pos, expectedPos);
             pos = newPos;
-            expectedPos = getLFDynamic(expectedPos);
+            expectedPos = getLF(expectedPos);
         }
     }
 
@@ -121,14 +129,14 @@ public class DynamicSACA {
 
         // Stage 2, replace in L (but not actually)
         int posFirstModified = permutation.getInverse(position + length);
-        int deletedLetter = waveletMatrix.access(posFirstModified);
+        int deletedLetter = waveletMatrix.get(posFirstModified);
 
-        int pointOfDeletion = getLFDynamic(posFirstModified);
+        int pointOfDeletion = getLF(posFirstModified);
 
         // Stage 3, Delete rows in L
         for (int i = 0; i < length - 1; i++) {
 
-            int currentLetter = waveletMatrix.access(pointOfDeletion);
+            int currentLetter = waveletMatrix.get(pointOfDeletion);
             int tmp_rank = getWaveletRank(pointOfDeletion);
             // Rank could be one off since T[i-1] is in L twice at this point
             if (posFirstModified < pointOfDeletion && deletedLetter == currentLetter) {
@@ -147,7 +155,7 @@ public class DynamicSACA {
             // Rank is one off potentially since T[i-1] is twice in L at this point
             pointOfDeletion -= deletedLetter < currentLetter ? 1 : 0;
         }
-        int currentLetter = waveletMatrix.access(pointOfDeletion);
+        int currentLetter = waveletMatrix.get(pointOfDeletion);
         int tmp_rank = getWaveletRank(pointOfDeletion);
         if (posFirstModified < pointOfDeletion && deletedLetter == currentLetter) {
             tmp_rank--;
@@ -165,17 +173,17 @@ public class DynamicSACA {
         pointOfDeletion = posFirstModified;
         substituteInL(currentLetter, pointOfDeletion);
 
-        pointOfDeletion = getLFDynamic(pointOfDeletion);
+        pointOfDeletion = getLF(pointOfDeletion);
 
         // Stage 4
         int pos = previousCS;
         int expectedPos = pointOfDeletion;
 
         while (pos != expectedPos) {
-            int newPos = getLFDynamic(pos);
+            int newPos = getLF(pos);
             moveRow(pos, expectedPos);
             pos = newPos;
-            expectedPos = getLFDynamic(expectedPos);
+            expectedPos = getLF(expectedPos);
         }
     }
 
@@ -189,9 +197,15 @@ public class DynamicSACA {
         return l;
     }
 
-    public int getLFDynamic(int index) {
+    public int getLF(int index) {
 
-        int charsBefore = getCharsBefore(waveletMatrix.access(index));
+        int charsBefore = getCharsBefore(waveletMatrix.get(index));
+        int rank = getWaveletRank(index);
+        return charsBefore + rank;
+    }
+
+    public int getInverseLF(int index) {
+        int charsBefore = getCharsBefore(waveletMatrix.get(index));
         int rank = getWaveletRank(index);
         return charsBefore + rank;
     }
@@ -205,13 +219,16 @@ public class DynamicSACA {
     }
 
     private void moveRow(int i, int j) {
-        int lValue = waveletMatrix.access(i);
+        int lValue = waveletMatrix.get(i);
         waveletMatrix.delete(i);
         waveletMatrix.insert(j, lValue);
 
         int permValue = permutation.get(i);
         permutation.delete(i);
         permutation.insert(j, permValue);
+
+        lcp.addPositionToUpdate(i);
+        lcp.addPositionToUpdate(j);
 
     }
 
@@ -221,15 +238,31 @@ public class DynamicSACA {
     }
 
     private void deleteInL(int position) {
-        charCounts.deleteChar(waveletMatrix.access(position));
+        charCounts.deleteChar(waveletMatrix.get(position));
         waveletMatrix.delete(position);
     }
 
     private void substituteInL(int ch, int position) {
-        charCounts.deleteChar(waveletMatrix.access(position));
+        charCounts.deleteChar(waveletMatrix.get(position));
         charCounts.addChar(ch);
         waveletMatrix.delete(position);
         waveletMatrix.insert(position, ch);
     }
 
+    private void updateLCP() {
+        for (int pos : lcp.getPositionsToUpdate()) {
+            int[] suffix = getSuffixAt(pos);
+            System.out.println("Suffix: " + Printer.print(suffix));
+        }
+    }
+
+    public int[] getSuffixAt(int index) {
+        int current = getLF(0);
+        int[] out = new int[permutation.size() - index];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = waveletMatrix.get(current);
+            current = getLF(current);
+        }
+        return out;
+    }
 }

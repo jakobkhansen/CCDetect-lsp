@@ -7,8 +7,11 @@ package CCDetect.lsp.datastructures;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Iterator;
 import java.util.Scanner;
 import java.util.logging.Logger;
+
+import CCDetect.lsp.datastructures.OrderStatisticTree.Node;
 
 public class SAIS {
 
@@ -243,8 +246,10 @@ public class SAIS {
         int[] lcp = new int[n];
 
         int l = 0;
+        Iterator<Node> bIterator = permutation.bTree.iterator();
         for (int i = 0; i < n - 1; i++) {
             int r = permutation.getInverse(i);
+            // int r = DynamicPermutation.inOrderRank(bIterator.next().getLink());
             int prevSuffix = permutation.get(r - 1);
             while (T[i + l] == T[prevSuffix + l] && T[i + l] != 1) {
                 l++;

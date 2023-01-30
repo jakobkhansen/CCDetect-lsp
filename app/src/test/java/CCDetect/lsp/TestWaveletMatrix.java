@@ -18,7 +18,7 @@ public class TestWaveletMatrix {
         int[] input = { 4, 7, 6, 5, 3, 2, 1, 0, 1, 4, 1, 7 };
         WaveletMatrix matrix = new WaveletMatrix(input, 10);
         for (int i = 0; i < input.length; i++) {
-            assertEquals(input[i], matrix.access(i));
+            assertEquals(input[i], matrix.get(i));
         }
     }
 
@@ -27,7 +27,7 @@ public class TestWaveletMatrix {
         int[] input = { 1, 2, 3 };
         WaveletMatrix matrix = new WaveletMatrix(input, 10);
         for (int i = 0; i < input.length; i++) {
-            assertEquals(input[i], matrix.access(i));
+            assertEquals(input[i], matrix.get(i));
         }
     }
 
@@ -50,10 +50,10 @@ public class TestWaveletMatrix {
         matrix.insert(1, 2);
         System.out.println(Printer.print(matrix));
 
-        assertEquals(2, matrix.access(0));
-        assertEquals(2, matrix.access(1));
-        assertEquals(0, matrix.access(2));
-        assertEquals(1, matrix.access(3));
+        assertEquals(2, matrix.get(0));
+        assertEquals(2, matrix.get(1));
+        assertEquals(0, matrix.get(2));
+        assertEquals(1, matrix.get(3));
     }
 
     @Test
@@ -64,7 +64,7 @@ public class TestWaveletMatrix {
         matrix.insert(0, 4);
 
         for (int i = 0; i < newInput.length; i++) {
-            assertEquals(newInput[i], matrix.access(i));
+            assertEquals(newInput[i], matrix.get(i));
         }
     }
 
@@ -76,7 +76,7 @@ public class TestWaveletMatrix {
         matrix.insert(3, 5);
 
         for (int i = 0; i < newInput.length; i++) {
-            assertEquals(newInput[i], matrix.access(i));
+            assertEquals(newInput[i], matrix.get(i));
         }
     }
 
@@ -88,7 +88,7 @@ public class TestWaveletMatrix {
         matrix.delete(1);
 
         for (int i = 0; i < newInput.length; i++) {
-            assertEquals(newInput[i], matrix.access(i));
+            assertEquals(newInput[i], matrix.get(i));
         }
     }
 
@@ -101,11 +101,11 @@ public class TestWaveletMatrix {
         matrix.delete(3);
 
         for (int i = 0; i < middle.length; i++) {
-            assertEquals(middle[i], matrix.access(i));
+            assertEquals(middle[i], matrix.get(i));
         }
         matrix.delete(0);
         for (int i = 0; i < end.length; i++) {
-            assertEquals(end[i], matrix.access(i));
+            assertEquals(end[i], matrix.get(i));
         }
     }
 
@@ -117,7 +117,7 @@ public class TestWaveletMatrix {
         matrix.insert(1, 2);
 
         for (int i = 0; i < newInput.length; i++) {
-            assertEquals(newInput[i], matrix.access(i));
+            assertEquals(newInput[i], matrix.get(i));
         }
     }
 
@@ -129,7 +129,7 @@ public class TestWaveletMatrix {
         matrix.insert(2, 1);
 
         for (int i = 0; i < newInput.length; i++) {
-            assertEquals(newInput[i], matrix.access(i));
+            assertEquals(newInput[i], matrix.get(i));
         }
     }
 }
