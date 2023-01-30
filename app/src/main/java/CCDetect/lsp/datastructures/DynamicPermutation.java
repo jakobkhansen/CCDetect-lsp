@@ -20,14 +20,8 @@ public class DynamicPermutation {
         }
 
         for (int i = 0; i < initial.length; i++) {
-            // System.out.println("i: " + i);
-            // System.out.println("arr[i]: " + initial[i]);
-            // System.out.println("aTree: " + aTree.getRoot());
-            // System.out.println("bTree: " + bTree.getRoot());
             Node aNode = aTree.getByRank(i);
             Node bNode = bTree.getByRank(initial[i]);
-            // System.out.println("aNode: " + aNode);
-            // System.out.println("bNode: " + bNode);
             aNode.setLink(bNode);
             bNode.setLink(aNode);
         }
@@ -41,6 +35,13 @@ public class DynamicPermutation {
     public void insert(int index, int element) {
         Node aNode = aTree.add(index, index);
         Node bNode = bTree.add(element, element);
+        aNode.setLink(bNode);
+        bNode.setLink(aNode);
+    }
+
+    public void insert(int index, int element, int label) {
+        Node aNode = aTree.add(index, label);
+        Node bNode = bTree.add(element, label);
         aNode.setLink(bNode);
         bNode.setLink(aNode);
     }
@@ -84,5 +85,17 @@ public class DynamicPermutation {
             out[i] = get(i);
         }
         return out;
+    }
+
+    public int[] inverseToArray() {
+        int[] out = new int[aTree.size()];
+        for (int i = 0; i < aTree.size(); i++) {
+            out[i] = getInverse(i);
+        }
+        return out;
+    }
+
+    public int size() {
+        return aTree.size();
     }
 }

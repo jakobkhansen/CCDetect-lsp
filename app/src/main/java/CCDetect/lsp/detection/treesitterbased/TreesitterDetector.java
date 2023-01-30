@@ -108,8 +108,12 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                 return;
             }
 
+            Timer updateTimer = new Timer();
+            updateTimer.start();
             dynamicUpdate(edits, fingerprint);
-            eSuff = saca.getExtendedSuffixArray(fingerprint);
+            updateTimer.stop();
+            updateTimer.log("Time to update sa");
+            eSuff = saca.getESuffFromPermutation(fingerprint);
             timer.stop();
             timer.log("Incremental time");
         }

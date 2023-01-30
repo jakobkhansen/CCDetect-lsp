@@ -238,6 +238,24 @@ public class SAIS {
         return lcp;
     }
 
+    public int[] buildLCPArray(int[] T, DynamicPermutation permutation) {
+        int n = T.length;
+        int[] lcp = new int[n];
+
+        int l = 0;
+        for (int i = 0; i < n - 1; i++) {
+            int r = permutation.getInverse(i);
+            int prevSuffix = permutation.get(r - 1);
+            while (T[i + l] == T[prevSuffix + l] && T[i + l] != 1) {
+                l++;
+            }
+            lcp[r] = l;
+            l = Integer.max(l - 1, 0);
+        }
+
+        return lcp;
+    }
+
     // Int array is expected to end with a 0 and have no 0's otherwise
     public ExtendedSuffixArray buildExtendedSuffixArray(int[] text) {
         int max = 0;

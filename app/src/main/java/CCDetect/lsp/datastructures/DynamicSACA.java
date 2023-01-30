@@ -19,9 +19,6 @@ public class DynamicSACA {
     int EXTRA_SIZE_INCREASE = 200;
 
     DynamicPermutation permutation;
-    int[] sa;
-    int[] isa;
-    int[] lcp;
     CharacterCount charCounts;
     WaveletMatrix waveletMatrix;
     int arraySize = 0;
@@ -32,17 +29,9 @@ public class DynamicSACA {
     public DynamicSACA(int[] initialText, int[] initialSA, int[] initialISA, int[] initialLCP, int initialSize) {
         arraySize = initialSize;
         actualSize = initialText.length;
-        sa = new int[arraySize];
-        isa = new int[arraySize];
-        lcp = new int[arraySize];
         charCounts = new CharacterCount(initialText);
         permutation = new DynamicPermutation(initialSA);
 
-        for (int i = 0; i < initialText.length; i++) {
-            sa[i] = initialSA[i];
-            isa[i] = initialISA[i];
-            lcp[i] = initialLCP[i];
-        }
         int[] l = calculateL(initialSA, initialText, initialText.length);
         waveletMatrix = new WaveletMatrix(l, initialSize);
     }
@@ -52,60 +41,19 @@ public class DynamicSACA {
                 initialSize);
     }
 
-    public void updateSizes(int newSize) {
-        if (newSize > arraySize) {
-            int newArraySize = newSize + EXTRA_SIZE_INCREASE;
-            resizeArrays(newArraySize);
-            arraySize = newArraySize;
-        }
-        actualSize = newSize;
-    }
-
-    public void resizeArrays(int newSize) {
-        LOGGER.info("Resizing dynamic arrays");
-        int oldSize = actualSize;
-        int[] newSA = new int[newSize];
-        int[] newISA = new int[newSize];
-
-        for (int i = 0; i < oldSize; i++) {
-            newSA[i] = sa[i];
-            newISA[i] = isa[i];
-        }
-        sa = newSA;
-        isa = newISA;
-    }
-
-    public ExtendedSuffixArray getSmallExtendedSuffixArray(int[] fingerprint) {
-        int[] smallSA = new int[actualSize];
-        int[] smallISA = new int[actualSize];
-
-        for (int i = 0; i < actualSize; i++) {
-            smallSA[i] = sa[i];
-            smallISA[i] = isa[i];
-        }
-
-        // Placeholder LCP array since we aren't dynamically updating yet
-        SAIS sais = new SAIS();
-        Timer lcptimer = new Timer();
-        lcptimer.start();
-        int[] lcp = sais.buildLCPArray(fingerprint, smallSA, smallISA);
-        lcptimer.stop();
-        lcptimer.log("Time to build LCP array from scratch");
-        return new ExtendedSuffixArray(smallSA, smallISA, lcp);
-    }
-
-    public ExtendedSuffixArray getExtendedSuffixArray(int[] fingerprint) {
-        SAIS sais = new SAIS();
-        Timer lcptimer = new Timer();
-        lcptimer.start();
-        int[] newLCP = sais.buildLCPArray(fingerprint, sa, isa);
-        lcptimer.stop();
-        lcptimer.log("Time to build LCP array from scratch");
-        return new ExtendedSuffixArray(sa, isa, newLCP, actualSize);
-    }
-
     public DynamicPermutation getPermutation() {
         return permutation;
+    }
+
+    public DynamicExtendedSuffixArray getESuffFromPermutation(int[] fingerprint) {
+        int[] lcp = new SAIS().buildLCPArray(fingerprint, permutation);
+
+        return new DynamicExtendedSuffixArray(permutation, lcp);
+    }
+
+    public int[] getLCP(int[] fingerprint) {
+        SAIS sais = new SAIS();
+        return sais.buildLCPArray(fingerprint, permutation);
     }
 
     // Inserts a factor into the suffix array at position [start, end] (inclusive)
@@ -114,17 +62,16 @@ public class DynamicSACA {
         int position = edit.getPosition();
 
         int newSize = actualSize + newText.length;
-        updateSizes(newSize);
         int end = newText.length - 1;
 
         // Stage 2, replace in L
-        int posFirstModified = isa[position];
+        int posFirstModified = permutation.getInverse(position);
         int previousCS = getLFDynamic(posFirstModified);
 
-        int storedLetter = waveletMatrix.access(isa[position]);
-        substituteInL(newText[end], isa[position]);
+        int storedLetter = waveletMatrix.access(posFirstModified);
+        substituteInL(newText[end], posFirstModified);
 
-        int pointOfInsertion = getLFDynamic(isa[position]);
+        int pointOfInsertion = getLFDynamic(posFirstModified);
         // Number of smaller characters is one off if the char we have stored is less
         // than the one we inserted
         pointOfInsertion += storedLetter < newText[end] ? 1 : 0;
@@ -134,22 +81,12 @@ public class DynamicSACA {
 
             insertInL(newText[i], pointOfInsertion);
 
-            int l_length = newSize - (i + 1);
-
             // Increment previousCS and/or posFirstModified if we inserted before them
             previousCS += pointOfInsertion <= previousCS ? 1 : 0;
             posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;
 
-            // Increment all values in SA greater than or equal to position
-            incrementGreaterThan(sa, position, l_length - 1);
-
-            // Increment all values in ISA greater than or equal to LF(ISA[position])
-            incrementGreaterThan(isa, pointOfInsertion, l_length - 1);
-
             // Insert new rows
             permutation.insert(pointOfInsertion, position);
-            insert(sa, pointOfInsertion, position);
-            insert(isa, position, pointOfInsertion);
 
             int oldPOS = pointOfInsertion;
             pointOfInsertion = getLFDynamic(pointOfInsertion);
@@ -161,8 +98,6 @@ public class DynamicSACA {
             if (posFirstModified < oldPOS && newText[i] == storedLetter) {
                 pointOfInsertion++;
             }
-            System.out.println("SA loop: " + Printer.print(sa, l_length));
-            System.out.println("Perm loop: " + Printer.print(permutation.toArray()));
 
         }
         // Inserting final character that we substituted before
@@ -171,33 +106,15 @@ public class DynamicSACA {
         previousCS += pointOfInsertion <= previousCS ? 1 : 0;
         posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;
 
-        int[] positionsToIncrementInISA = new int[newSize - pointOfInsertion - 1];
-        for (int j = pointOfInsertion; j < newSize - 1; j++) {
-            positionsToIncrementInISA[j - pointOfInsertion] = sa[j];
-        }
-
-        // Increment all values in SA greater than or equal to position
-        incrementGreaterThan(sa, position, newSize - 1);
-
-        // Increment all values in ISA greater than or equal to LF(ISA[position])
-        incrementGreaterThan(isa, pointOfInsertion, newSize - 1);
-
         permutation.insert(pointOfInsertion, position);
-        insert(sa, pointOfInsertion, position);
-
-        // Insert new row in ISA
-        insert(isa, position, pointOfInsertion);
 
         // Stage 4
         int pos = previousCS;
         int expectedPos = getLFDynamic(pointOfInsertion);
-        System.out.println("SA after s3: " + Printer.print(sa, newSize));
-        System.out.println("Perm after s3: " + Printer.print(permutation.toArray()));
 
         while (pos != expectedPos) {
             int newPos = getLFDynamic(pos);
-            moveRow(pos, expectedPos, sa, isa);
-            System.out.println("perm: " + Printer.print(permutation.toArray()));
+            moveRow(pos, expectedPos);
             pos = newPos;
             expectedPos = getLFDynamic(expectedPos);
         }
@@ -209,10 +126,9 @@ public class DynamicSACA {
 
         int oldSize = actualSize;
         int newSize = actualSize - length;
-        updateSizes(newSize);
 
         // Stage 2, replace in L (but not actually)
-        int posFirstModified = isa[position + length];
+        int posFirstModified = permutation.getInverse(position + length);
         int deletedLetter = waveletMatrix.access(posFirstModified);
 
         int pointOfDeletion = getLFDynamic(posFirstModified);
@@ -233,15 +149,8 @@ public class DynamicSACA {
             // Update posFirstModified if it has moved because of deletion
             posFirstModified -= pointOfDeletion <= posFirstModified ? 1 : 0;
 
-            // Decrement all values in SA greater than or equal to the value we deleted
-            decrementGreaterThan(sa, sa[pointOfDeletion], l_length + 1);
-
-            // Decrement all values in ISA greater than or equal to the value we deleted
-            decrementGreaterThan(isa, pointOfDeletion, l_length + 1);
-
             // Delete rows
-            delete(sa, pointOfDeletion, l_length);
-            delete(isa, position, l_length);
+            permutation.delete(pointOfDeletion);
 
             pointOfDeletion = tmp_rank + getCharsBefore(currentLetter);
             // Rank is one off potentially since T[i-1] is twice in L at this point
@@ -256,14 +165,7 @@ public class DynamicSACA {
         deleteInL(pointOfDeletion);
         posFirstModified -= pointOfDeletion <= posFirstModified ? 1 : 0;
 
-        // Decrement all values in SA greater than or equal to position
-        decrementGreaterThan(sa, sa[pointOfDeletion], newSize + 1);
-
-        // Decrement all values in ISA greater than or equal to LF(ISA[position])
-        decrementGreaterThan(isa, pointOfDeletion, newSize + 1);
-
-        delete(sa, pointOfDeletion, newSize);
-        delete(isa, position, newSize);
+        permutation.delete(pointOfDeletion);
 
         int previousCS = tmp_rank + getCharsBefore(currentLetter);
         previousCS -= deletedLetter < currentLetter ? 1 : 0;
@@ -280,7 +182,7 @@ public class DynamicSACA {
 
         while (pos != expectedPos) {
             int newPos = getLFDynamic(pos);
-            moveRow(pos, expectedPos, sa, isa);
+            moveRow(pos, expectedPos);
             pos = newPos;
             expectedPos = getLFDynamic(expectedPos);
         }
@@ -315,73 +217,15 @@ public class DynamicSACA {
         return waveletMatrix.rank(position);
     }
 
-    private void moveRow(int i, int j, int[] newSA, int[] newISA) {
-        System.out.println("moveRow " + i + " " + j);
+    private void moveRow(int i, int j) {
         int lValue = waveletMatrix.access(i);
         waveletMatrix.delete(i);
         waveletMatrix.insert(j, lValue);
 
         int permValue = permutation.get(i);
-        System.out.println("permValue: " + permValue);
         permutation.delete(i);
-        System.out.println("perm after delete: " + Printer.print(permutation.toArray()));
         permutation.insert(j, permValue);
 
-        // Update ISA
-        if (i < j) {
-            for (int index = i + 1; index <= j; index++) {
-                newISA[newSA[index]]--;
-            }
-        } else {
-            for (int index = j; index < i; index++) {
-                newISA[newSA[index]]++;
-            }
-        }
-        newISA[newSA[i]] = j;
-
-        // Update SA
-        move(newSA, i, j);
-    }
-
-    private void insert(int[] arr, int index, int element) {
-        for (int i = arr.length - 1; i > index; i--) {
-            arr[i] = arr[i - 1];
-        }
-        arr[index] = element;
-    }
-
-    private void delete(int[] arr, int index, int size) {
-        for (int i = index; i < size; i++) {
-            arr[i] = arr[i + 1];
-        }
-    }
-
-    // Move arr[i] to index j
-    private void move(int[] arr, int i, int j) {
-        int item = arr[i];
-        if (i < j) {
-            for (int k = i; k < j; k++) {
-                arr[k] = arr[k + 1];
-            }
-        } else {
-            for (int k = i; k > j; k--) {
-                arr[k] = arr[k - 1];
-            }
-        }
-        // Mo
-        arr[j] = item;
-    }
-
-    private void incrementGreaterThan(int[] arr, int element, int size) {
-        for (int i = 0; i < size; i++) {
-            arr[i] += arr[i] >= element ? 1 : 0;
-        }
-    }
-
-    private void decrementGreaterThan(int[] arr, int element, int size) {
-        for (int i = 0; i < size; i++) {
-            arr[i] -= arr[i] >= element ? 1 : 0;
-        }
     }
 
     private void insertInL(int ch, int position) {

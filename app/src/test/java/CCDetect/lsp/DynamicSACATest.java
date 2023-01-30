@@ -71,10 +71,10 @@ public class DynamicSACATest {
 
     @Test
     public void testInsertSingleCharOnAllIndices() {
-        // testInsertOnAllIndices("helloworld", "a");
-        // testInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis", "a");
-        // testInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis", "x");
-        // testInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis", "h");
+        testInsertOnAllIndices("helloworld", "a");
+        testInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis", "a");
+        testInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis", "x");
+        testInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis", "h");
     }
 
     public void testDynamicSuffixInsertFactor(String input, String edit, int position) {
@@ -97,13 +97,9 @@ public class DynamicSACATest {
         incrementalTimer.start();
         DynamicSACA dynSACA = new DynamicSACA(originalArray, eSuffBanana, eSuffBanana.size() + 100);
         dynSACA.insertFactor(new EditOperation(EditOperationType.INSERT, position, editArray));
-        ExtendedSuffixArray eSuffUpdated = dynSACA.getSmallExtendedSuffixArray(resultArray);
-        DynamicPermutation permutation = dynSACA.getPermutation();
+        ExtendedSuffixArray eSuffUpdated = dynSACA.getESuffFromPermutation(resultArray);
         incrementalTimer.stop();
-        System.out.println("Expected SA: " + Printer.print(expected.getSuffix()));
-        System.out.println("Permutation: " + Printer.print(dynSACA.getPermutation().toArray()));
 
-        assertArrayEquals(expected.getSuffix(), permutation.toArray());
         assertArrayEquals(expected.getSuffix(), eSuffUpdated.getSuffix());
 
         assertArrayEquals(expected.getInverseSuffix(),
@@ -133,39 +129,39 @@ public class DynamicSACATest {
         testDynamicSuffixInsertFactor("bcd", "xxx", 3);
         testDynamicSuffixInsertFactor("bcd", "xadpx", 1);
         testDynamicSuffixInsertFactor("bcd", "cd", 2);
-        // testInsertOnAllIndices("bcd", "hx");
-        // testInsertOnAllIndices("bcd", "aj");
+        testInsertOnAllIndices("bcd", "hx");
+        testInsertOnAllIndices("bcd", "aj");
     }
 
     @Test
     public void testInsertFactorOnAllIndices() {
-        // testInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis",
-        // "habc");
-        // testInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis",
-        // "xxxxxasldkjsadoiqw");
+        testInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis",
+                "habc");
+        testInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis",
+                "xxxxxasldkjsadoiqw");
     }
 
     @Test
     public void deleteSmallFactor() {
-        // testDynamicSuffixDeleteFactor("abc", 1, 2);
-        // testDynamicSuffixDeleteFactor("abcd", 1, 2);
-        // testDynamicSuffixDeleteFactor("abcde", 1, 2);
-        // testDynamicSuffixDeleteFactor("abcde", 1, 3);
-        // testDynamicSuffixDeleteFactor("abcde", 1, 4);
-        // testDynamicSuffixDeleteFactor("ba", 1, 1);
-        // testDynamicSuffixDeleteFactor("jsaldkj", 0, 4);
-        // testDynamicSuffixDeleteFactor("abb", 2, 1);
+        testDynamicSuffixDeleteFactor("abc", 1, 2);
+        testDynamicSuffixDeleteFactor("abcd", 1, 2);
+        testDynamicSuffixDeleteFactor("abcde", 1, 2);
+        testDynamicSuffixDeleteFactor("abcde", 1, 3);
+        testDynamicSuffixDeleteFactor("abcde", 1, 4);
+        testDynamicSuffixDeleteFactor("ba", 1, 1);
+        testDynamicSuffixDeleteFactor("jsaldkj", 0, 4);
+        testDynamicSuffixDeleteFactor("abb", 2, 1);
 
     }
 
     @Test
     public void deleteAllFactorsInString() {
-        // testDeleteAllFactors("abc");
-        // testDeleteAllFactors("abb");
-        // testDeleteAllFactors("pneumonoultramicroscopicsilicovolcanoconiosis");
-        // testDeleteAllFactors("floccinaucinihilipilification");
-        // testDeleteAllFactors("incomprehensibility");
-        // testDeleteAllFactors("xenotransplantation");
+        testDeleteAllFactors("abc");
+        testDeleteAllFactors("abb");
+        testDeleteAllFactors("pneumonoultramicroscopicsilicovolcanoconiosis");
+        testDeleteAllFactors("floccinaucinihilipilification");
+        testDeleteAllFactors("incomprehensibility");
+        testDeleteAllFactors("xenotransplantation");
     }
 
     public void testDynamicSuffixDeleteFactor(String input, int position, int length) {
@@ -183,7 +179,7 @@ public class DynamicSACATest {
         Timer incrementalTimer = new Timer();
         incrementalTimer.start();
         dynSACA.deleteFactor(new EditOperation(EditOperationType.DELETE, position, new int[length]));
-        ExtendedSuffixArray eSuffUpdated = dynSACA.getSmallExtendedSuffixArray(resultArray);
+        ExtendedSuffixArray eSuffUpdated = dynSACA.getESuffFromPermutation(resultArray);
         incrementalTimer.stop();
 
         assertArrayEquals(expected.getSuffix(), eSuffUpdated.getSuffix());
