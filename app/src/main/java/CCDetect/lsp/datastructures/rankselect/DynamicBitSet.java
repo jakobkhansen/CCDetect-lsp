@@ -61,6 +61,19 @@ public class DynamicBitSet {
         return res;
     }
 
+    public int select(int rank, boolean value) {
+        int goal = rank + 1;
+        int seenBefore = 0;
+
+        for (int i = 0; i < realSize; i++) {
+            seenBefore += get(i) == value ? 1 : 0;
+            if (seenBefore == goal) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     public int getNumZeroes() {
         return realSize - set.cardinality();
     }

@@ -93,4 +93,28 @@ public class TestDynamicTreeBitSet {
         assertEquals(true, set.get(20));
         assertEquals(false, set.get(21));
     }
+
+    @Test
+    public void testTreeSelect() {
+        DynamicTreeBitSet set = new DynamicTreeBitSet(32);
+        set.set(1, true);
+        set.set(2, true);
+        set.set(3, true);
+        set.set(9, true);
+        System.out.println(Printer.print(set.toBitSet()));
+
+        assertEquals(1, set.select(0, true));
+        assertEquals(2, set.select(1, true));
+        assertEquals(3, set.select(2, true));
+
+        assertEquals(9, set.select(3, true));
+
+        assertEquals(0, set.select(0, false));
+        assertEquals(4, set.select(1, false));
+        assertEquals(5, set.select(2, false));
+        assertEquals(6, set.select(3, false));
+        assertEquals(7, set.select(4, false));
+        assertEquals(8, set.select(5, false));
+        assertEquals(10, set.select(6, false));
+    }
 }

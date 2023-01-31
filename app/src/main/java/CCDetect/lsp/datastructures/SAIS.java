@@ -223,14 +223,14 @@ public class SAIS {
     }
 
     public int[] buildLCPArray(int[] T, int[] L, int[] R) {
-        int n = T.length;
+        int n = L.length;
         int[] lcp = new int[n];
 
         int l = 0;
         for (int i = 0; i < n - 1; i++) {
             int r = R[i];
             int prevSuffix = L[r - 1];
-            while (T[i + l] == T[prevSuffix + l] && T[i + l] != 1) {
+            while (T[i + l] == T[prevSuffix + l]) {
                 l++;
             }
             lcp[r] = l;
@@ -246,7 +246,6 @@ public class SAIS {
         int[] lcp = new int[n];
 
         int l = 0;
-        Iterator<Node> bIterator = permutation.bTree.iterator();
         for (int i = 0; i < n - 1; i++) {
             int r = permutation.getInverse(i);
             // int r = DynamicPermutation.inOrderRank(bIterator.next().getLink());
