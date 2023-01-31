@@ -81,14 +81,15 @@ public class DynamicSACA {
         for (int i = end - 1; i >= 0; i--) {
 
             insertInL(newText[i], pointOfInsertion);
-            lcp.insertNewValue(pointOfInsertion);
 
             // Increment previousCS and/or posFirstModified if we inserted before them
             previousCS += pointOfInsertion <= previousCS ? 1 : 0;
             posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;
 
             // Insert new rows
+            System.out.println("New value " + position + " in SA at pos " + pointOfInsertion);
             permutation.insert(pointOfInsertion, position);
+            lcp.insertNewValue(pointOfInsertion);
 
             int oldPOS = pointOfInsertion;
             pointOfInsertion = getLF(pointOfInsertion);
@@ -105,8 +106,9 @@ public class DynamicSACA {
         // Inserting final character that we substituted before
 
         insertInL(storedLetter, pointOfInsertion);
+        System.out.println("New value " + position + " in SA at pos " + pointOfInsertion);
         permutation.insert(pointOfInsertion, position);
-        lcp.insertNewValue(pointOfInsertion + 1);
+        lcp.insertNewValue(pointOfInsertion);
 
         previousCS += pointOfInsertion <= previousCS ? 1 : 0;
         posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;
@@ -221,6 +223,7 @@ public class DynamicSACA {
     }
 
     private void moveRow(int i, int j) {
+        System.out.println("moveRow " + i + " " + j);
         int lValue = waveletMatrix.get(i);
         waveletMatrix.delete(i);
         waveletMatrix.insert(j, lValue);
@@ -229,7 +232,7 @@ public class DynamicSACA {
         permutation.delete(i);
         permutation.insert(j, permValue);
 
-        lcp.insertNewValue(i);
+        lcp.deleteValue(i);
         lcp.insertNewValue(j);
 
     }
@@ -253,10 +256,17 @@ public class DynamicSACA {
 
     private void updateLCP() {
 
+        System.out.println("sa: " + Printer.print(permutation.toArray()));
+        System.out.println("inverse: " + Printer.print(permutation.inverseToArray()));
         for (int pos : lcp.getPositionsToUpdate()) {
+            if (pos >= permutation.size()) {
+                continue;
+            }
             System.out.println("pos to update: " + pos);
-            int[] newSuffix = getSuffixAt(pos - 1);
-            int[] previous = getSuffixAt(pos - 2);
+            int[] newSuffix = getSuffixAt(permutation.get(pos));
+            int[] previous = getSuffixAt(permutation.get(pos - 1));
+            System.out.println("This suffix: " + Printer.print(newSuffix));
+            System.out.println("Prev suffix: " + Printer.print(previous));
             int lcpValue = getLCPValue(newSuffix, previous);
             System.out.println("New lcp value " + lcpValue);
             lcp.setValue(pos, lcpValue);

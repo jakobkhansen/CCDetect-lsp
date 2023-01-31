@@ -197,10 +197,11 @@ public class TestDynamicSACA {
 
     @Test
     public void testLCP() {
-        testDynamicLCPInsertFactor("ab", "a", 0);
-
+        // testDynamicLCPInsertFactor("ab", "a", 0);
+        // testDynamicLCPInsertFactor("ab", "ab", 0);
         // testDynamicLCPInsertFactor("b", "a", 0);
-        // testDynamicLCPInsertFactor("ctctgc", "g", 2);
+        testDynamicLCPInsertFactor("abc", "ab", 1);
+
         // testDynamicLCPInsertFactor("b", "ac", 1);
         // testDynamicLCPInsertFactor("b", "acd", 1);
         // testDynamicLCPInsertFactor("b", "a", 0);
@@ -235,8 +236,8 @@ public class TestDynamicSACA {
         Timer incrementalTimer = new Timer();
         incrementalTimer.start();
         DynamicSACA dynSACA = new DynamicSACA(originalArray, eSuffBanana, eSuffBanana.size() + 100);
+        System.out.println("Initial LCP: " + Printer.print(dynSACA.getDynLCP().toArray()));
         dynSACA.insertFactor(new EditOperation(EditOperationType.INSERT, position, editArray));
-        ExtendedSuffixArray eSuffUpdated = dynSACA.getESuffFromPermutation(resultArray);
         incrementalTimer.stop();
 
         System.out.println("dyn lcp: " + Printer.print(dynSACA.getDynLCP().toArray()));
