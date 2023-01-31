@@ -81,7 +81,7 @@ public class DynamicSACA {
         for (int i = end - 1; i >= 0; i--) {
 
             insertInL(newText[i], pointOfInsertion);
-            lcp.addPositionToUpdate(pointOfInsertion);
+            lcp.insertNewValue(pointOfInsertion);
 
             // Increment previousCS and/or posFirstModified if we inserted before them
             previousCS += pointOfInsertion <= previousCS ? 1 : 0;
@@ -106,7 +106,7 @@ public class DynamicSACA {
 
         insertInL(storedLetter, pointOfInsertion);
         permutation.insert(pointOfInsertion, position);
-        lcp.addPositionToUpdate(pointOfInsertion);
+        lcp.insertNewValue(pointOfInsertion + 1);
 
         previousCS += pointOfInsertion <= previousCS ? 1 : 0;
         posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;
@@ -121,6 +121,8 @@ public class DynamicSACA {
             pos = newPos;
             expectedPos = getLF(expectedPos);
         }
+
+        updateLCP();
     }
 
     public void deleteFactor(EditOperation edit) {
@@ -227,8 +229,8 @@ public class DynamicSACA {
         permutation.delete(i);
         permutation.insert(j, permValue);
 
-        lcp.addPositionToUpdate(i);
-        lcp.addPositionToUpdate(j);
+        lcp.insertNewValue(i);
+        lcp.insertNewValue(j);
 
     }
 
@@ -250,19 +252,35 @@ public class DynamicSACA {
     }
 
     private void updateLCP() {
+
         for (int pos : lcp.getPositionsToUpdate()) {
-            int[] suffix = getSuffixAt(pos);
-            System.out.println("Suffix: " + Printer.print(suffix));
+            System.out.println("pos to update: " + pos);
+            int[] newSuffix = getSuffixAt(pos - 1);
+            int[] previous = getSuffixAt(pos - 2);
+            int lcpValue = getLCPValue(newSuffix, previous);
+            System.out.println("New lcp value " + lcpValue);
+            lcp.setValue(pos, lcpValue);
         }
     }
 
-    public int[] getSuffixAt(int index) {
-        int current = getLF(0);
+    private int[] getSuffixAt(int index) {
+        int current = permutation.getInverse(0);
         int[] out = new int[permutation.size() - index];
-        for (int i = 0; i < out.length; i++) {
+        for (int i = out.length - 1; i >= 0; i--) {
             out[i] = waveletMatrix.get(current);
             current = getLF(current);
         }
         return out;
     }
+
+    private int getLCPValue(int[] suff1, int[] suff2) {
+        for (int i = 0; i < Math.min(suff1.length, suff2.length); i++) {
+            if (suff1[i] != suff2[i]) {
+                return i;
+            }
+        }
+        // Unreachable
+        return Math.min(suff1.length, suff2.length);
+    }
+
 }

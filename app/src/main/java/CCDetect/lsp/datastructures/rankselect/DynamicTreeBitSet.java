@@ -110,6 +110,21 @@ public class DynamicTreeBitSet {
             return equalBitsInLeft + right.rank(index - bitsInLeft, value);
         }
 
+        public int select(int rank, boolean value) {
+            if (isLeaf()) {
+                return bitSet.select(rank, value);
+            }
+
+            int equalBitsInLeft = value ? setInLeft : (bitsInLeft - setInLeft);
+
+            if (rank < equalBitsInLeft) {
+                return left.select(rank, value);
+            }
+
+            int rightValue = right.select(rank - equalBitsInLeft, value);
+            return rightValue != -1 ? bitsInLeft + rightValue : -1;
+        }
+
         public void insert(int index, boolean value) {
             if (isLeaf()) {
                 bitSet.insert(index, value);
@@ -185,6 +200,13 @@ public class DynamicTreeBitSet {
         return root.rank(index, value);
     }
 
+    public int select(int rank, boolean value) {
+        if (rank > size) {
+            return -1;
+        }
+        return root.select(rank, value);
+    }
+
     public void set(int index, boolean value) {
         root.setBit(index, value);
     }
@@ -203,9 +225,6 @@ public class DynamicTreeBitSet {
         size--;
     }
 
-    // Should return number of zeroes in entire bitset
-    // Should be easy, just return the number at the root or traverse to the bottom
-    // right or smth. Could also track these numbers
     public int getNumZeroes() {
         return size - root.getNumSetBits();
     }
