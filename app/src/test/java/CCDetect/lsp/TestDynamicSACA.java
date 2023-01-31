@@ -21,7 +21,7 @@ import CCDetect.lsp.utils.Timer;
 /**
  * DynamicSATest
  */
-public class DynamicSACATest {
+public class TestDynamicSACA {
 
     private static final Logger LOGGER = Logger.getLogger(
             Logger.GLOBAL_LOGGER_NAME);
