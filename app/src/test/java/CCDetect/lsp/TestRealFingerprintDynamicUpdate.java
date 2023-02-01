@@ -31,7 +31,7 @@ public class TestRealFingerprintDynamicUpdate {
         Iterator<String> iter = reader.lines().iterator();
         iter.next();
         int[] oldFingerprint = Arrays.stream(iter.next().split("\\s+")).mapToInt(Integer::parseInt).toArray();
-        ExtendedSuffixArray old = buildOldSuffix(iter);
+        ExtendedSuffixArray old = buildOldSuffix(iter, oldFingerprint);
 
         int[] edit = Arrays.stream(iter.next().split("\\s+")).mapToInt(Integer::parseInt).toArray();
         int position = Integer.parseInt(iter.next());
@@ -43,7 +43,7 @@ public class TestRealFingerprintDynamicUpdate {
         ExtendedSuffixArray expected = sais.buildExtendedSuffixArray(newArray);
         linearTimer.stop();
 
-        DynamicSACA dynSACA = new DynamicSACA(oldFingerprint, old, oldFingerprint.length + 100);
+        DynamicSACA dynSACA = new DynamicSACA(oldFingerprint, old);
         Timer incrementalTimer = new Timer();
         incrementalTimer.start();
         dynSACA.insertFactor(new EditOperation(EditOperationType.INSERT, position, edit));
@@ -53,9 +53,15 @@ public class TestRealFingerprintDynamicUpdate {
         linearTimer.log("Linear time");
         incrementalTimer.log("Incremental time");
 
+        System.out.println("insert " + position);
+        System.out.println("old size: " + oldFingerprint.length);
+        System.out.println("new size: " + newArray.length);
+
         assertArrayEquals(expected.getSuffix(), dynUpdated.getSuffix());
         assertArrayEquals(expected.getInverseSuffix(),
                 dynUpdated.getInverseSuffix());
+        assertArrayEquals(expected.getLcp(),
+                dynSACA.getDynLCP().toArray());
 
         reader.close();
     }
@@ -63,7 +69,7 @@ public class TestRealFingerprintDynamicUpdate {
     // TODO reimplement tests
     @Test
     public void testCCDetectFingerprint() throws Exception {
-        // testFile("src/test/resources/Fingerprints/ccdetect.txt");
+        testFile("src/test/resources/Fingerprints/ccdetect.txt");
     }
 
     @Test
@@ -76,15 +82,11 @@ public class TestRealFingerprintDynamicUpdate {
         // testFile("src/test/resources/Fingerprints/worldwind_factor.txt");
     }
 
-    public ExtendedSuffixArray buildOldSuffix(Iterator<String> iter) throws Exception {
+    public ExtendedSuffixArray buildOldSuffix(Iterator<String> iter, int[] fingerprint) throws Exception {
         String oldSALine = iter.next();
         int[] oldSA = Arrays.stream(oldSALine.split("\\s+")).mapToInt(Integer::parseInt).toArray();
-
-        String oldISALine = iter.next();
-        int[] oldISA = Arrays.stream(oldISALine.split("\\s+")).mapToInt(Integer::parseInt).toArray();
-
-        String oldLCPLine = iter.next();
-        int[] oldLCP = Arrays.stream(oldLCPLine.split("\\s+")).mapToInt(Integer::parseInt).toArray();
+        int[] oldISA = new SAIS().buildInverseSuffixArray(oldSA);
+        int[] oldLCP = new SAIS().buildLCPArray(fingerprint, oldSA, oldISA);
 
         return new ExtendedSuffixArray(oldSA, oldISA, oldLCP);
     }
