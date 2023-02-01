@@ -87,7 +87,6 @@ public class DynamicSACA {
             posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;
 
             // Insert new rows
-            System.out.println("New value " + position + " in SA at pos " + pointOfInsertion);
             permutation.insert(pointOfInsertion, position);
             lcp.insertNewValue(pointOfInsertion);
 
@@ -115,14 +114,12 @@ public class DynamicSACA {
         // Stage 4
         int pos = previousCS;
         int expectedPos = getLF(pointOfInsertion);
-        int numMoveRows = 0;
 
         while (pos != expectedPos) {
             int newPos = getLF(pos);
             moveRow(pos, expectedPos);
             pos = newPos;
             expectedPos = getLF(expectedPos);
-            numMoveRows++;
         }
 
         updateLCP(pos);
@@ -148,13 +145,13 @@ public class DynamicSACA {
                 tmp_rank--;
             }
 
+            // Delete rows
             deleteInL(pointOfDeletion);
+            permutation.delete(pointOfDeletion);
+            lcp.deleteValue(pointOfDeletion);
 
             // Update posFirstModified if it has moved because of deletion
             posFirstModified -= pointOfDeletion <= posFirstModified ? 1 : 0;
-
-            // Delete rows
-            permutation.delete(pointOfDeletion);
 
             pointOfDeletion = tmp_rank + getCharsBefore(currentLetter);
             // Rank is one off potentially since T[i-1] is twice in L at this point
@@ -167,9 +164,10 @@ public class DynamicSACA {
         }
 
         deleteInL(pointOfDeletion);
-        posFirstModified -= pointOfDeletion <= posFirstModified ? 1 : 0;
-
         permutation.delete(pointOfDeletion);
+        lcp.deleteValue(pointOfDeletion);
+
+        posFirstModified -= pointOfDeletion <= posFirstModified ? 1 : 0;
 
         int previousCS = tmp_rank + getCharsBefore(currentLetter);
         previousCS -= deletedLetter < currentLetter ? 1 : 0;
@@ -190,6 +188,8 @@ public class DynamicSACA {
             pos = newPos;
             expectedPos = getLF(expectedPos);
         }
+
+        updateLCP(pos);
     }
 
     // Returns L in an array with custom extra size
@@ -301,6 +301,10 @@ public class DynamicSACA {
             pos = getLF(pos);
 
         }
+
+        // LCP[0] should always be 0, maybe we could avoid this assignment, but not too
+        // important
+        lcp.setValue(0, 0);
 
     }
 

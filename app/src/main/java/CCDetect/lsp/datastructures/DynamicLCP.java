@@ -37,13 +37,6 @@ public class DynamicLCP {
         tree.addWithKey(index, -1);
     }
 
-    public void delete(int index) {
-        positionsToUpdate.set(index + 1, false);
-        tree.deleteByNode(tree.getByRank(index));
-
-        positionsToUpdate.set(index, true);
-    }
-
     public void deleteValue(int index) {
         if (index > 1) {
 
