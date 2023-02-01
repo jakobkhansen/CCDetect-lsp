@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import CCDetect.lsp.datastructures.OrderStatisticTree.Node;
-import CCDetect.lsp.datastructures.rankselect.DynamicBitSet;
 import CCDetect.lsp.datastructures.rankselect.DynamicTreeBitSet;
 import CCDetect.lsp.utils.Printer;
 
@@ -24,7 +23,7 @@ public class DynamicLCP {
         }
 
         // positionsToUpdate = new DynamicTreeBitSet(initial.length);
-        positionsToUpdate = new DynamicTreeBitSet(initial.length + 20);
+        positionsToUpdate = new DynamicTreeBitSet(initial.length);
     }
 
     public int get(int index) {
@@ -33,10 +32,9 @@ public class DynamicLCP {
 
     // Inserts new node which will later be set to the correct value
     public void insertNewValue(int index) {
-        System.out.println("new value at " + index + " and " + (index + 1));
-        positionsToUpdate.set(index, true);
+        positionsToUpdate.insert(index, true);
         positionsToUpdate.set(index + 1, true);
-        tree.addWithKey(index, 0);
+        tree.addWithKey(index, -1);
     }
 
     public void delete(int index) {
@@ -47,8 +45,12 @@ public class DynamicLCP {
     }
 
     public void deleteValue(int index) {
-        System.out.println("LCP value deleted at " + index);
-        positionsToUpdate.set(index, true);
+        if (index > 1) {
+
+            positionsToUpdate.set(index - 1, true);
+        }
+        positionsToUpdate.set(index + 1, true);
+        positionsToUpdate.delete(index);
         tree.remove(index);
     }
 
@@ -57,7 +59,6 @@ public class DynamicLCP {
     }
 
     public List<Integer> getPositionsToUpdate() {
-        System.out.println("Positions to update bitset: " + Printer.print(positionsToUpdate.toBitSet()));
         List<Integer> positions = new ArrayList<>();
         int rank = 0;
         int current = positionsToUpdate.select(rank, true);
