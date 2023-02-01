@@ -26,31 +26,6 @@ public class TestDynamicSACA {
     private static final Logger LOGGER = Logger.getLogger(
             Logger.GLOBAL_LOGGER_NAME);
 
-    // @Test
-    // public void testLF() {
-    // String input = "pneumonoultramicroscopicsilicovolcanoconiosis";
-    // int[] inputArr = stringToIntArrayWithTerminator(input);
-    // SAIS sais = new SAIS();
-    // ExtendedSuffixArray suff = sais.buildExtendedSuffixArray(inputArr);
-    //
-    // int[] l = DynamicSACA.calculateL(suff.getSuffix(), inputArr,
-    // suff.getSuffix().length);
-    //
-    // int current = 0;
-    // boolean found = false;
-    // for (int i = 0; i < inputArr.length; i++) {
-    // if (DynamicSACA.getLFDynamic(i, l, l.length) == 0) {
-    // current = i;
-    // found = true;
-    // }
-    // }
-    // assertTrue(found);
-    // for (int i = inputArr.length - 1; i >= 0; i--) {
-    // assertEquals(inputArr[i], l[current]);
-    // current = DynamicSACA.getLFDynamic(current, l, l.length);
-    // }
-    // }
-
     @Test
     public void testShortSingleInsert() {
         // testDynamicSuffixInsertFactor("cacgacg", "a", 3);
@@ -166,6 +141,11 @@ public class TestDynamicSACA {
                 "a");
     }
 
+    @Test
+    public void testLCPDelete() {
+        testLCPDeleteOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis");
+    }
+
     public void testDynamicSuffixInsertFactor(String input, String edit, int position) {
         // Build arrays
         SAIS sais = new SAIS();
@@ -192,6 +172,7 @@ public class TestDynamicSACA {
 
         assertArrayEquals(expected.getInverseSuffix(),
                 eSuffUpdated.getInverseSuffix());
+        assertArrayEquals(expected.getLcp(), dynSACA.getDynLCP().toArray());
 
     }
 
@@ -223,6 +204,8 @@ public class TestDynamicSACA {
 
         assertArrayEquals(expected.getInverseSuffix(),
                 eSuffUpdated.getInverseSuffix());
+
+        assertArrayEquals(expected.getLcp(), dynSACA.getDynLCP().toArray());
     }
 
     public void testDeleteAllFactors(String input) {
@@ -267,10 +250,47 @@ public class TestDynamicSACA {
 
     }
 
+    public void testDynamicLCPDeleteFactor(String input, int position, int length) {
+        SAIS sais = new SAIS();
+        int[] originalArray = stringToIntArrayWithTerminator(input);
+        ExtendedSuffixArray eSuffOriginal = sais.buildExtendedSuffixArray(originalArray);
+        int[] resultArray = stringToIntArrayWithTerminator(getStringWithDelete(input, position, length));
+
+        System.out.println("Input array: " + Printer.print(originalArray));
+        System.out.println("Result array: " + Printer.print(resultArray));
+
+        Timer linearTimer = new Timer();
+        linearTimer.start();
+        ExtendedSuffixArray expected = sais.buildExtendedSuffixArray(resultArray);
+        linearTimer.stop();
+
+        DynamicSACA dynSACA = new DynamicSACA(originalArray, eSuffOriginal, eSuffOriginal.size() + 100);
+        System.out.println("Initial SA: " + Printer.print(dynSACA.getPermutation().toArray()));
+        System.out.println("Initial LCP: " + Printer.print(dynSACA.getDynLCP().toArray()));
+        Timer incrementalTimer = new Timer();
+        incrementalTimer.start();
+        dynSACA.deleteFactor(new EditOperation(EditOperationType.DELETE, position, new int[length]));
+        incrementalTimer.stop();
+
+        System.out.println("Final SA: " + Printer.print(dynSACA.getPermutation().toArray()));
+        System.out.println("Final LCP: " + Printer.print(dynSACA.getDynLCP().toArray()));
+        System.out.println("Expected LCP: " + Printer.print(expected.getLcp()));
+        System.out.println("Expected SA: " + Printer.print(expected.getSuffix()));
+
+        assertArrayEquals(expected.getLcp(), dynSACA.getDynLCP().toArray());
+    }
+
     public void testLCPInsertOnAllIndices(String input, String edit) {
         for (int i = 0; i <= input.length(); i++) {
-            System.out.println("Inserting on pos: " + i);
             testDynamicLCPInsertFactor(input, edit, i);
+        }
+    }
+
+    public void testLCPDeleteOnAllIndices(String input) {
+        for (int i = 0; i <= input.length(); i++) {
+            for (int j = 1; j <= input.length() - i; j++) {
+                testDynamicLCPDeleteFactor(input, i, j);
+            }
         }
     }
 
