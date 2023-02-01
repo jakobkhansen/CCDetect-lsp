@@ -166,6 +166,7 @@ public class DynamicSACA {
         deleteInL(pointOfDeletion);
         permutation.delete(pointOfDeletion);
         lcp.deleteValue(pointOfDeletion);
+        System.out.println("Deleting at " + pointOfDeletion);
 
         posFirstModified -= pointOfDeletion <= posFirstModified ? 1 : 0;
 
@@ -184,6 +185,7 @@ public class DynamicSACA {
 
         while (pos != expectedPos) {
             int newPos = getLF(pos);
+            System.out.println("moveRow " + pos + " " + expectedPos);
             moveRow(pos, expectedPos);
             pos = newPos;
             expectedPos = getLF(expectedPos);
@@ -259,24 +261,24 @@ public class DynamicSACA {
         // System.out.println("sa: " + Printer.print(permutation.toArray()));
         // System.out.println("inverse: " +
         // Printer.print(permutation.inverseToArray()));
+        System.out.println("Positions to update: " + Printer.print(lcp.positionsToUpdate.toBitSet()));
         for (int pos : lcp.getPositionsToUpdate()) {
             if (pos >= permutation.size()) {
                 continue;
             }
             int[] newSuffix = getSuffixAt(permutation.get(pos));
             int[] previous = getSuffixAt(permutation.get(pos - 1));
-            // System.out.println("This suffix: " + Printer.print(newSuffix));
-            // System.out.println("Prev suffix: " + Printer.print(previous));
+            System.out.println("This suffix: " + Printer.print(newSuffix));
+            System.out.println("Prev suffix: " + Printer.print(previous));
             int lcpValue = getLCPValue(newSuffix, previous);
             // System.out.println("New lcp value " + lcpValue);
             lcp.setValue(pos, lcpValue);
         }
 
         int pos = startPos;
-        for (int i = 0; i < 200; i++) {
-            if (permutation.get(pos) == 0) {
-                break;
-            }
+        System.out.println("MOVEROW UPDATES");
+        while (true) {
+            System.out.println("pos: " + pos);
 
             if (pos != 0) {
                 int oldLCP = lcp.get(pos);
@@ -296,6 +298,10 @@ public class DynamicSACA {
                 if (oldLCP != lcpValue) {
                 }
                 lcp.setValue(pos + 1, lcpValue);
+            }
+
+            if (permutation.get(pos) == 0) {
+                break;
             }
             // System.out.println("New lcp value " + lcpValue);
             pos = getLF(pos);
