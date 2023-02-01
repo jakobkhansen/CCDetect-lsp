@@ -77,41 +77,6 @@ public class TestDynamicSACA {
         // testInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis", "h");
     }
 
-    public void testDynamicSuffixInsertFactor(String input, String edit, int position) {
-        // Build arrays
-        SAIS sais = new SAIS();
-        int[] originalArray = stringToIntArrayWithTerminator(input);
-        ExtendedSuffixArray eSuffBanana = sais.buildExtendedSuffixArray(originalArray);
-        int[] editArray = stringToIntArray(edit);
-        int[] resultArray = stringToIntArrayWithTerminator(getStringWithEdit(input, edit, position));
-
-        // Build expected result suffix array
-        Timer linearTimer = new Timer();
-        linearTimer.start();
-        ExtendedSuffixArray expected = sais.buildExtendedSuffixArray(resultArray);
-        linearTimer.stop();
-
-        // Dynamically update original
-        Timer incrementalTimer = new Timer();
-        incrementalTimer.start();
-        DynamicSACA dynSACA = new DynamicSACA(originalArray, eSuffBanana, eSuffBanana.size() + 100);
-        dynSACA.insertFactor(new EditOperation(EditOperationType.INSERT, position, editArray));
-        ExtendedSuffixArray eSuffUpdated = dynSACA.getESuffFromPermutation(resultArray);
-        incrementalTimer.stop();
-
-        assertArrayEquals(expected.getSuffix(), eSuffUpdated.getSuffix());
-
-        assertArrayEquals(expected.getInverseSuffix(),
-                eSuffUpdated.getInverseSuffix());
-
-    }
-
-    public void testInsertOnAllIndices(String input, String edit) {
-        for (int i = 0; i <= input.length(); i++) {
-            testDynamicSuffixInsertFactor(input, edit, i);
-        }
-    }
-
     @Test
     public void testInsertSmallFactor() {
         // testDynamicSuffixInsertFactor("b", "a", 0);
@@ -163,6 +128,79 @@ public class TestDynamicSACA {
         // testDeleteAllFactors("xenotransplantation");
     }
 
+    @Test
+    public void testLCP() {
+        testDynamicLCPInsertFactor("ab", "a", 0);
+        testDynamicLCPInsertFactor("ab", "ab", 0);
+        testDynamicLCPInsertFactor("b", "a", 0);
+        testDynamicLCPInsertFactor("abc", "ab", 1);
+
+        testDynamicLCPInsertFactor("b", "ac", 1);
+        testDynamicLCPInsertFactor("b", "acd", 1);
+        testDynamicLCPInsertFactor("b", "a", 0);
+        testDynamicLCPInsertFactor("b", "ab", 0);
+        testDynamicLCPInsertFactor("ac", "da", 1);
+        testDynamicLCPInsertFactor("ab", "ab", 2);
+        testDynamicLCPInsertFactor("b", "bb", 0);
+        testDynamicLCPInsertFactor("b", "asldkjsalkdj", 0);
+        testDynamicLCPInsertFactor("bcd", "bcad", 1);
+        testDynamicLCPInsertFactor("bcd", "xxx", 3);
+        testDynamicLCPInsertFactor("bcd", "xadpx", 1);
+        testDynamicLCPInsertFactor("bcd", "cd", 2);
+        testDynamicLCPInsertFactor("pneumonoultramicroscopicsilicovolcanoconiosis",
+                "habc", 6);
+    }
+
+    @Test
+    public void testLCPAllIndices() {
+        testLCPInsertOnAllIndices("aaabc", "abc");
+        testLCPInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis",
+                "habc");
+        testLCPInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis",
+                "xxxxxasldkjsadoiqw");
+        testLCPInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis",
+                "alksdj");
+        testLCPInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis",
+                "qwoiueqpzx");
+        testLCPInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis",
+                "a");
+    }
+
+    public void testDynamicSuffixInsertFactor(String input, String edit, int position) {
+        // Build arrays
+        SAIS sais = new SAIS();
+        int[] originalArray = stringToIntArrayWithTerminator(input);
+        ExtendedSuffixArray eSuffBanana = sais.buildExtendedSuffixArray(originalArray);
+        int[] editArray = stringToIntArray(edit);
+        int[] resultArray = stringToIntArrayWithTerminator(getStringWithEdit(input, edit, position));
+
+        // Build expected result suffix array
+        Timer linearTimer = new Timer();
+        linearTimer.start();
+        ExtendedSuffixArray expected = sais.buildExtendedSuffixArray(resultArray);
+        linearTimer.stop();
+
+        // Dynamically update original
+        Timer incrementalTimer = new Timer();
+        incrementalTimer.start();
+        DynamicSACA dynSACA = new DynamicSACA(originalArray, eSuffBanana, eSuffBanana.size() + 100);
+        dynSACA.insertFactor(new EditOperation(EditOperationType.INSERT, position, editArray));
+        ExtendedSuffixArray eSuffUpdated = dynSACA.getESuffFromPermutation(resultArray);
+        incrementalTimer.stop();
+
+        assertArrayEquals(expected.getSuffix(), eSuffUpdated.getSuffix());
+
+        assertArrayEquals(expected.getInverseSuffix(),
+                eSuffUpdated.getInverseSuffix());
+
+    }
+
+    public void testInsertOnAllIndices(String input, String edit) {
+        for (int i = 0; i <= input.length(); i++) {
+            testDynamicSuffixInsertFactor(input, edit, i);
+        }
+    }
+
     public void testDynamicSuffixDeleteFactor(String input, int position, int length) {
         SAIS sais = new SAIS();
         int[] originalArray = stringToIntArrayWithTerminator(input);
@@ -195,27 +233,6 @@ public class TestDynamicSACA {
         }
     }
 
-    @Test
-    public void testLCP() {
-        // testDynamicLCPInsertFactor("ab", "a", 0);
-        // testDynamicLCPInsertFactor("ab", "ab", 0);
-        // testDynamicLCPInsertFactor("b", "a", 0);
-        testDynamicLCPInsertFactor("abc", "ab", 1);
-
-        // testDynamicLCPInsertFactor("b", "ac", 1);
-        // testDynamicLCPInsertFactor("b", "acd", 1);
-        // testDynamicLCPInsertFactor("b", "a", 0);
-        // testDynamicLCPInsertFactor("b", "ab", 0);
-        // testDynamicLCPInsertFactor("ac", "da", 1);
-        // testDynamicLCPInsertFactor("ab", "ab", 2);
-        // testDynamicLCPInsertFactor("b", "bb", 0);
-        // testDynamicLCPInsertFactor("b", "asldkjsalkdj", 0);
-        // testDynamicLCPInsertFactor("bcd", "bcad", 1);
-        // testDynamicLCPInsertFactor("bcd", "xxx", 3);
-        // testDynamicLCPInsertFactor("bcd", "xadpx", 1);
-        // testDynamicLCPInsertFactor("bcd", "cd", 2);
-    }
-
     public void testDynamicLCPInsertFactor(String input, String edit, int position) {
         // Build arrays
         SAIS sais = new SAIS();
@@ -236,16 +253,25 @@ public class TestDynamicSACA {
         Timer incrementalTimer = new Timer();
         incrementalTimer.start();
         DynamicSACA dynSACA = new DynamicSACA(originalArray, eSuffBanana, eSuffBanana.size() + 100);
+        System.out.println("Initial SA: " + Printer.print(dynSACA.getPermutation().toArray()));
         System.out.println("Initial LCP: " + Printer.print(dynSACA.getDynLCP().toArray()));
         dynSACA.insertFactor(new EditOperation(EditOperationType.INSERT, position, editArray));
         incrementalTimer.stop();
 
-        System.out.println("dyn lcp: " + Printer.print(dynSACA.getDynLCP().toArray()));
+        System.out.println("Final SA: " + Printer.print(dynSACA.getPermutation().toArray()));
+        System.out.println("Final LCP: " + Printer.print(dynSACA.getDynLCP().toArray()));
         System.out.println("Expected LCP: " + Printer.print(expected.getLcp()));
         System.out.println("Expected SA: " + Printer.print(expected.getSuffix()));
 
         assertArrayEquals(expected.getLcp(), dynSACA.getDynLCP().toArray());
 
+    }
+
+    public void testLCPInsertOnAllIndices(String input, String edit) {
+        for (int i = 0; i <= input.length(); i++) {
+            System.out.println("Inserting on pos: " + i);
+            testDynamicLCPInsertFactor(input, edit, i);
+        }
     }
 
     public int[] stringToIntArrayWithTerminator(String input) {
