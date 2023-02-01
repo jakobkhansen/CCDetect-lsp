@@ -141,6 +141,27 @@ public class WaveletMatrix {
         return i - p;
     }
 
+    public int select(int index, int value) {
+        return select(index, value, 0, 0);
+    }
+
+    private int select(int index, int value, int level, int p) {
+        if (level >= matrix.length) {
+            return p + index;
+        }
+        int currentBit = (numBitsUsed - 1) - level;
+        boolean currBit = getBitBool(value, currentBit);
+        if (!currBit) {
+            p = matrix[level].rank(p, false);
+            int j = select(index, value, level + 1, p);
+            return matrix[level].select(j, false);
+        }
+        int numZeroes = matrix[level].getNumZeroes();
+        p = numZeroes + matrix[level].rank(p, true);
+        int j = select(index, value, level + 1, p);
+        return matrix[level].select(j - numZeroes, true);
+    }
+
     public void insert(int index, int value) {
         int level = 0;
         int currIndex = index;
