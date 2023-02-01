@@ -26,7 +26,6 @@ public class DynamicSACA {
     public DynamicSACA(int[] initialText, int[] initialSA, int[] initialISA, int[] initialLCP) {
         charCounts = new CharacterCount(initialText);
         permutation = new DynamicPermutation(initialSA);
-        System.out.println("initial lcp size: " + initialLCP.length);
         lcp = new DynamicLCP(initialLCP);
 
         int[] l = calculateL(initialSA, initialText, initialText.length);
@@ -55,7 +54,6 @@ public class DynamicSACA {
 
     // Inserts a factor into the suffix array at position [start, end] (inclusive)
     public void insertFactor(EditOperation edit) {
-        System.out.println("lcp size: " + lcp.tree.size());
         int[] newText = edit.getChars().stream().mapToInt(i -> i).toArray();
         int position = edit.getPosition();
 
@@ -111,7 +109,6 @@ public class DynamicSACA {
         int pos = previousCS;
         int expectedPos = getLF(pointOfInsertion);
 
-        System.out.println("lcp size: " + lcp.tree.size());
         while (pos != expectedPos) {
             int newPos = getLF(pos);
             moveRow(pos, expectedPos);
@@ -258,9 +255,7 @@ public class DynamicSACA {
         // System.out.println("sa: " + Printer.print(permutation.toArray()));
         // System.out.println("inverse: " +
         // Printer.print(permutation.inverseToArray()));
-        System.out.println("Positions to update: " + Printer.print(lcp.positionsToUpdate.toBitSet()));
         for (int pos : lcp.getPositionsToUpdate()) {
-            System.out.println("lcp size: " + lcp.tree.size());
             if (pos >= permutation.size()) {
                 continue;
             }
@@ -272,10 +267,7 @@ public class DynamicSACA {
         }
 
         int pos = startPos;
-        System.out.println("MOVEROW UPDATES");
         while (true) {
-            System.out.println("lcp size: " + lcp.tree.size());
-            System.out.println("pos: " + pos);
 
             if (pos != 0) {
                 int oldLCP = lcp.get(pos);
