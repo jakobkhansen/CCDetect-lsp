@@ -223,14 +223,14 @@ public class SAIS {
     }
 
     public int[] buildLCPArray(int[] T, int[] L, int[] R) {
-        int n = L.length;
+        int n = T.length;
         int[] lcp = new int[n];
 
         int l = 0;
         for (int i = 0; i < n - 1; i++) {
             int r = R[i];
             int prevSuffix = L[r - 1];
-            while (T[i + l] == T[prevSuffix + l]) {
+            while ((i + l) < n && (prevSuffix + l) < n && T[i + l] == T[prevSuffix + l]) {
                 l++;
             }
             lcp[r] = l;
