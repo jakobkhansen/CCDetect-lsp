@@ -1,6 +1,7 @@
 package CCDetect.lsp.datastructures;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import CCDetect.lsp.datastructures.OrderStatisticTree.Node;
@@ -13,7 +14,6 @@ import CCDetect.lsp.utils.Printer;
 public class DynamicLCP {
 
     OrderStatisticTree tree;
-    // DynamicTreeBitSet positionsToUpdate;
     public DynamicTreeBitSet positionsToUpdate;
 
     public DynamicLCP(int[] initial) {
@@ -22,7 +22,6 @@ public class DynamicLCP {
             tree.addWithKey(i, initial[i]);
         }
 
-        // positionsToUpdate = new DynamicTreeBitSet(initial.length);
         positionsToUpdate = new DynamicTreeBitSet(initial.length);
     }
 
@@ -61,6 +60,14 @@ public class DynamicLCP {
             current = positionsToUpdate.select(rank, true);
         }
         return positions;
+    }
+
+    public void setLinks(DynamicPermutation permutation) {
+        Iterator<Node> lcpIterator = tree.iterator();
+        Iterator<Node> saIterator = permutation.aTree.iterator();
+        while (lcpIterator.hasNext() && saIterator.hasNext()) {
+            lcpIterator.next().setLink(saIterator.next());
+        }
     }
 
     public int[] toArray() {
