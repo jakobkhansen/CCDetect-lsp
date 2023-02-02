@@ -178,7 +178,7 @@ public class TestDynamicSACA {
         ExtendedSuffixArray eSuffBanana = sais.buildExtendedSuffixArray(originalArray);
         int[] editArray = stringToIntArray(edit);
         int[] resultArray = stringToIntArrayWithTerminator(getStringWithEdit(input, edit, position));
-        // System.out.println("input: " + Printer.print(originalArray));
+        System.out.println("input: " + Printer.print(originalArray));
         // System.out.println("result: " + Printer.print(resultArray));
 
         // Build expected result suffix array
@@ -192,7 +192,7 @@ public class TestDynamicSACA {
         incrementalTimer.start();
         DynamicSACA dynSACA = new DynamicSACA(originalArray, eSuffBanana);
         dynSACA.insertFactor(new EditOperation(EditOperationType.INSERT, position, editArray));
-        ExtendedSuffixArray eSuffUpdated = dynSACA.getESuffFromPermutation();
+        ExtendedSuffixArray eSuffUpdated = dynSACA.buildESuff();
         incrementalTimer.stop();
 
         assertArrayEquals(expected.getSuffix(), eSuffUpdated.getSuffix());
@@ -232,7 +232,7 @@ public class TestDynamicSACA {
         Timer incrementalTimer = new Timer();
         incrementalTimer.start();
         dynSACA.deleteFactor(new EditOperation(EditOperationType.DELETE, position, new int[length]));
-        ExtendedSuffixArray eSuffUpdated = dynSACA.getESuffFromPermutation();
+        ExtendedSuffixArray eSuffUpdated = dynSACA.buildESuff();
         incrementalTimer.stop();
         // System.out.println("Final SA: " +
         // Printer.print(dynSACA.getSA().toArray()));
@@ -264,6 +264,7 @@ public class TestDynamicSACA {
         ExtendedSuffixArray eSuffBanana = sais.buildExtendedSuffixArray(originalArray);
         int[] editArray = stringToIntArray(edit);
         int[] resultArray = stringToIntArrayWithTerminator(getStringWithEdit(input, edit, position));
+        System.out.println("Input: " + Printer.print(originalArray));
 
         // Build expected result suffix array
         Timer linearTimer = new Timer();
@@ -341,13 +342,13 @@ public class TestDynamicSACA {
 
     public int[] stringToIntArrayWithTerminator(String input) {
         return IntStream.concat(input.chars().map(c -> {
-            return (int) c - ('a' - 1);
+            return (int) c - ('a' - 2);
         }), IntStream.of(0)).toArray();
     }
 
     public int[] stringToIntArray(String input) {
         return input.chars().map(c -> {
-            return (int) c - ('a' - 1);
+            return (int) c - ('a' - 2);
         }).toArray();
     }
 

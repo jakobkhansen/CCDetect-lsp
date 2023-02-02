@@ -113,14 +113,13 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             dynamicUpdate(edits);
             updateTimer.stop();
             updateTimer.log("Time to update sa");
-            eSuff = saca.getESuffFromPermutation();
             timer.stop();
+            eSuff = saca.buildESuff();
             timer.log("Incremental time");
         }
         for (TreesitterDocumentModel document : index) {
             document.setChanged(false);
         }
-        LOGGER.info(Printer.print(eSuff));
 
         clones = new ArrayList<>();
 
@@ -258,18 +257,11 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         for (int i = 0; i < cloneIndices.length; i++) {
             int firstIndex = cloneIndices[i];
             int secondIndex = eSuff.getLCPMatchIndex(cloneIndices[i]);
-            LOGGER.info("clone index: " + firstIndex);
-            LOGGER.info("match index: " + secondIndex);
 
             int cloneSize = eSuff.getLCPValue(firstIndex) - 1;
-            LOGGER.info("match size: " + cloneSize);
 
             TokenSourcePair first = getTokenSourcePairFromIndex(firstIndex, cloneSize);
             TokenSourcePair second = getTokenSourcePairFromIndex(secondIndex, cloneSize);
-
-            LOGGER.info("first index uri " + first.getUri());
-
-            LOGGER.info("second index uri " + second.getUri());
 
             Range firstRange = converter.convertFromRight(first.getRangeBetween());
             Range secondRange = converter.convertFromRight(second.getRangeBetween());

@@ -230,7 +230,7 @@ public class SAIS {
         for (int i = 0; i < n - 1; i++) {
             int r = R[i];
             int prevSuffix = L[r - 1];
-            while ((i + l) < n && (prevSuffix + l) < n && T[i + l] == T[prevSuffix + l]) {
+            while (T[i + l] == T[prevSuffix + l] && T[i + l] != 1 && T[i + l] != 0) {
                 l++;
             }
             lcp[r] = l;
