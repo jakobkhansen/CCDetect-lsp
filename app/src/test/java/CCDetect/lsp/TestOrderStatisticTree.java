@@ -19,23 +19,23 @@ public class TestOrderStatisticTree {
             tree.add(i);
         }
         for (int i = 0; i < 100; i++) {
-            assertEquals(i, DynamicPermutation.inOrderRank(tree.getByRank(i)));
+            assertEquals(i, OrderStatisticTree.inOrderRank(tree.getByRank(i)));
         }
         tree.add(20);
         for (int i = 0; i < 101; i++) {
-            assertEquals(i, DynamicPermutation.inOrderRank(tree.getByRank(i)));
+            assertEquals(i, OrderStatisticTree.inOrderRank(tree.getByRank(i)));
         }
         tree.add(50);
         for (int i = 0; i < 102; i++) {
-            assertEquals(i, DynamicPermutation.inOrderRank(tree.getByRank(i)));
+            assertEquals(i, OrderStatisticTree.inOrderRank(tree.getByRank(i)));
         }
         tree.add(75);
         for (int i = 0; i < 103; i++) {
-            assertEquals(i, DynamicPermutation.inOrderRank(tree.getByRank(i)));
+            assertEquals(i, OrderStatisticTree.inOrderRank(tree.getByRank(i)));
         }
         tree.add(76);
         for (int i = 0; i < 103; i++) {
-            assertEquals(i, DynamicPermutation.inOrderRank(tree.getByRank(i)));
+            assertEquals(i, OrderStatisticTree.inOrderRank(tree.getByRank(i)));
         }
     }
 
@@ -50,15 +50,15 @@ public class TestOrderStatisticTree {
             tree.add(i);
         }
         for (int i = 0; i < initial.length; i++) {
-            assertEquals(i, DynamicPermutation.inOrderRank(tree.getByRank(i)));
+            assertEquals(i, OrderStatisticTree.inOrderRank(tree.getByRank(i)));
         }
         tree.add(2);
         for (int i = 0; i < first.length; i++) {
-            assertEquals(i, DynamicPermutation.inOrderRank(tree.getByRank(i)));
+            assertEquals(i, OrderStatisticTree.inOrderRank(tree.getByRank(i)));
         }
         tree.remove(2);
         for (int i = 0; i < second.length; i++) {
-            assertEquals(i, DynamicPermutation.inOrderRank(tree.getByRank(i)));
+            assertEquals(i, OrderStatisticTree.inOrderRank(tree.getByRank(i)));
         }
 
     }

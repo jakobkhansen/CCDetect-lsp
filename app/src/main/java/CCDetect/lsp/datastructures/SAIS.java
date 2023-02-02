@@ -11,8 +11,6 @@ import java.util.Iterator;
 import java.util.Scanner;
 import java.util.logging.Logger;
 
-import CCDetect.lsp.datastructures.OrderStatisticTree.Node;
-
 public class SAIS {
 
     private static final Logger LOGGER = Logger.getLogger(

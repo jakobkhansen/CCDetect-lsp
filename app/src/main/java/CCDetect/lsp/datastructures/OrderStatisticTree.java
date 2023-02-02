@@ -15,19 +15,19 @@ import java.util.Set;
  * @version 1.6 (Feb 11, 2016)
  * @param the actual element type.
  */
-public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
+public class OrderStatisticTree implements Iterable<OrderStatisticTree.OSTreeNode> {
 
-    public static final class Node {
+    public static final class OSTreeNode {
 
-        Node parent;
-        Node left;
-        Node right;
-        Node link;
+        OSTreeNode parent;
+        OSTreeNode left;
+        OSTreeNode right;
+        OSTreeNode link;
 
         // Link to corresponding lcp node
-        Node lcpLink;
+        OSTreeNode lcpLink;
 
-        int key = -1;
+        public int key = -1;
 
         // Used when building int[] sa;
         int inorderRank;
@@ -35,18 +35,18 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
         int height;
         int count = 0;
 
-        Node() {
+        OSTreeNode() {
         }
 
-        Node(int key) {
+        OSTreeNode(int key) {
             this.key = key;
         }
 
-        public Node getLink() {
+        public OSTreeNode getLink() {
             return link;
         }
 
-        public void setLink(Node link) {
+        public void setLink(OSTreeNode link) {
             this.link = link;
         }
 
@@ -76,31 +76,31 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
         }
     }
 
-    private Node root;
+    private OSTreeNode root;
     private int size;
     private int modCount;
 
-    public Node getRoot() {
+    public OSTreeNode getRoot() {
         return root;
     }
 
-    public Node addWithKey(int rank, int key) {
-        Node added = add(rank);
+    public OSTreeNode addWithKey(int rank, int key) {
+        OSTreeNode added = add(rank);
         added.key = key;
         return added;
     }
 
-    public Node add(int rank) {
+    public OSTreeNode add(int rank) {
 
         if (root == null) {
-            root = new Node();
+            root = new OSTreeNode();
             size = 1;
             modCount++;
             return root;
         }
 
-        Node parent = null;
-        Node node = root;
+        OSTreeNode parent = null;
+        OSTreeNode node = root;
 
         boolean parentLeft = false;
         while (node != null) {
@@ -116,7 +116,7 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
             }
         }
 
-        Node newNode = new Node();
+        OSTreeNode newNode = new OSTreeNode();
 
         if (parentLeft) {
             parent.left = newNode;
@@ -127,8 +127,8 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
         newNode.parent = parent;
         size++;
         modCount++;
-        Node hi = parent;
-        Node lo = newNode;
+        OSTreeNode hi = parent;
+        OSTreeNode lo = newNode;
 
         while (hi != null) {
             if (hi.left == lo) {
@@ -143,9 +143,9 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
         return newNode;
     }
 
-    public Node remove(int rank) {
+    public OSTreeNode remove(int rank) {
 
-        Node node = root;
+        OSTreeNode node = root;
 
         while (node != null) {
             if (rank == node.rank() + 1) {
@@ -170,8 +170,8 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
         return node;
     }
 
-    public Node getByRank(int rank) {
-        Node current = root;
+    public OSTreeNode getByRank(int rank) {
+        OSTreeNode current = root;
         while (current != null) {
             int currentRank = current.rank();
 
@@ -220,7 +220,7 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
         }
     }
 
-    public Node deleteByNode(Node node) {
+    public OSTreeNode deleteByNode(OSTreeNode node) {
 
         node = deleteNode(node);
         fixAfterModification(node, false);
@@ -229,10 +229,10 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
         return node;
     }
 
-    private Node deleteNode(Node node) {
+    private OSTreeNode deleteNode(OSTreeNode node) {
         if (node.left == null && node.right == null) {
             // 'node' has no children.
-            Node parent = node.parent;
+            OSTreeNode parent = node.parent;
 
             if (parent == null) {
                 // 'node' is the root node of this tree.
@@ -241,8 +241,8 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
                 return node;
             }
 
-            Node lo = node;
-            Node hi = parent;
+            OSTreeNode lo = node;
+            OSTreeNode hi = parent;
 
             while (hi != null) {
                 if (hi.left == lo) {
@@ -265,7 +265,7 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
         if (node.left != null && node.right != null) {
             // 'node' has both children.
 
-            Node successor = minimumNode(node.right);
+            OSTreeNode successor = minimumNode(node.right);
             int tmpKey = node.key;
             node.key = successor.key;
 
@@ -275,8 +275,8 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
             }
             node.key = successor.key;
 
-            Node child = successor.right;
-            Node parent = successor.parent;
+            OSTreeNode child = successor.right;
+            OSTreeNode parent = successor.parent;
 
             if (parent.left == successor) {
                 parent.left = child;
@@ -288,8 +288,8 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
                 child.parent = parent;
             }
 
-            Node lo = child;
-            Node hi = parent;
+            OSTreeNode lo = child;
+            OSTreeNode hi = parent;
 
             while (hi != null) {
                 if (hi.left == lo) {
@@ -304,7 +304,7 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
             return successor;
         }
 
-        Node child;
+        OSTreeNode child;
 
         // 'node' has only one child.
         if (node.left != null) {
@@ -313,7 +313,7 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
             child = node.right;
         }
 
-        Node parent = node.parent;
+        OSTreeNode parent = node.parent;
         child.parent = parent;
 
         if (parent == null) {
@@ -327,8 +327,8 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
             parent.right = child;
         }
 
-        Node hi = parent;
-        Node lo = child;
+        OSTreeNode hi = parent;
+        OSTreeNode lo = child;
 
         while (hi != null) {
             if (hi.left == lo) {
@@ -343,7 +343,7 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
 
     }
 
-    private Node minimumNode(Node node) {
+    private OSTreeNode minimumNode(OSTreeNode node) {
         while (node.left != null) {
             node = node.left;
         }
@@ -351,12 +351,12 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
         return node;
     }
 
-    private int height(Node node) {
+    private int height(OSTreeNode node) {
         return node == null ? -1 : node.height;
     }
 
-    private Node leftRotate(Node node1) {
-        Node node2 = node1.right;
+    private OSTreeNode leftRotate(OSTreeNode node1) {
+        OSTreeNode node2 = node1.right;
         node2.parent = node1.parent;
         node1.parent = node2;
         node1.right = node2.left;
@@ -372,8 +372,8 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
         return node2;
     }
 
-    private Node rightRotate(Node node1) {
-        Node node2 = node1.left;
+    private OSTreeNode rightRotate(OSTreeNode node1) {
+        OSTreeNode node2 = node1.left;
         node2.parent = node1.parent;
         node1.parent = node2;
         node1.left = node2.right;
@@ -389,24 +389,24 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
         return node2;
     }
 
-    private Node rightLeftRotate(Node node1) {
-        Node node2 = node1.right;
+    private OSTreeNode rightLeftRotate(OSTreeNode node1) {
+        OSTreeNode node2 = node1.right;
         node1.right = rightRotate(node2);
         return leftRotate(node1);
     }
 
-    private Node leftRightRotate(Node node1) {
-        Node node2 = node1.left;
+    private OSTreeNode leftRightRotate(OSTreeNode node1) {
+        OSTreeNode node2 = node1.left;
         node1.left = leftRotate(node2);
         return rightRotate(node1);
     }
 
     // Fixing an insertion: use insertionMode = true.
     // Fixing a deletion: use insertionMode = false.
-    private void fixAfterModification(Node node, boolean insertionMode) {
-        Node parent = node.parent;
-        Node grandParent;
-        Node subTree;
+    private void fixAfterModification(OSTreeNode node, boolean insertionMode) {
+        OSTreeNode parent = node.parent;
+        OSTreeNode grandParent;
+        OSTreeNode subTree;
 
         while (parent != null) {
             if (height(parent.left) == height(parent.right) + 2) {
@@ -482,11 +482,11 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
     }
 
     private boolean containsCycles() {
-        Set<Node> visitedNodes = new HashSet<>();
+        Set<OSTreeNode> visitedNodes = new HashSet<>();
         return containsCycles(root, visitedNodes);
     }
 
-    private boolean containsCycles(Node current, Set<Node> visitedNodes) {
+    private boolean containsCycles(OSTreeNode current, Set<OSTreeNode> visitedNodes) {
         if (current == null) {
             return false;
         }
@@ -505,7 +505,7 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
         return getHeight(root) == root.height;
     }
 
-    private int getHeight(Node node) {
+    private int getHeight(OSTreeNode node) {
         if (node == null) {
             return -1;
         }
@@ -533,7 +533,7 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
         return isBalanced(root);
     }
 
-    private boolean isBalanced(Node node) {
+    private boolean isBalanced(OSTreeNode node) {
         if (node == null) {
             return true;
         }
@@ -556,7 +556,7 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
         return size == count(root);
     }
 
-    private int count(Node node) {
+    private int count(OSTreeNode node) {
         if (node == null) {
             return 0;
         }
@@ -581,15 +581,15 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
     }
 
     @Override
-    public Iterator<Node> iterator() {
+    public Iterator<OSTreeNode> iterator() {
         // TODO Auto-generated method stub
         return new TreeIterator();
     }
 
-    private final class TreeIterator implements Iterator<Node> {
+    private final class TreeIterator implements Iterator<OSTreeNode> {
 
-        private Node previousNode;
-        private Node nextNode;
+        private OSTreeNode previousNode;
+        private OSTreeNode nextNode;
         private int expectedModCount = modCount;
 
         TreeIterator() {
@@ -606,13 +606,13 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
         }
 
         @Override
-        public Node next() {
+        public OSTreeNode next() {
             if (nextNode == null) {
                 throw new NoSuchElementException("Iteration exceeded.");
             }
 
             checkConcurrentModification();
-            Node datum = nextNode;
+            OSTreeNode datum = nextNode;
             previousNode = nextNode;
             nextNode = successorOf(nextNode);
             return datum;
@@ -628,7 +628,7 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
 
             checkConcurrentModification();
 
-            Node x = deleteNode(previousNode);
+            OSTreeNode x = deleteNode(previousNode);
             fixAfterModification(x, false);
 
             if (x == nextNode) {
@@ -648,7 +648,7 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
         }
     }
 
-    private Node successorOf(Node node) {
+    private static OSTreeNode successorOf(OSTreeNode node) {
         if (node.right != null) {
             node = node.right;
 
@@ -659,7 +659,7 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
             return node;
         }
 
-        Node parent = node.parent;
+        OSTreeNode parent = node.parent;
 
         while (parent != null && parent.right == node) {
             node = parent;
@@ -667,6 +667,36 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
         }
 
         return parent;
+    }
+
+    public static OSTreeNode predecessorOf(OSTreeNode node) {
+        if (node.left != null) {
+            node = node.left;
+
+            while (node.right != null) {
+                node = node.right;
+            }
+
+            return node;
+        }
+
+        OSTreeNode parent = node.parent;
+        while (parent != null && parent.left == node) {
+            node = parent;
+            parent = parent.parent;
+        }
+        return parent;
+    }
+
+    public static int inOrderRank(OSTreeNode node) {
+        int rank = node.rank();
+        while (node.parent != null) {
+            if (node.isRightChild()) {
+                rank += node.parent.rank() + 1;
+            }
+            node = node.parent;
+        }
+        return rank;
     }
 
 }

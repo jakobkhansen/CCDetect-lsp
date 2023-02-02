@@ -178,7 +178,7 @@ public class TestDynamicSACA {
         ExtendedSuffixArray eSuffBanana = sais.buildExtendedSuffixArray(originalArray);
         int[] editArray = stringToIntArray(edit);
         int[] resultArray = stringToIntArrayWithTerminator(getStringWithEdit(input, edit, position));
-        System.out.println("input: " + Printer.print(originalArray));
+        // System.out.println("input: " + Printer.print(originalArray));
         // System.out.println("result: " + Printer.print(resultArray));
 
         // Build expected result suffix array
@@ -264,7 +264,7 @@ public class TestDynamicSACA {
         ExtendedSuffixArray eSuffBanana = sais.buildExtendedSuffixArray(originalArray);
         int[] editArray = stringToIntArray(edit);
         int[] resultArray = stringToIntArrayWithTerminator(getStringWithEdit(input, edit, position));
-        System.out.println("Input: " + Printer.print(originalArray));
+        // System.out.println("Input: " + Printer.print(originalArray));
 
         // Build expected result suffix array
         Timer linearTimer = new Timer();
