@@ -83,7 +83,7 @@ public class DynamicSACA {
 
             // Insert new rows
             sa.insert(pointOfInsertion, position);
-            lcp.insertNewValue(pointOfInsertion);
+            lcp.insertNewNode(pointOfInsertion);
 
             int oldPOS = pointOfInsertion;
             pointOfInsertion = getLF(pointOfInsertion);
@@ -101,7 +101,7 @@ public class DynamicSACA {
 
         insertInL(storedLetter, pointOfInsertion);
         sa.insert(pointOfInsertion, position);
-        lcp.insertNewValue(pointOfInsertion);
+        lcp.insertNewNode(pointOfInsertion);
 
         previousCS += pointOfInsertion <= previousCS ? 1 : 0;
         posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;
@@ -236,7 +236,7 @@ public class DynamicSACA {
         sa.insert(j, permValue);
 
         lcp.deleteValue(i);
-        lcp.insertNewValue(j);
+        lcp.insertNewNode(j);
 
     }
 

@@ -11,9 +11,13 @@ import com.google.common.primitives.Ints;
 import org.eclipse.lsp4j.Range;
 
 import CCDetect.lsp.CodeClone;
+import CCDetect.lsp.datastructures.DynamicLCP;
+import CCDetect.lsp.datastructures.DynamicPermutation;
 import CCDetect.lsp.datastructures.DynamicSACA;
 import CCDetect.lsp.datastructures.ExtendedSuffixArray;
+import CCDetect.lsp.datastructures.OrderStatisticTree;
 import CCDetect.lsp.datastructures.SAIS;
+import CCDetect.lsp.datastructures.OrderStatisticTree.OSTreeNode;
 import CCDetect.lsp.datastructures.editdistance.EditOperation;
 import CCDetect.lsp.detection.CloneDetector;
 import CCDetect.lsp.detection.treesitterbased.fingerprint.Fingerprint;
@@ -75,7 +79,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         // Build suffix, inverse, lcp
         LOGGER.info("Building suffix array");
         NotificationHandler.startNotification("clones", "Finding clones");
-        if (eSuff == null || !config.isDynamicDetection()) {
+        if (saca == null || !config.isDynamicDetection()) {
             Timer timer = new Timer();
             timer.start();
             int[] fingerprint = getFullFingerprint(index);
@@ -89,6 +93,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             }
         } else {
 
+            eSuff = null;
             if (config.isEvaluate()) {
                 Timer timer = new Timer();
                 timer.start();
@@ -125,7 +130,13 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
 
         Timer extractClonesTimer = new Timer();
         extractClonesTimer.start();
-        int[] cloneIndices = extractCloneIndicesFromSA();
+        int[] cloneIndices;
+
+        if (config.isDynamicDetection()) {
+            cloneIndices = extractCloneIndicesFromSAIncremental();
+        } else {
+            cloneIndices = extractCloneIndicesFromSA();
+        }
 
         LOGGER.info("Clone indices: " + Printer.print(cloneIndices));
 
@@ -224,28 +235,43 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
 
     }
 
+    // TODO add links between sa nodes and lcp nodes
     private int[] extractCloneIndicesFromSAIncremental() {
         int cloneThreshold = config.getCloneTokenThreshold();
         // Fetch clones, ignore contained clones
         ArrayList<Integer> clones = new ArrayList<>();
-        for (int i = 0; i < eSuff.size(); i++) {
-            if (eSuff.getRank(i) == 0 || eSuff.getLCPMatchIndex(i) == 0) {
-                continue;
-            }
-            int secondIndex = eSuff.getLCPMatchIndex(i);
-            // If we find a large enough clone where the match is not contained within
-            // another clone, we found a new clone
-            if (eSuff.getLCPValue(i) >= cloneThreshold
-                    && eSuff.getPreceedingSuffixLCPValue(secondIndex) <= eSuff.getLCPValue(secondIndex)) {
-                clones.add(i);
-                i++;
-                // Ignore all contained clones for the new clones
-                while (i < eSuff.size() &&
-                        eSuff.getPreceedingSuffixLCPValue(i) > eSuff.getLCPValue(i) &&
-                        eSuff.getLCPValue(i) >= cloneThreshold) {
-                    i++;
-                }
-            }
+        DynamicLCP lcp = saca.getDynLCP();
+        DynamicPermutation sa = saca.getSA();
+        LOGGER.info(Printer.print(sa.toArray()));
+        LOGGER.info(Printer.print(sa.inverseToArray()));
+
+        for (OSTreeNode node : lcp.getNodesAboveThreshold()) {
+            int saValue = OrderStatisticTree.inOrderRank(node);
+            int inverseValue = sa.getInverse(saValue);
+            int textIndex = sa.get(saValue);
+            LOGGER.info("suff value: " + saValue);
+            LOGGER.info("inverse value: " + inverseValue);
+            LOGGER.info("LCP value: " + node.key);
+            LOGGER.info("Clone index: " + textIndex);
+
+            // int secondIndex = sa.get(sa.getInverse(i) - 1);
+            // if (sa.getInverse(i) == 0 || secondIndex == 0) {
+            // continue;
+            // }
+            // // If we find a large enough clone where the match is not contained within
+            // // another clone, we found a new clone
+            // if (lcp.get(sa.getInverse(secondIndex - 1)) <=
+            // lcp.get(sa.getInverse(secondIndex))) {
+            // clones.add(i);
+            // i++;
+            //
+            // // Ignore all contained clones for the new clones
+            // while (i < sa.size() &&
+            // lcp.get(sa.getInverse(i - 1)) > lcp.get(sa.getInverse(i)) &&
+            // lcp.get(sa.getInverse(i)) >= cloneThreshold) {
+            // i++;
+            // }
+            // }
         }
         return Ints.toArray(clones);
 

@@ -45,7 +45,7 @@ public class TestCodebaseCloneDetection {
         config.setExtraNodes(new String[] {});
         config.setIgnoreNodes(new String[] {});
         config.setFragmentQuery("(method_declaration) @method");
-        config.setDynamicDetection(false);
+        config.setDynamicDetection(true);
     }
 
     @Test
@@ -86,9 +86,9 @@ public class TestCodebaseCloneDetection {
         TreesitterDetector detector = new TreesitterDetector();
         detector.onIndexChange(index);
         List<CodeClone> clones = detector.getClones();
-        // for (CodeClone clone : clones) {
-        // LOGGER.info(clone.toString());
-        // }
+        for (CodeClone clone : clones) {
+            LOGGER.info(clone.toString());
+        }
         for (TreesitterDocumentModel doc : index) {
             System.out.println("doc " + doc.getUri() + " " + doc.getFingerprintStart() +
                     " " + doc.getFingerprintEnd());

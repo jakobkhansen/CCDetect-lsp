@@ -66,7 +66,6 @@ public class TestRealFingerprintDynamicUpdate {
         reader.close();
     }
 
-    // TODO reimplement tests
     @Test
     public void testCCDetectFingerprint() throws Exception {
         testFile("src/test/resources/Fingerprints/ccdetect.txt");
