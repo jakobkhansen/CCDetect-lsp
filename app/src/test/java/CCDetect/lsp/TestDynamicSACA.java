@@ -106,68 +106,69 @@ public class TestDynamicSACA {
         testDeleteAllFactors("simplification");
         testDeleteAllFactors("incomprehensibility");
         testDeleteAllFactors("xenotransplantation");
+        testDeleteAllFactors("fcacafaefaecacda");
+        testDeleteAllFactors("bdfecaefcabdfc");
     }
 
     @Test
     public void testLCP() {
-        // testDynamicLCPInsertFactor("ab", "a", 0);
-        // testDynamicLCPInsertFactor("ab", "ab", 0);
-        // testDynamicLCPInsertFactor("b", "a", 0);
-        // testDynamicLCPInsertFactor("abc", "ab", 1);
-        //
-        // testDynamicLCPInsertFactor("b", "ac", 1);
-        // testDynamicLCPInsertFactor("b", "acd", 1);
-        // testDynamicLCPInsertFactor("b", "a", 0);
-        // testDynamicLCPInsertFactor("b", "ab", 0);
-        // testDynamicLCPInsertFactor("ac", "da", 1);
-        // testDynamicLCPInsertFactor("ab", "ab", 2);
-        // testDynamicLCPInsertFactor("b", "bb", 0);
-        // testDynamicLCPInsertFactor("b", "asldkjsalkdj", 0);
-        // testDynamicLCPInsertFactor("bcd", "bcad", 1);
-        // testDynamicLCPInsertFactor("bcd", "xxx", 3);
-        // testDynamicLCPInsertFactor("bcd", "xadpx", 1);
-        // testDynamicLCPInsertFactor("bcd", "cd", 2);
-        // testDynamicLCPInsertFactor("pneumonoultramicroscopicsilicovolcanoconiosis",
-        // "habc", 6);
+        testDynamicLCPInsertFactor("ab", "a", 0);
+        testDynamicLCPInsertFactor("ab", "ab", 0);
+        testDynamicLCPInsertFactor("b", "a", 0);
+        testDynamicLCPInsertFactor("abc", "ab", 1);
+
+        testDynamicLCPInsertFactor("b", "ac", 1);
+        testDynamicLCPInsertFactor("b", "acd", 1);
+        testDynamicLCPInsertFactor("b", "a", 0);
+        testDynamicLCPInsertFactor("b", "ab", 0);
+        testDynamicLCPInsertFactor("ac", "da", 1);
+        testDynamicLCPInsertFactor("ab", "ab", 2);
+        testDynamicLCPInsertFactor("b", "bb", 0);
+        testDynamicLCPInsertFactor("b", "asldkjsalkdj", 0);
+        testDynamicLCPInsertFactor("bcd", "bcad", 1);
+        testDynamicLCPInsertFactor("bcd", "xxx", 3);
+        testDynamicLCPInsertFactor("bcd", "xadpx", 1);
+        testDynamicLCPInsertFactor("bcd", "cd", 2);
+        testDynamicLCPInsertFactor("pneumonoultramicroscopicsilicovolcanoconiosis",
+                "habc", 6);
     }
 
     @Test
     public void testLCPAllIndices() {
-        // testLCPInsertOnAllIndices("aaabc", "abc");
-        // testLCPInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis",
-        // "habc");
-        // testLCPInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis",
-        // "xxxxxasldkjsadoiqw");
-        // testLCPInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis",
-        // "alksdj");
-        // testLCPInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis",
-        // "qwoiueqpzx");
-        // testLCPInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis",
-        // "a");
+        testLCPInsertOnAllIndices("aaabc", "abc");
+        testLCPInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis",
+                "habc");
+        testLCPInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis",
+                "xxxxxasldkjsadoiqw");
+        testLCPInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis",
+                "alksdj");
+        testLCPInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis",
+                "qwoiueqpzx");
+        testLCPInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis",
+                "a");
     }
 
     @Test
     public void testLCPDelete() {
-        // testLCPDeleteOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis");
-        // testDynamicSuffixDeleteFactor("baba", 1, 1);
+        testLCPDeleteOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis");
+        testDynamicSuffixDeleteFactor("baba", 1, 1);
     }
 
     @Test
     public void testRandomString() {
-        // for (int i = 0; i < 1000; i++) {
-        //
-        // UUID randomUUID = UUID.randomUUID();
-        //
-        // String str = randomUUID.toString().replaceAll("-", "").replaceAll("\\d", "");
-        // char[] withChars = str.chars().map((int num) -> {
-        // System.out.println(num);
-        // return (Integer.valueOf((num)));
-        // }).mapToObj(j -> Character.toString((char)
-        // j)).collect(Collectors.joining()).toCharArray();
-        // String longStr = String.valueOf(withChars);
-        // String shortStr = longStr;
-        // testDeleteAllFactors(shortStr);
-        // }
+        for (int i = 0; i < 1000; i++) {
+
+            UUID randomUUID = UUID.randomUUID();
+
+            String str = randomUUID.toString().replaceAll("-", "").replaceAll("\\d", "");
+            char[] withChars = str.chars().map((int num) -> {
+                return (Integer.valueOf((num)));
+            }).mapToObj(j -> Character.toString((char) j)).collect(Collectors.joining()).toCharArray();
+            String longStr = String.valueOf(withChars);
+            String shortStr = longStr;
+            // System.out.println("Generated string: " + shortStr);
+            testDeleteAllFactors(shortStr);
+        }
     }
 
     public void testDynamicSuffixInsertFactor(String input, String edit, int position) {
@@ -191,7 +192,7 @@ public class TestDynamicSACA {
         incrementalTimer.start();
         DynamicSACA dynSACA = new DynamicSACA(originalArray, eSuffBanana);
         dynSACA.insertFactor(new EditOperation(EditOperationType.INSERT, position, editArray));
-        ExtendedSuffixArray eSuffUpdated = dynSACA.getESuffFromPermutation(resultArray);
+        ExtendedSuffixArray eSuffUpdated = dynSACA.getESuffFromPermutation();
         incrementalTimer.stop();
 
         assertArrayEquals(expected.getSuffix(), eSuffUpdated.getSuffix());
@@ -231,10 +232,10 @@ public class TestDynamicSACA {
         Timer incrementalTimer = new Timer();
         incrementalTimer.start();
         dynSACA.deleteFactor(new EditOperation(EditOperationType.DELETE, position, new int[length]));
-        ExtendedSuffixArray eSuffUpdated = dynSACA.getESuffFromPermutation(resultArray);
+        ExtendedSuffixArray eSuffUpdated = dynSACA.getESuffFromPermutation();
         incrementalTimer.stop();
         // System.out.println("Final SA: " +
-        // Printer.print(dynSACA.getPermutation().toArray()));
+        // Printer.print(dynSACA.getSA().toArray()));
         // System.out.println("Final LCP: " +
         // Printer.print(dynSACA.getDynLCP().toArray()));
         // System.out.println("Expected LCP: " + Printer.print(expected.getLcp()));
@@ -274,15 +275,18 @@ public class TestDynamicSACA {
         Timer incrementalTimer = new Timer();
         incrementalTimer.start();
         DynamicSACA dynSACA = new DynamicSACA(originalArray, eSuffBanana);
-        System.out.println("Initial SA: " + Printer.print(dynSACA.getPermutation().toArray()));
-        System.out.println("Initial LCP: " + Printer.print(dynSACA.getDynLCP().toArray()));
+        // System.out.println("Initial SA: " +
+        // Printer.print(dynSACA.getSA().toArray()));
+        // System.out.println("Initial LCP: " +
+        // Printer.print(dynSACA.getDynLCP().toArray()));
         dynSACA.insertFactor(new EditOperation(EditOperationType.INSERT, position, editArray));
         incrementalTimer.stop();
 
-        System.out.println("Final SA: " + Printer.print(dynSACA.getPermutation().toArray()));
-        System.out.println("Final LCP: " + Printer.print(dynSACA.getDynLCP().toArray()));
-        System.out.println("Expected LCP: " + Printer.print(expected.getLcp()));
-        System.out.println("Expected SA: " + Printer.print(expected.getSuffix()));
+        // System.out.println("Final SA: " + Printer.print(dynSACA.getSA().toArray()));
+        // System.out.println("Final LCP: " +
+        // Printer.print(dynSACA.getDynLCP().toArray()));
+        // System.out.println("Expected LCP: " + Printer.print(expected.getLcp()));
+        // System.out.println("Expected SA: " + Printer.print(expected.getSuffix()));
 
         assertArrayEquals(expected.getLcp(), dynSACA.getDynLCP().toArray());
 
@@ -294,8 +298,8 @@ public class TestDynamicSACA {
         ExtendedSuffixArray eSuffOriginal = sais.buildExtendedSuffixArray(originalArray);
         int[] resultArray = stringToIntArrayWithTerminator(getStringWithDelete(input, position, length));
 
-        System.out.println("Input array: " + Printer.print(originalArray));
-        System.out.println("Result array: " + Printer.print(resultArray));
+        // System.out.println("Input array: " + Printer.print(originalArray));
+        // System.out.println("Result array: " + Printer.print(resultArray));
 
         Timer linearTimer = new Timer();
         linearTimer.start();
@@ -303,17 +307,20 @@ public class TestDynamicSACA {
         linearTimer.stop();
 
         DynamicSACA dynSACA = new DynamicSACA(originalArray, eSuffOriginal);
-        System.out.println("Initial SA: " + Printer.print(dynSACA.getPermutation().toArray()));
-        System.out.println("Initial LCP: " + Printer.print(dynSACA.getDynLCP().toArray()));
+        // System.out.println("Initial SA: " +
+        // Printer.print(dynSACA.getSA().toArray()));
+        // System.out.println("Initial LCP: " +
+        // Printer.print(dynSACA.getDynLCP().toArray()));
         Timer incrementalTimer = new Timer();
         incrementalTimer.start();
         dynSACA.deleteFactor(new EditOperation(EditOperationType.DELETE, position, new int[length]));
         incrementalTimer.stop();
 
-        System.out.println("Final SA: " + Printer.print(dynSACA.getPermutation().toArray()));
-        System.out.println("Final LCP: " + Printer.print(dynSACA.getDynLCP().toArray()));
-        System.out.println("Expected LCP: " + Printer.print(expected.getLcp()));
-        System.out.println("Expected SA: " + Printer.print(expected.getSuffix()));
+        // System.out.println("Final SA: " + Printer.print(dynSACA.getSA().toArray()));
+        // System.out.println("Final LCP: " +
+        // Printer.print(dynSACA.getDynLCP().toArray()));
+        // System.out.println("Expected LCP: " + Printer.print(expected.getLcp()));
+        // System.out.println("Expected SA: " + Printer.print(expected.getSuffix()));
 
         assertArrayEquals(expected.getLcp(), dynSACA.getDynLCP().toArray());
     }

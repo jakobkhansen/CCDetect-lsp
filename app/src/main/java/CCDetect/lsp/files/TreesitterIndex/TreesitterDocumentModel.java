@@ -191,9 +191,6 @@ public class TreesitterDocumentModel extends DocumentModel {
         HirschbergsAlgorithm algorithm = new HirschbergsAlgorithm(fullOldFingerprint,
                 fullNewFingerprint);
         List<EditOperation> operations = algorithm.getOperations();
-        // List<EditOperation> operations =
-        // EditOperationsCalculator.findEditOperations(fullOldFingerprint,
-        // fullNewFingerprint);
 
         // Update positions of all operations based on the fingerprints offset
         for (EditOperation operation : operations) {

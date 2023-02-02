@@ -16,9 +16,11 @@ import org.junit.Test;
 
 import CCDetect.lsp.detection.treesitterbased.TreesitterDetector;
 import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentIndex;
+import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentModel;
 import CCDetect.lsp.files.fileiterators.FiletypeIterator;
 import CCDetect.lsp.files.fileiterators.ProjectFileIterator;
 import CCDetect.lsp.server.Configuration;
+import CCDetect.lsp.utils.Printer;
 
 /**
  * TestCodebaseCloneDetection
@@ -83,6 +85,13 @@ public class TestCodebaseCloneDetection {
         // TreesitterDetector detector = new TreesitterDetector();
         // detector.onIndexChange(index);
         // List<CodeClone> clones = detector.getClones();
+        // // for (CodeClone clone : clones) {
+        // // LOGGER.info(clone.toString());
+        // // }
+        // for (TreesitterDocumentModel doc : index) {
+        // System.out.println("doc " + doc.getUri() + " " + doc.getFingerprintStart() +
+        // " " + doc.getFingerprintEnd());
+        // }
         //
         // for (CodeClone expectedClone : expectedClones) {
         // boolean found = false;

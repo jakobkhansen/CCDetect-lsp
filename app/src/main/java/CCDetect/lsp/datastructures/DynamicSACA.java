@@ -16,7 +16,7 @@ public class DynamicSACA {
 
     int EXTRA_SIZE_INCREASE = 200;
 
-    DynamicPermutation permutation;
+    DynamicPermutation sa;
     DynamicLCP lcp;
 
     CharacterCount charCounts;
@@ -26,7 +26,7 @@ public class DynamicSACA {
     // Creates a dynamic suffix array datastructure with initialSize potential size
     public DynamicSACA(int[] initialText, int[] initialSA, int[] initialISA, int[] initialLCP) {
         charCounts = new CharacterCount(initialText);
-        permutation = new DynamicPermutation(initialSA);
+        sa = new DynamicPermutation(initialSA);
         lcp = new DynamicLCP(initialLCP);
 
         int[] l = calculateL(initialSA, initialText, initialText.length);
@@ -37,16 +37,16 @@ public class DynamicSACA {
         this(initialText, initialESuff.getSuffix(), initialESuff.getInverseSuffix(), initialESuff.getLcp());
     }
 
-    public DynamicPermutation getPermutation() {
-        return permutation;
+    public DynamicPermutation getSA() {
+        return sa;
     }
 
-    public ExtendedSuffixArray getESuffFromPermutation(int[] fingerprint) {
-        int[] sa = permutation.toArray();
-        int[] isa = permutation.inverseToArray();
+    public ExtendedSuffixArray getESuffFromPermutation() {
+        int[] saArr = sa.toArray();
+        int[] isaArr = sa.inverseToArray();
         int[] lcpArr = lcp.toArray();
 
-        return new ExtendedSuffixArray(sa, isa, lcpArr);
+        return new ExtendedSuffixArray(saArr, isaArr, lcpArr);
     }
 
     public DynamicLCP getDynLCP() {
@@ -61,7 +61,7 @@ public class DynamicSACA {
         int end = newText.length - 1;
 
         // Stage 2, replace in L
-        int posFirstModified = permutation.getInverse(position);
+        int posFirstModified = sa.getInverse(position);
         int previousCS = getLF(posFirstModified);
 
         int storedLetter = waveletMatrix.get(posFirstModified);
@@ -82,7 +82,7 @@ public class DynamicSACA {
             posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;
 
             // Insert new rows
-            permutation.insert(pointOfInsertion, position);
+            sa.insert(pointOfInsertion, position);
             lcp.insertNewValue(pointOfInsertion);
 
             int oldPOS = pointOfInsertion;
@@ -100,7 +100,7 @@ public class DynamicSACA {
         // Inserting final character that we substituted before
 
         insertInL(storedLetter, pointOfInsertion);
-        permutation.insert(pointOfInsertion, position);
+        sa.insert(pointOfInsertion, position);
         lcp.insertNewValue(pointOfInsertion);
 
         previousCS += pointOfInsertion <= previousCS ? 1 : 0;
@@ -120,7 +120,7 @@ public class DynamicSACA {
         updateLCP(pos, position);
 
         // TODO better to update links for only inserts/deletes
-        lcp.setLinks(permutation);
+        lcp.setLinks(sa);
     }
 
     public void deleteFactor(EditOperation edit) {
@@ -128,7 +128,7 @@ public class DynamicSACA {
         int length = edit.getChars().size();
 
         // Stage 2, replace in L (but not actually)
-        int posFirstModified = permutation.getInverse(position + length);
+        int posFirstModified = sa.getInverse(position + length);
         int deletedLetter = waveletMatrix.get(posFirstModified);
 
         int pointOfDeletion = getLF(posFirstModified);
@@ -145,7 +145,7 @@ public class DynamicSACA {
 
             // Delete rows
             deleteInL(pointOfDeletion);
-            permutation.delete(pointOfDeletion);
+            sa.delete(pointOfDeletion);
             lcp.deleteValue(pointOfDeletion);
 
             // Update posFirstModified if it has moved because of deletion
@@ -162,7 +162,7 @@ public class DynamicSACA {
         }
 
         deleteInL(pointOfDeletion);
-        permutation.delete(pointOfDeletion);
+        sa.delete(pointOfDeletion);
         lcp.deleteValue(pointOfDeletion);
 
         posFirstModified -= pointOfDeletion <= posFirstModified ? 1 : 0;
@@ -231,9 +231,9 @@ public class DynamicSACA {
         waveletMatrix.delete(i);
         waveletMatrix.insert(j, lValue);
 
-        int permValue = permutation.get(i);
-        permutation.delete(i);
-        permutation.insert(j, permValue);
+        int permValue = sa.get(i);
+        sa.delete(i);
+        sa.insert(j, permValue);
 
         lcp.deleteValue(i);
         lcp.insertNewValue(j);
@@ -258,9 +258,11 @@ public class DynamicSACA {
     }
 
     private void updateLCP(int startPos, int positionOfChange) {
-        for (int pos : lcp.getPositionsToUpdate()) {
-            // System.out.println("Updating pos " + pos);
-            if (pos >= permutation.size()) {
+        int pos;
+        while ((pos = lcp.positionsToUpdate.select(0, true)) != -1) {
+
+            lcp.positionsToUpdate.set(pos, false);
+            if (pos >= sa.size()) {
                 continue;
             }
 
@@ -273,21 +275,23 @@ public class DynamicSACA {
                 prevSuffixCS = getInverseLF(prevSuffixCS);
             }
 
-            // System.out.println("New lcp value " + lcpValue);
             lcp.setValue(pos, lcpValue);
-            // System.out.println("new lcp val " + lcpValue);
         }
 
         int cs = startPos;
         boolean hasToUpdate = true;
-        while (hasToUpdate) {
+        int numExtraIterations = 3;
+        int isFinishing = 0;
+        while (numExtraIterations > 0) {
 
-            // System.out.println("Updating pos " + cs);
+            if (!hasToUpdate) {
+                isFinishing = 1;
+            }
+            numExtraIterations -= isFinishing;
+
             hasToUpdate = false;
             if (cs != 0) {
                 int oldLCP = lcp.get(cs);
-                // System.out.println("first: " + cs);
-                // System.out.println("old lcp: " + oldLCP);
                 int currentSuffixCS = getInverseLF(cs);
                 int prevSuffixCS = getInverseLF(cs - 1);
                 int lcpValue = 0;
@@ -300,12 +304,9 @@ public class DynamicSACA {
                     hasToUpdate = true;
                 }
                 lcp.setValue(cs, lcpValue);
-                // System.out.println("new lcp val " + lcpValue);
             }
             if (cs < lcp.tree.size() - 1) {
                 int oldLCP = lcp.get(cs);
-                // System.out.println("first: " + (cs - 1));
-                // System.out.println("old lcp: " + oldLCP);
 
                 int currentSuffixCS = getInverseLF(cs + 1);
                 int prevSuffixCS = getInverseLF(cs);
@@ -319,13 +320,8 @@ public class DynamicSACA {
                     hasToUpdate = true;
                 }
                 lcp.setValue(cs + 1, lcpValue);
-                // System.out.println("new lcp val " + lcpValue);
             }
 
-            if (permutation.get(cs) == 0) {
-                break;
-            }
-            // System.out.println("New lcp value " + lcpValue);
             cs = getLF(cs);
 
         }
