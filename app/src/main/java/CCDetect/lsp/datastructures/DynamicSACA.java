@@ -41,7 +41,7 @@ public class DynamicSACA {
         return sa;
     }
 
-    public ExtendedSuffixArray getESuffFromPermutation() {
+    public ExtendedSuffixArray buildESuff() {
         int[] saArr = sa.toArray();
         int[] isaArr = sa.inverseToArray();
         int[] lcpArr = lcp.toArray();
@@ -120,7 +120,7 @@ public class DynamicSACA {
         updateLCP(pos, position);
 
         // TODO better to update links for only inserts/deletes
-        lcp.setLinks(sa);
+        // lcp.setLinks(sa);
     }
 
     public void deleteFactor(EditOperation edit) {
@@ -269,7 +269,8 @@ public class DynamicSACA {
             int currentSuffixCS = getInverseLF(pos);
             int prevSuffixCS = getInverseLF(pos - 1);
             int lcpValue = 0;
-            while (waveletMatrix.get(currentSuffixCS) == waveletMatrix.get(prevSuffixCS)) {
+            while (waveletMatrix.get(currentSuffixCS) == waveletMatrix.get(prevSuffixCS)
+                    && waveletMatrix.get(currentSuffixCS) != 1) {
                 lcpValue++;
                 currentSuffixCS = getInverseLF(currentSuffixCS);
                 prevSuffixCS = getInverseLF(prevSuffixCS);
@@ -295,11 +296,17 @@ public class DynamicSACA {
                 int currentSuffixCS = getInverseLF(cs);
                 int prevSuffixCS = getInverseLF(cs - 1);
                 int lcpValue = 0;
-                while (waveletMatrix.get(currentSuffixCS) == waveletMatrix.get(prevSuffixCS)) {
+
+                int currentSuffixCSValue = waveletMatrix.get(currentSuffixCS);
+                int prevSuffixCSValue = waveletMatrix.get(prevSuffixCS);
+                while (currentSuffixCSValue == prevSuffixCSValue && currentSuffixCSValue != 1) {
                     lcpValue++;
                     currentSuffixCS = getInverseLF(currentSuffixCS);
                     prevSuffixCS = getInverseLF(prevSuffixCS);
+                    currentSuffixCSValue = waveletMatrix.get(currentSuffixCS);
+                    prevSuffixCSValue = waveletMatrix.get(prevSuffixCS);
                 }
+
                 if (oldLCP != lcpValue) {
                     hasToUpdate = true;
                 }
@@ -311,7 +318,8 @@ public class DynamicSACA {
                 int currentSuffixCS = getInverseLF(cs + 1);
                 int prevSuffixCS = getInverseLF(cs);
                 int lcpValue = 0;
-                while (waveletMatrix.get(currentSuffixCS) == waveletMatrix.get(prevSuffixCS)) {
+                while (waveletMatrix.get(currentSuffixCS) == waveletMatrix.get(prevSuffixCS)
+                        && waveletMatrix.get(currentSuffixCS) != 1) {
                     lcpValue++;
                     currentSuffixCS = getInverseLF(currentSuffixCS);
                     prevSuffixCS = getInverseLF(prevSuffixCS);
