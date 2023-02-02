@@ -8,6 +8,14 @@ public class Timer {
 
     double start;
     double stop;
+    boolean stdout = false;
+
+    public Timer() {
+    }
+
+    public Timer(boolean stdout) {
+        this.stdout = stdout;
+    }
 
     public void start() {
         start = System.nanoTime();
@@ -23,6 +31,10 @@ public class Timer {
     }
 
     public void log(String message) {
+        if (stdout) {
+            System.out.println(message + ":" + getTotal());
+            return;
+        }
         LOGGER.info(message + ": " + getTotal());
     }
 }

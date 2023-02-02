@@ -24,6 +24,9 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.Node> {
         Node right;
         Node link;
 
+        // Link to corresponding lcp node
+        Node lcpLink;
+
         int key = -1;
 
         // Used when building int[] sa;

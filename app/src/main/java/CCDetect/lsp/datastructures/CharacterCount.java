@@ -34,4 +34,8 @@ public class CharacterCount {
     public void addChar(int ch) {
         charCounts[ch]++;
     }
+
+    public int getCharCount(int ch) {
+        return charCounts[ch];
+    }
 }
