@@ -39,12 +39,15 @@ public class DynamicPermutation {
         bNode.setLink(aNode);
     }
 
-    public void delete(int index) {
+    // Returns aNode which has a link to bNode
+    public Node delete(int index) {
 
         Node aNode = aTree.getByRank(index);
         Node bNode = aNode.getLink();
         aTree.deleteByNode(aNode);
         bTree.deleteByNode(bNode);
+
+        return aNode;
     }
 
     public int get(int index) {

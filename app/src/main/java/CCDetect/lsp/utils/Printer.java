@@ -10,6 +10,7 @@ import com.google.common.base.Strings;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
+import CCDetect.lsp.datastructures.ExtendedSuffixArray;
 import CCDetect.lsp.datastructures.editdistance.EditOperation;
 import CCDetect.lsp.datastructures.rankselect.DynamicBitSet;
 import CCDetect.lsp.datastructures.rankselect.DynamicTreeBitSet;
@@ -199,5 +200,14 @@ public class Printer {
 
     public static String print(DynamicTreeBitSet bitSet) {
         return bitSet.getRoot().toString();
+    }
+
+    public static String print(ExtendedSuffixArray eSuff) {
+        StringBuilder out = new StringBuilder();
+        out.append("SA: " + Printer.print(eSuff.getSuffix()));
+        out.append("\nISA: " + Printer.print(eSuff.getInverseSuffix()));
+        out.append("\nLCP: " + Printer.print(eSuff.getLcp()));
+
+        return out.toString();
     }
 }
