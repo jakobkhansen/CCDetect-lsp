@@ -2,6 +2,7 @@ package CCDetect.lsp.datastructures;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import CCDetect.lsp.datastructures.OrderStatisticTree.OSTreeNode;
@@ -17,7 +18,7 @@ public class DynamicLCP {
     int CLONE_THRESHOLD = Configuration.getInstance().getCloneTokenThreshold();
     OrderStatisticTree tree;
     public DynamicTreeBitSet positionsToUpdate;
-    List<OSTreeNode> nodesAboveThreshold = new ArrayList<>();
+    List<OSTreeNode> nodesAboveThreshold = new LinkedList<>();
 
     public DynamicLCP(int[] initial) {
         tree = new OrderStatisticTree();

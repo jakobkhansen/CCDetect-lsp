@@ -9,6 +9,7 @@ import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
 import CCDetect.lsp.datastructures.editdistance.EditOperation;
+import CCDetect.lsp.datastructures.editdistance.EditOperationType;
 import CCDetect.lsp.datastructures.editdistance.HirschbergsAlgorithm;
 import CCDetect.lsp.detection.treesitterbased.fingerprint.Fingerprint;
 import CCDetect.lsp.files.DocumentModel;

@@ -86,13 +86,13 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             eSuff = new SAIS().buildExtendedSuffixArray(fingerprint);
             timer.stop();
             timer.log("Linear time");
-            if (saca == null) {
+            if (config.isDynamicDetection() && saca == null) {
                 LOGGER.info("Building dynamic structures");
                 saca = new DynamicSACA(fingerprint, eSuff);
                 LOGGER.info("Built dynamic structures");
+                eSuff = null;
             }
         } else {
-            eSuff = null;
 
             if (config.isEvaluate()) {
                 Timer timer = new Timer();
