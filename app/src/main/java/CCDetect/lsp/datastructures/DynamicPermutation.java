@@ -22,8 +22,8 @@ public class DynamicPermutation {
         for (int i = 0; i < initial.length; i++) {
             OSTreeNode aNode = aTree.getByRank(i);
             OSTreeNode bNode = bTree.getByRank(initial[i]);
-            aNode.setLink(bNode);
-            bNode.setLink(aNode);
+            aNode.setInverseLink(bNode);
+            bNode.setInverseLink(aNode);
         }
     }
 
@@ -32,18 +32,20 @@ public class DynamicPermutation {
         bTree.add(element);
     }
 
-    public void insert(int index, int element) {
+    public OSTreeNode insert(int index, int element) {
         OSTreeNode aNode = aTree.add(index);
         OSTreeNode bNode = bTree.add(element);
-        aNode.setLink(bNode);
-        bNode.setLink(aNode);
+        aNode.setInverseLink(bNode);
+        bNode.setInverseLink(aNode);
+
+        return aNode;
     }
 
     // Returns aNode which has a link to bNode
     public OSTreeNode delete(int index) {
 
         OSTreeNode aNode = aTree.getByRank(index);
-        OSTreeNode bNode = aNode.getLink();
+        OSTreeNode bNode = aNode.getInverseLink();
         aTree.deleteByNode(aNode);
         bTree.deleteByNode(bNode);
 
@@ -52,28 +54,28 @@ public class DynamicPermutation {
 
     public int get(int index) {
         OSTreeNode aNode = aTree.getByRank(index);
-        OSTreeNode bNode = aNode.getLink();
+        OSTreeNode bNode = aNode.getInverseLink();
 
         return OrderStatisticTree.inOrderRank(bNode);
     }
 
     public OSTreeNode getNode(int index) {
         OSTreeNode aNode = aTree.getByRank(index);
-        OSTreeNode bNode = aNode.getLink();
+        OSTreeNode bNode = aNode.getInverseLink();
 
         return bNode;
     }
 
     public int getInverse(int index) {
         OSTreeNode bNode = bTree.getByRank(index);
-        OSTreeNode aNode = bNode.getLink();
+        OSTreeNode aNode = bNode.getInverseLink();
 
         return OrderStatisticTree.inOrderRank(aNode);
     }
 
     public OSTreeNode getInverseNode(int index) {
         OSTreeNode bNode = bTree.getByRank(index);
-        OSTreeNode aNode = bNode.getLink();
+        OSTreeNode aNode = bNode.getInverseLink();
 
         return aNode;
     }
@@ -95,7 +97,7 @@ public class DynamicPermutation {
         }
         int index = 0;
         for (OSTreeNode node : aTree) {
-            out[index] = node.getLink().inorderRank;
+            out[index] = node.getInverseLink().inorderRank;
             index++;
         }
         return out;
@@ -110,7 +112,7 @@ public class DynamicPermutation {
         }
         int index = 0;
         for (OSTreeNode node : bTree) {
-            out[index] = node.getLink().inorderRank;
+            out[index] = node.getInverseLink().inorderRank;
             index++;
         }
         return out;

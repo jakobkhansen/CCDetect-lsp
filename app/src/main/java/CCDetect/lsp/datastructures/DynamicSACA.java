@@ -1,7 +1,9 @@
 package CCDetect.lsp.datastructures;
 
+import java.util.Iterator;
 import java.util.logging.Logger;
 
+import CCDetect.lsp.datastructures.OrderStatisticTree.OSTreeNode;
 import CCDetect.lsp.datastructures.editdistance.EditOperation;
 import CCDetect.lsp.datastructures.rankselect.WaveletMatrix;
 import CCDetect.lsp.utils.Printer;
@@ -24,17 +26,27 @@ public class DynamicSACA {
 
     // Assume initial arrays are of same size
     // Creates a dynamic suffix array datastructure with initialSize potential size
-    public DynamicSACA(int[] initialText, int[] initialSA, int[] initialISA, int[] initialLCP) {
+    public DynamicSACA(int[] initialText, int[] initialSA, int[] initialLCP) {
         charCounts = new CharacterCount(initialText);
         sa = new DynamicPermutation(initialSA);
         lcp = new DynamicLCP(initialLCP);
+
+        Iterator<OSTreeNode> saIterator = sa.aTree.iterator();
+        Iterator<OSTreeNode> lcpIterator = lcp.tree.iterator();
+
+        while (saIterator.hasNext() && lcpIterator.hasNext()) {
+            OSTreeNode saNode = saIterator.next();
+            OSTreeNode lcpNode = lcpIterator.next();
+            saNode.lcpLink = lcpNode;
+            lcpNode.saLink = saNode;
+        }
 
         int[] l = calculateL(initialSA, initialText, initialText.length);
         waveletMatrix = new WaveletMatrix(l, l.length + 100);
     }
 
     public DynamicSACA(int[] initialText, ExtendedSuffixArray initialESuff) {
-        this(initialText, initialESuff.getSuffix(), initialESuff.getInverseSuffix(), initialESuff.getLcp());
+        this(initialText, initialESuff.getSuffix(), initialESuff.getLcp());
     }
 
     public DynamicPermutation getSA() {
@@ -82,8 +94,10 @@ public class DynamicSACA {
             posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;
 
             // Insert new rows
-            sa.insert(pointOfInsertion, position);
-            lcp.insertNewNode(pointOfInsertion);
+            OSTreeNode saNode = sa.insert(pointOfInsertion, position);
+            OSTreeNode lcpNode = lcp.insertNewNode(pointOfInsertion);
+            saNode.lcpLink = lcpNode;
+            lcpNode.saLink = saNode;
 
             int oldPOS = pointOfInsertion;
             pointOfInsertion = getLF(pointOfInsertion);
@@ -100,8 +114,11 @@ public class DynamicSACA {
         // Inserting final character that we substituted before
 
         insertInL(storedLetter, pointOfInsertion);
-        sa.insert(pointOfInsertion, position);
-        lcp.insertNewNode(pointOfInsertion);
+
+        OSTreeNode saNode = sa.insert(pointOfInsertion, position);
+        OSTreeNode lcpNode = lcp.insertNewNode(pointOfInsertion);
+        saNode.lcpLink = lcpNode;
+        lcpNode.saLink = saNode;
 
         previousCS += pointOfInsertion <= previousCS ? 1 : 0;
         posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;

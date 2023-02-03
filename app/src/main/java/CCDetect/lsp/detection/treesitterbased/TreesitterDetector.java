@@ -86,14 +86,14 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             eSuff = new SAIS().buildExtendedSuffixArray(fingerprint);
             timer.stop();
             timer.log("Linear time");
-            if (config.isDynamicDetection()) {
+            if (saca == null) {
                 LOGGER.info("Building dynamic structures");
                 saca = new DynamicSACA(fingerprint, eSuff);
                 LOGGER.info("Built dynamic structures");
             }
         } else {
-
             eSuff = null;
+
             if (config.isEvaluate()) {
                 Timer timer = new Timer();
                 timer.start();
@@ -103,8 +103,6 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                 timer.log("Linear time");
             }
 
-            Timer timer = new Timer();
-            timer.start();
             List<EditOperation> edits = getDocumentEdits(index);
 
             if (edits.size() == 0) {
@@ -118,30 +116,25 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             dynamicUpdate(edits);
             updateTimer.stop();
             updateTimer.log("Time to update sa");
-            timer.stop();
-            eSuff = saca.buildESuff();
-            timer.log("Incremental time");
         }
         for (TreesitterDocumentModel document : index) {
             document.setChanged(false);
         }
 
-        clones = new ArrayList<>();
-
         Timer extractClonesTimer = new Timer();
         extractClonesTimer.start();
-        int[] cloneIndices;
 
+        Map<Integer, CodeClone> cloneMap = null;
         if (config.isDynamicDetection()) {
-            cloneIndices = extractCloneIndicesFromSAIncremental();
+            int[] cloneIndices = extractCloneIndicesFromSAIncremental();
+            LOGGER.info("Clone indices: " + Printer.print(cloneIndices));
+            cloneMap = getClonesIncremental(cloneIndices);
         } else {
-            cloneIndices = extractCloneIndicesFromSA();
+            int[] cloneIndices = extractCloneIndicesFromSA();
+            cloneMap = getClones(cloneIndices);
         }
 
-        LOGGER.info("Clone indices: " + Printer.print(cloneIndices));
-
-        Map<Integer, CodeClone> cloneMap = getClones(cloneIndices);
-
+        clones = new ArrayList<>();
         for (CodeClone clone : cloneMap.values()) {
             clones.add(clone);
         }
@@ -237,41 +230,26 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
 
     // TODO add links between sa nodes and lcp nodes
     private int[] extractCloneIndicesFromSAIncremental() {
-        int cloneThreshold = config.getCloneTokenThreshold();
         // Fetch clones, ignore contained clones
         ArrayList<Integer> clones = new ArrayList<>();
         DynamicLCP lcp = saca.getDynLCP();
         DynamicPermutation sa = saca.getSA();
-        LOGGER.info(Printer.print(sa.toArray()));
-        LOGGER.info(Printer.print(sa.inverseToArray()));
 
         for (OSTreeNode node : lcp.getNodesAboveThreshold()) {
             int saValue = OrderStatisticTree.inOrderRank(node);
-            int inverseValue = sa.getInverse(saValue);
-            int textIndex = sa.get(saValue);
-            LOGGER.info("suff value: " + saValue);
-            LOGGER.info("inverse value: " + inverseValue);
-            LOGGER.info("LCP value: " + node.key);
-            LOGGER.info("Clone index: " + textIndex);
+            int inverseValue = sa.get(saValue);
 
             // int secondIndex = sa.get(sa.getInverse(i) - 1);
-            // if (sa.getInverse(i) == 0 || secondIndex == 0) {
-            // continue;
-            // }
-            // // If we find a large enough clone where the match is not contained within
-            // // another clone, we found a new clone
-            // if (lcp.get(sa.getInverse(secondIndex - 1)) <=
-            // lcp.get(sa.getInverse(secondIndex))) {
-            // clones.add(i);
-            // i++;
-            //
-            // // Ignore all contained clones for the new clones
-            // while (i < sa.size() &&
-            // lcp.get(sa.getInverse(i - 1)) > lcp.get(sa.getInverse(i)) &&
-            // lcp.get(sa.getInverse(i)) >= cloneThreshold) {
-            // i++;
-            // }
-            // }
+            int secondIndex = sa.get(sa.getInverse(inverseValue) - 1);
+
+            OSTreeNode secondNode = lcp.getNode(secondIndex);
+            int firstLCP = node.key;
+            int secondLCP = secondNode.key;
+            int firstPreceedingLCP = lcp.get(sa.getInverse(inverseValue - 1));
+            int secondPreceedingLCP = lcp.get(sa.getInverse(secondIndex - 1));
+            if (firstPreceedingLCP <= firstLCP && secondPreceedingLCP <= secondLCP) {
+                clones.add(inverseValue);
+            }
         }
         return Ints.toArray(clones);
 
@@ -283,8 +261,61 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         for (int i = 0; i < cloneIndices.length; i++) {
             int firstIndex = cloneIndices[i];
             int secondIndex = eSuff.getLCPMatchIndex(cloneIndices[i]);
+            LOGGER.info("firstIndex: " + firstIndex + "\n secondindex: " + secondIndex);
 
             int cloneSize = eSuff.getLCPValue(firstIndex) - 1;
+            LOGGER.info("clone size: " + cloneSize);
+
+            TokenSourcePair first = getTokenSourcePairFromIndex(firstIndex, cloneSize);
+            TokenSourcePair second = getTokenSourcePairFromIndex(secondIndex, cloneSize);
+
+            Range firstRange = converter.convertFromRight(first.getRangeBetween());
+            Range secondRange = converter.convertFromRight(second.getRangeBetween());
+
+            CodeClone firstClone = cloneMap.getOrDefault(firstIndex,
+                    new CodeClone(first.getUri(), firstRange));
+            CodeClone secondClone = cloneMap.getOrDefault(secondIndex,
+                    new CodeClone(second.getUri(), secondRange));
+
+            if (cloneSize > firstClone.getCloneSize()) {
+                firstClone.setRange(firstRange);
+                firstClone.setCloneSize(cloneSize);
+            }
+            if (cloneSize > secondClone.getCloneSize()) {
+                secondClone.setRange(secondRange);
+                secondClone.setCloneSize(cloneSize);
+            }
+
+            CodeClone.addMatch(firstClone, secondClone);
+
+            for (CodeClone clone : firstClone.getMatches()) {
+                if (clone != firstClone && clone != secondClone) {
+                    CodeClone.addMatch(secondClone, clone);
+                }
+            }
+
+            for (CodeClone clone : secondClone.getMatches()) {
+                if (clone != firstClone && clone != secondClone) {
+                    CodeClone.addMatch(firstClone, clone);
+                }
+            }
+
+            cloneMap.put(firstIndex, firstClone);
+            cloneMap.put(secondIndex, secondClone);
+        }
+        return cloneMap;
+    }
+
+    private Map<Integer, CodeClone> getClonesIncremental(int[] cloneIndices) {
+        RangeConverter converter = new RangeConverter();
+        Map<Integer, CodeClone> cloneMap = new HashMap<>();
+        DynamicPermutation sa = saca.getSA();
+        DynamicLCP lcp = saca.getDynLCP();
+        for (int i = 0; i < cloneIndices.length; i++) {
+            int firstIndex = cloneIndices[i];
+            int secondIndex = sa.get(sa.getInverse(firstIndex) - 1);
+
+            int cloneSize = lcp.get(sa.getInverse(firstIndex)) - 1;
 
             TokenSourcePair first = getTokenSourcePairFromIndex(firstIndex, cloneSize);
             TokenSourcePair second = getTokenSourcePairFromIndex(secondIndex, cloneSize);

@@ -22,10 +22,10 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.OSTreeNod
         OSTreeNode parent;
         OSTreeNode left;
         OSTreeNode right;
-        OSTreeNode link;
+        OSTreeNode inverseLink;
 
-        // Link to corresponding lcp node
-        OSTreeNode lcpLink;
+        // Links specifically for lcp connection
+        public OSTreeNode saLink, isaLink, lcpLink;
 
         public int key = -1;
 
@@ -42,12 +42,12 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.OSTreeNod
             this.key = key;
         }
 
-        public OSTreeNode getLink() {
-            return link;
+        public OSTreeNode getInverseLink() {
+            return inverseLink;
         }
 
-        public void setLink(OSTreeNode link) {
-            this.link = link;
+        public void setInverseLink(OSTreeNode link) {
+            this.inverseLink = link;
         }
 
         public int rank() {
@@ -65,7 +65,7 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.OSTreeNod
         @Override
         public String toString() {
             String out = "Node(" + "rank: " + rank() + ", key:" + (key != -1 ? key : "")
-                    + ", link: " + (link != null ? link.key : "");
+                    + ", link: " + (inverseLink != null ? inverseLink.key : "");
             if (left != null) {
                 out += "\nLeft: " + left.toString();
             }
@@ -269,9 +269,12 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.OSTreeNod
             int tmpKey = node.key;
             node.key = successor.key;
 
-            if (successor.getLink() != null) {
-                successor.getLink().setLink(node);
-                node.setLink(successor.getLink());
+            if (successor.getInverseLink() != null) {
+                successor.getInverseLink().setInverseLink(node);
+                if (successor.lcpLink != null) {
+                    successor.lcpLink.saLink = node;
+                }
+                node.setInverseLink(successor.getInverseLink());
             }
             node.key = successor.key;
 

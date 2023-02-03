@@ -39,11 +39,15 @@ public class DynamicLCP {
         return tree.getByRank(index).key;
     }
 
+    public OSTreeNode getNode(int index) {
+        return tree.getByRank(index);
+    }
+
     // Inserts new node which will later be set to the correct value
-    public void insertNewNode(int index) {
+    public OSTreeNode insertNewNode(int index) {
         positionsToUpdate.insert(index, true);
         positionsToUpdate.set(index + 1, true);
-        tree.addWithKey(index, -1);
+        return tree.addWithKey(index, -1);
     }
 
     public OSTreeNode deleteValue(int index) {
@@ -90,7 +94,7 @@ public class DynamicLCP {
         Iterator<OSTreeNode> lcpIterator = tree.iterator();
         Iterator<OSTreeNode> saIterator = permutation.aTree.iterator();
         while (lcpIterator.hasNext() && saIterator.hasNext()) {
-            lcpIterator.next().setLink(saIterator.next());
+            lcpIterator.next().setInverseLink(saIterator.next());
         }
     }
 
