@@ -81,8 +81,4 @@ public class DynamicBitSet {
     public int getNumOnes() {
         return set.cardinality();
     }
-
-    private int availableSpace() {
-        return set.size();
-    }
 }

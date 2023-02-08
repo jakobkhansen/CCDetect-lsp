@@ -85,31 +85,6 @@ public class DynamicTreeBitSet {
             return right.setBit(index - bitsInLeft, value);
         }
 
-        public boolean get(int index) {
-            if (isLeaf()) {
-                return bitSet.get(index);
-            }
-
-            if (index < bitsInLeft) {
-                return left.get(index);
-            }
-
-            return right.get(index - bitsInLeft);
-        }
-
-        public int rank(int index, boolean value) {
-            if (isLeaf()) {
-                return bitSet.rank(index, value);
-            }
-
-            if (index < bitsInLeft) {
-                return left.rank(index, value);
-            }
-
-            int equalBitsInLeft = value ? setInLeft : (bitsInLeft - setInLeft);
-            return equalBitsInLeft + right.rank(index - bitsInLeft, value);
-        }
-
         public int select(int rank, boolean value) {
             if (isLeaf()) {
                 return bitSet.select(rank, value);
@@ -197,7 +172,21 @@ public class DynamicTreeBitSet {
     }
 
     public int rank(int index, boolean value) {
-        return root.rank(index, value);
+        Node current = root;
+        int result = 0;
+        while (!current.isLeaf()) {
+            if (index < current.bitsInLeft) {
+                current = current.left;
+            } else {
+                int equalBitsInLeft = value ? current.setInLeft : (current.bitsInLeft - current.setInLeft);
+                result += equalBitsInLeft;
+                index -= current.bitsInLeft;
+                current = current.right;
+            }
+
+        }
+
+        return result + current.bitSet.rank(index, value);
     }
 
     public int select(int rank, boolean value) {
@@ -212,7 +201,16 @@ public class DynamicTreeBitSet {
     }
 
     public boolean get(int index) {
-        return root.get(index);
+
+        Node current = root;
+        while (!current.isLeaf()) {
+            Node previous = current;
+            current = index < previous.bitsInLeft ? previous.left : previous.right;
+            index -= index < previous.bitsInLeft ? 0 : previous.bitsInLeft;
+        }
+
+        return current.bitSet.get(index);
+
     }
 
     public void insert(int index, boolean value) {

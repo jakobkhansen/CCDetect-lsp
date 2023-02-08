@@ -91,7 +91,9 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                 LOGGER.info("Building dynamic structures");
                 saca = new DynamicSACA(fingerprint, eSuff);
                 LOGGER.info("Built dynamic structures");
-                eSuff = null;
+                if (!config.isEvaluate()) {
+                    eSuff = null;
+                }
             }
         } else {
 
@@ -122,15 +124,23 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             document.setChanged(false);
         }
 
-        Timer extractClonesTimer = new Timer();
-        extractClonesTimer.start();
-
         Map<Integer, CodeClone> cloneMap = null;
         if (config.isDynamicDetection()) {
+            if (config.isEvaluate()) {
+                Timer linearTimer = new Timer();
+                linearTimer.start();
+                int[] linearCloneIndices = extractCloneIndicesFromSA();
+                linearTimer.stop();
+                linearTimer.log("Linear time to extract clones");
+            }
+            Timer extractClonesTimer = new Timer();
+            extractClonesTimer.start();
             int[] cloneIndices = extractCloneIndicesFromSAIncremental();
 
             LOGGER.info("Clone indices: " + Printer.print(cloneIndices));
             cloneMap = getClonesIncremental(cloneIndices);
+            extractClonesTimer.stop();
+            extractClonesTimer.log("Time to extract clones");
         } else {
             int[] cloneIndices = extractCloneIndicesFromSA();
             cloneMap = getClones(cloneIndices);
@@ -140,8 +150,6 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         for (CodeClone clone : cloneMap.values()) {
             clones.add(clone);
         }
-        extractClonesTimer.stop();
-        extractClonesTimer.log("Time to extract clones");
 
         timerIndexChange.stop();
         timerIndexChange.log("indexDidChange time");

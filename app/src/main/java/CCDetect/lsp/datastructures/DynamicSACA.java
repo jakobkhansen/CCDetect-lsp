@@ -263,6 +263,7 @@ public class DynamicSACA {
             sa.setLCPValue(pos, lcpValue);
         }
 
+        int lowerBound = 0;
         int cs = startPos;
         boolean hasToUpdate = true;
         int numExtraIterations = 2;
@@ -277,44 +278,50 @@ public class DynamicSACA {
             hasToUpdate = false;
             if (cs != 0) {
                 int oldLCP = sa.getLCPValue(cs);
-                int currentSuffixCS = getInverseLF(cs);
-                int prevSuffixCS = getInverseLF(cs - 1);
-                int lcpValue = 0;
+                if (oldLCP >= lowerBound) {
+                    int currentSuffixCS = getInverseLF(cs);
+                    int prevSuffixCS = getInverseLF(cs - 1);
+                    int lcpValue = 0;
 
-                int currentSuffixCSValue = waveletMatrix.get(currentSuffixCS);
-                int prevSuffixCSValue = waveletMatrix.get(prevSuffixCS);
-                while (currentSuffixCSValue == prevSuffixCSValue && currentSuffixCSValue != 1) {
-                    lcpValue++;
-                    currentSuffixCS = getInverseLF(currentSuffixCS);
-                    prevSuffixCS = getInverseLF(prevSuffixCS);
-                    currentSuffixCSValue = waveletMatrix.get(currentSuffixCS);
-                    prevSuffixCSValue = waveletMatrix.get(prevSuffixCS);
-                }
+                    int currentSuffixCSValue = waveletMatrix.get(currentSuffixCS);
+                    int prevSuffixCSValue = waveletMatrix.get(prevSuffixCS);
+                    while (currentSuffixCSValue == prevSuffixCSValue && currentSuffixCSValue != 1) {
+                        lcpValue++;
+                        currentSuffixCS = getInverseLF(currentSuffixCS);
+                        prevSuffixCS = getInverseLF(prevSuffixCS);
+                        currentSuffixCSValue = waveletMatrix.get(currentSuffixCS);
+                        prevSuffixCSValue = waveletMatrix.get(prevSuffixCS);
+                    }
 
-                if (oldLCP != lcpValue) {
-                    hasToUpdate = true;
+                    if (oldLCP != lcpValue) {
+                        hasToUpdate = true;
+                    }
+                    sa.setLCPValue(cs, lcpValue);
                 }
-                sa.setLCPValue(cs, lcpValue);
             }
             if (cs < sa.aTree.size() - 1) {
-                int oldLCP = sa.getLCPValue(cs);
+                int oldLCP = sa.getLCPValue(cs + 1);
 
-                int currentSuffixCS = getInverseLF(cs + 1);
-                int prevSuffixCS = getInverseLF(cs);
-                int lcpValue = 0;
-                while (waveletMatrix.get(currentSuffixCS) == waveletMatrix.get(prevSuffixCS)
-                        && waveletMatrix.get(currentSuffixCS) != 1) {
-                    lcpValue++;
-                    currentSuffixCS = getInverseLF(currentSuffixCS);
-                    prevSuffixCS = getInverseLF(prevSuffixCS);
+                if (oldLCP >= lowerBound) {
+                    int currentSuffixCS = getInverseLF(cs + 1);
+                    int prevSuffixCS = getInverseLF(cs);
+                    int lcpValue = 0;
+                    while (waveletMatrix.get(currentSuffixCS) == waveletMatrix.get(prevSuffixCS)
+                            && waveletMatrix.get(currentSuffixCS) != 1) {
+                        lcpValue++;
+                        currentSuffixCS = getInverseLF(currentSuffixCS);
+                        prevSuffixCS = getInverseLF(prevSuffixCS);
+                    }
+                    if (oldLCP != lcpValue) {
+                        hasToUpdate = true;
+                    }
+                    sa.setLCPValue(cs + 1, lcpValue);
+
                 }
-                if (oldLCP != lcpValue) {
-                    hasToUpdate = true;
-                }
-                sa.setLCPValue(cs + 1, lcpValue);
             }
 
             cs = getLF(cs);
+            lowerBound++;
 
         }
 

@@ -186,8 +186,18 @@ public class TreesitterDocumentModel extends DocumentModel {
     }
 
     public List<EditOperation> getEditOperationsFromOldFingerprint() {
+
         int[] fullOldFingerprint = getFullOldFingerprint();
         int[] fullNewFingerprint = getFullFingerprint();
+        int startOffset = HirschbergsAlgorithm.getEqualCharactersStart(fullOldFingerprint, fullNewFingerprint);
+        int endOffset = HirschbergsAlgorithm.getEqualCharactersEnd(fullOldFingerprint, fullNewFingerprint, startOffset);
+        int commonElements = (startOffset + endOffset);
+
+        int oldArea = (fullOldFingerprint.length - commonElements);
+        int newArea = (fullNewFingerprint.length - commonElements);
+        if (oldArea < 100 && newArea < 100) {
+            return getDeleteAndInsertOnly(fullOldFingerprint, fullNewFingerprint, startOffset, endOffset);
+        }
 
         HirschbergsAlgorithm algorithm = new HirschbergsAlgorithm(fullOldFingerprint,
                 fullNewFingerprint);
@@ -196,6 +206,31 @@ public class TreesitterDocumentModel extends DocumentModel {
         // Update positions of all operations based on the fingerprints offset
         for (EditOperation operation : operations) {
             operation.setPosition(operation.getPosition() + fingerprintStart);
+        }
+
+        return operations;
+    }
+
+    public List<EditOperation> getDeleteAndInsertOnly(int[] fullOldFingerprint, int[] fullNewFingerprint,
+            int startOffset, int endOffset) {
+
+        List<EditOperation> operations = new ArrayList<>();
+
+        EditOperation delete = new EditOperation(EditOperationType.DELETE, startOffset);
+        EditOperation insert = new EditOperation(EditOperationType.INSERT, startOffset);
+        for (int i = startOffset; i < fullOldFingerprint.length - endOffset; i++) {
+            delete.getChars().add(fullOldFingerprint[i]);
+        }
+        for (int i = startOffset; i < fullNewFingerprint.length - endOffset; i++) {
+            insert.getChars().add(fullNewFingerprint[i]);
+        }
+
+        if (delete.getChars().size() > 0) {
+            operations.add(delete);
+        }
+
+        if (insert.getChars().size() > 0) {
+            operations.add(insert);
         }
 
         return operations;

@@ -13,12 +13,12 @@ import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
+import org.eclipse.lsp4j.DocumentLink;
+import org.eclipse.lsp4j.DocumentLinkParams;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.TextDocumentService;
-
-import com.google.common.util.concurrent.RateLimiter;
 
 import CCDetect.lsp.CodeClone;
 import CCDetect.lsp.codeactions.CodeActionProvider;
@@ -38,10 +38,8 @@ import CCDetect.lsp.utils.Timer;
 public class CCTextDocumentService implements TextDocumentService {
     // URI -> TextDocumentItem
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
-    private final static Logger FILE_LOGGER = Logger.getLogger("CCFileStateLogger");
     private DocumentIndex<TreesitterDocumentModel> index;
     private CloneDetector<TreesitterDocumentModel> detector;
-    private RateLimiter limiter = RateLimiter.create(1);
 
     public void initialize(String rootUri) {
         Timer timer = new Timer();
@@ -121,7 +119,6 @@ public class CCTextDocumentService implements TextDocumentService {
         }
 
         if (!Configuration.getInstance().shouldUpdateOnSave()) {
-            limiter.acquire();
             findClones();
             updateDiagnostics();
         }
@@ -146,7 +143,6 @@ public class CCTextDocumentService implements TextDocumentService {
         timer.start();
 
         if (Configuration.getInstance().shouldUpdateOnSave()) {
-            limiter.acquire();
             findClones();
             updateDiagnostics();
         }
@@ -169,4 +165,5 @@ public class CCTextDocumentService implements TextDocumentService {
     public void updateDiagnostics() {
         DiagnosticsPublisher.publishCloneDiagnosticsFromIndex(index);
     }
+
 }
