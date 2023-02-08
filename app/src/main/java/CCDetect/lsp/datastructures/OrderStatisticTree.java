@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * This class implements an order statistic tree which is based on AVL-trees.
@@ -16,6 +17,8 @@ import java.util.Set;
  * @param the actual element type.
  */
 public class OrderStatisticTree implements Iterable<OrderStatisticTree.OSTreeNode> {
+    private static final Logger LOGGER = Logger.getLogger(
+            Logger.GLOBAL_LOGGER_NAME);
 
     public static final class OSTreeNode {
 
@@ -23,9 +26,6 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.OSTreeNod
         OSTreeNode left;
         OSTreeNode right;
         OSTreeNode inverseLink;
-
-        // Links specifically for lcp connection
-        public OSTreeNode saLink, isaLink, lcpLink;
 
         public int key = -1;
 
@@ -64,15 +64,8 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.OSTreeNod
 
         @Override
         public String toString() {
-            String out = "Node(" + "rank: " + rank() + ", key:" + (key != -1 ? key : "")
-                    + ", link: " + (inverseLink != null ? inverseLink.key : "");
-            if (left != null) {
-                out += "\nLeft: " + left.toString();
-            }
-            if (right != null) {
-                out += "\nRight: " + right.toString();
-            }
-            return out + ")";
+            String out = "Node(" + "rank: " + rank() + ", key:" + key + "inorder rank: " + inOrderRank(this) + ")";
+            return out;
         }
     }
 
@@ -271,11 +264,9 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.OSTreeNod
 
             if (successor.getInverseLink() != null) {
                 successor.getInverseLink().setInverseLink(node);
-                if (successor.lcpLink != null) {
-                    successor.lcpLink.saLink = node;
-                }
                 node.setInverseLink(successor.getInverseLink());
             }
+
             node.key = successor.key;
 
             OSTreeNode child = successor.right;
@@ -303,7 +294,7 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.OSTreeNod
                 hi = hi.parent;
             }
 
-            successor.key = tmpKey;
+            successor.key = -1;
             return successor;
         }
 

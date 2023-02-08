@@ -1,5 +1,7 @@
 package CCDetect.lsp.detection.treesitterbased;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -127,6 +129,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         Map<Integer, CodeClone> cloneMap = null;
         if (config.isDynamicDetection()) {
             int[] cloneIndices = extractCloneIndicesFromSAIncremental();
+
             LOGGER.info("Clone indices: " + Printer.print(cloneIndices));
             cloneMap = getClonesIncremental(cloneIndices);
         } else {
@@ -228,27 +231,36 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
 
     }
 
-    // TODO add links between sa nodes and lcp nodes
     private int[] extractCloneIndicesFromSAIncremental() {
-        // Fetch clones, ignore contained clones
         ArrayList<Integer> clones = new ArrayList<>();
-        DynamicLCP lcp = saca.getDynLCP();
-        DynamicPermutation sa = saca.getSA();
 
-        for (OSTreeNode node : lcp.getNodesAboveThreshold()) {
-            int saValue = OrderStatisticTree.inOrderRank(node);
-            int inverseValue = sa.get(saValue);
+        for (OSTreeNode node : saca.getSA().getNodesAboveThreshold()) {
+            int index = OrderStatisticTree.inOrderRank(node.getInverseLink());
+            if (index == 0) {
+                continue;
+            }
 
+            OSTreeNode preceedingSANode = OrderStatisticTree.predecessorOf(node.getInverseLink()).getInverseLink();
+
+            // OSTreeNode secondNode = OrderStatisticTree.predecessorOf(node.saLink);
             // int secondIndex = sa.get(sa.getInverse(i) - 1);
-            int secondIndex = sa.get(sa.getInverse(inverseValue) - 1);
+            OSTreeNode secondNode = OrderStatisticTree.predecessorOf(node);
+            OSTreeNode secondNodePredecessor = OrderStatisticTree.predecessorOf(secondNode.getInverseLink());
 
-            OSTreeNode secondNode = lcp.getNode(secondIndex);
+            if (secondNodePredecessor == null) {
+                continue;
+            }
+
+            OSTreeNode secondPreceedingSANode = secondNodePredecessor
+                    .getInverseLink();
+
             int firstLCP = node.key;
             int secondLCP = secondNode.key;
-            int firstPreceedingLCP = lcp.get(sa.getInverse(inverseValue - 1));
-            int secondPreceedingLCP = lcp.get(sa.getInverse(secondIndex - 1));
+            int firstPreceedingLCP = preceedingSANode.key;
+            int secondPreceedingLCP = secondPreceedingSANode.key;
+
             if (firstPreceedingLCP <= firstLCP && secondPreceedingLCP <= secondLCP) {
-                clones.add(inverseValue);
+                clones.add(index);
             }
         }
         return Ints.toArray(clones);
@@ -310,12 +322,11 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         RangeConverter converter = new RangeConverter();
         Map<Integer, CodeClone> cloneMap = new HashMap<>();
         DynamicPermutation sa = saca.getSA();
-        DynamicLCP lcp = saca.getDynLCP();
         for (int i = 0; i < cloneIndices.length; i++) {
             int firstIndex = cloneIndices[i];
             int secondIndex = sa.get(sa.getInverse(firstIndex) - 1);
 
-            int cloneSize = lcp.get(sa.getInverse(firstIndex)) - 1;
+            int cloneSize = sa.getLCPValue(sa.getInverse(firstIndex)) - 1;
 
             TokenSourcePair first = getTokenSourcePairFromIndex(firstIndex, cloneSize);
             TokenSourcePair second = getTokenSourcePairFromIndex(secondIndex, cloneSize);

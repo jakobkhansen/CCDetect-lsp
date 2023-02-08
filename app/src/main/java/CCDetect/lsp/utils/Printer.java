@@ -89,6 +89,15 @@ public class Printer {
         return out.toString();
     }
 
+    public static <T> String print(List<T> ints) {
+        StringBuilder out = new StringBuilder("int[ ");
+        for (T s : ints) {
+            out.append(Strings.padEnd("" + s.toString(), 6, ' ') + " ");
+        }
+        out.append("]");
+        return out.toString();
+    }
+
     public static String print(int[] ints, int size) {
         StringBuilder out = new StringBuilder("int[ ");
         for (int i = 0; i < size; i++) {
