@@ -102,6 +102,8 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                 timer.start();
                 int[] fingerprint = getFullFingerprint(index);
                 ExtendedSuffixArray linearEsuff = new SAIS().buildExtendedSuffixArray(fingerprint);
+                // LOGGER.info("Expected SA: " + Printer.print(linearEsuff.getSuffix()));
+                // LOGGER.info("Expected LCP: " + Printer.print(linearEsuff.getLcp()));
                 timer.stop();
                 timer.log("Linear time");
             }
@@ -242,6 +244,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         ArrayList<Integer> clones = new ArrayList<>();
 
         for (OSTreeNode node : saca.getSA().getNodesAboveThreshold()) {
+
             int index = OrderStatisticTree.inOrderRank(node.getInverseLink());
             if (index == 0) {
                 continue;
@@ -331,9 +334,10 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         DynamicPermutation sa = saca.getSA();
         for (int i = 0; i < cloneIndices.length; i++) {
             int firstIndex = cloneIndices[i];
-            int secondIndex = sa.get(sa.getInverse(firstIndex) - 1);
-
-            int cloneSize = sa.getLCPValue(sa.getInverse(firstIndex)) - 1;
+            OSTreeNode firstNode = sa.getInverseNode(firstIndex);
+            int cloneSize = firstNode.key - 1;
+            int secondIndex = OrderStatisticTree
+                    .inOrderRank(OrderStatisticTree.predecessorOf(firstNode).getInverseLink());
 
             TokenSourcePair first = getTokenSourcePairFromIndex(firstIndex, cloneSize);
             TokenSourcePair second = getTokenSourcePairFromIndex(secondIndex, cloneSize);

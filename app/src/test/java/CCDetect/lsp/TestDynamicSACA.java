@@ -95,6 +95,8 @@ public class TestDynamicSACA {
         testDynamicSuffixDeleteFactor("jsaldkj", 0, 4);
         testDynamicSuffixDeleteFactor("abb", 2, 1);
 
+        testDynamicSuffixDeleteFactor("bdfecaefcabdfc", 3, 5);
+
     }
 
     @Test
@@ -146,6 +148,9 @@ public class TestDynamicSACA {
                 "qwoiueqpzx");
         testLCPInsertOnAllIndices("pneumonoultramicroscopicsilicovolcanoconiosis",
                 "a");
+        testLCPInsertOnAllIndices(
+                "pneumonoultramicroscopicsilicovolcanoconiosisdlkjadsiljaoiuqerlkjslkjxvczlkjwaerlkja",
+                "asdlkfjalkrejlkqwezxvcmncxzvmn");
     }
 
     @Test
@@ -161,8 +166,8 @@ public class TestDynamicSACA {
         ExtendedSuffixArray eSuffBanana = sais.buildExtendedSuffixArray(originalArray);
         int[] editArray = stringToIntArray(edit);
         int[] resultArray = stringToIntArrayWithTerminator(getStringWithEdit(input, edit, position));
-        System.out.println("input: " + Printer.print(originalArray));
-        System.out.println("result: " + Printer.print(resultArray));
+        // System.out.println("input: " + Printer.print(originalArray));
+        // System.out.println("result: " + Printer.print(resultArray));
 
         // Build expected result suffix array
         Timer linearTimer = new Timer();
@@ -178,8 +183,9 @@ public class TestDynamicSACA {
         ExtendedSuffixArray eSuffUpdated = dynSACA.buildESuff();
         incrementalTimer.stop();
 
-        System.out.println("final LCP: " + Printer.print(dynSACA.getSA().lcpToArray()));
-        System.out.println("expected LCP: " + Printer.print(expected.getLcp()));
+        // System.out.println("final LCP: " +
+        // Printer.print(dynSACA.getSA().lcpToArray()));
+        // System.out.println("expected LCP: " + Printer.print(expected.getLcp()));
 
         assertArrayEquals(expected.getSuffix(), eSuffUpdated.getSuffix());
 
@@ -212,9 +218,9 @@ public class TestDynamicSACA {
 
         DynamicSACA dynSACA = new DynamicSACA(originalArray, eSuffOriginal);
         // System.out.println("Initial SA: " +
-        // Printer.print(dynSACA.getPermutation().toArray()));
+        // Printer.print(dynSACA.getSA().toArray()));
         // System.out.println("Initial LCP: " +
-        // Printer.print(dynSACA.getDynLCP().toArray()));
+        // Printer.print(dynSACA.getSA().lcpToArray()));
         Timer incrementalTimer = new Timer();
         incrementalTimer.start();
         dynSACA.deleteFactor(new EditOperation(EditOperationType.DELETE, position, new int[length]));
@@ -223,7 +229,7 @@ public class TestDynamicSACA {
         // System.out.println("Final SA: " +
         // Printer.print(dynSACA.getSA().toArray()));
         // System.out.println("Final LCP: " +
-        // Printer.print(dynSACA.getDynLCP().toArray()));
+        // Printer.print(dynSACA.getSA().lcpToArray()));
         // System.out.println("Expected LCP: " + Printer.print(expected.getLcp()));
         // System.out.println("Expected SA: " + Printer.print(expected.getSuffix()));
 

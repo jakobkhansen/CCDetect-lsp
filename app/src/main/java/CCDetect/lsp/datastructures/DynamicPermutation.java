@@ -81,7 +81,6 @@ public class DynamicPermutation {
         if (index > 1) {
             positionsToUpdate.set(index - 1, true);
         }
-        positionsToUpdate.set(index, true);
         positionsToUpdate.set(index + 1, true);
         positionsToUpdate.delete(index);
 

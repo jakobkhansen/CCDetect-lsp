@@ -13,6 +13,7 @@ import CCDetect.lsp.datastructures.editdistance.EditOperationType;
 import CCDetect.lsp.datastructures.editdistance.HirschbergsAlgorithm;
 import CCDetect.lsp.detection.treesitterbased.fingerprint.Fingerprint;
 import CCDetect.lsp.files.DocumentModel;
+import CCDetect.lsp.server.Configuration;
 import CCDetect.lsp.utils.Printer;
 import ai.serenade.treesitter.TSInputEdit;
 import ai.serenade.treesitter.TSPoint;
@@ -195,7 +196,17 @@ public class TreesitterDocumentModel extends DocumentModel {
 
         int oldArea = (fullOldFingerprint.length - commonElements);
         int newArea = (fullNewFingerprint.length - commonElements);
+
         if (oldArea < 100 && newArea < 100) {
+            if (Configuration.getInstance().isEvaluate()) {
+                HirschbergsAlgorithm algorithm = new HirschbergsAlgorithm(fullOldFingerprint,
+                        fullNewFingerprint);
+                List<EditOperation> operations = algorithm.getOperations();
+                for (EditOperation edit : operations) {
+                    LOGGER.info("Hirschberg edit: " + Printer.print(edit));
+                }
+
+            }
             return getDeleteAndInsertOnly(fullOldFingerprint, fullNewFingerprint, startOffset, endOffset);
         }
 
@@ -216,11 +227,12 @@ public class TreesitterDocumentModel extends DocumentModel {
 
         List<EditOperation> operations = new ArrayList<>();
 
-        EditOperation delete = new EditOperation(EditOperationType.DELETE, startOffset);
-        EditOperation insert = new EditOperation(EditOperationType.INSERT, startOffset);
+        EditOperation delete = new EditOperation(EditOperationType.DELETE, fingerprintStart + startOffset);
+        EditOperation insert = new EditOperation(EditOperationType.INSERT, fingerprintStart + startOffset);
         for (int i = startOffset; i < fullOldFingerprint.length - endOffset; i++) {
             delete.getChars().add(fullOldFingerprint[i]);
         }
+
         for (int i = startOffset; i < fullNewFingerprint.length - endOffset; i++) {
             insert.getChars().add(fullNewFingerprint[i]);
         }
