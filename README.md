@@ -1,5 +1,13 @@
 # CCDetect-lsp
 
+Incremental, language agnostic and IDE agnostic duplicate code detection.
+
+Code clone diagnostics     |  Diagnostics overview
+:-------------------------:|:-------------------------:
+![](https://user-images.githubusercontent.com/8071566/217652306-e46e8fd1-2ba4-4d46-8442-85538da18283.png)  |  ![](https://user-images.githubusercontent.com/8071566/217652682-dd38eb9c-a746-406e-85d5-f6144a8ba945.png)
+
+
+
 This is an LSP tool which does duplicate code detection, otherwise known as code-clone
 detection. The goal of this tool is to create a completely incremental updating static
 analysis tool, which works in the editor setting to provide code analysis in real-time.
