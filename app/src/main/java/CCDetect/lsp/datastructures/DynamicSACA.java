@@ -28,18 +28,7 @@ public class DynamicSACA {
     // Creates a dynamic suffix array datastructure with initialSize potential size
     public DynamicSACA(int[] initialText, int[] initialSA, int[] initialLCP) {
         charCounts = new CharacterCount(initialText);
-        sa = new DynamicPermutation(initialSA);
-        lcp = new DynamicLCP(initialLCP);
-
-        Iterator<OSTreeNode> saIterator = sa.aTree.iterator();
-        Iterator<OSTreeNode> lcpIterator = lcp.tree.iterator();
-
-        while (saIterator.hasNext() && lcpIterator.hasNext()) {
-            OSTreeNode saNode = saIterator.next();
-            OSTreeNode lcpNode = lcpIterator.next();
-            saNode.lcpLink = lcpNode;
-            lcpNode.saLink = saNode;
-        }
+        sa = new DynamicPermutation(initialSA, initialLCP);
 
         int[] l = calculateL(initialSA, initialText, initialText.length);
         waveletMatrix = new WaveletMatrix(l, l.length + 100);
@@ -56,7 +45,7 @@ public class DynamicSACA {
     public ExtendedSuffixArray buildESuff() {
         int[] saArr = sa.toArray();
         int[] isaArr = sa.inverseToArray();
-        int[] lcpArr = lcp.toArray();
+        int[] lcpArr = sa.lcpToArray();
 
         return new ExtendedSuffixArray(saArr, isaArr, lcpArr);
     }
@@ -94,10 +83,7 @@ public class DynamicSACA {
             posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;
 
             // Insert new rows
-            OSTreeNode saNode = sa.insert(pointOfInsertion, position);
-            OSTreeNode lcpNode = lcp.insertNewNode(pointOfInsertion);
-            saNode.lcpLink = lcpNode;
-            lcpNode.saLink = saNode;
+            OSTreeNode saNode = sa.insert(pointOfInsertion, position, -1);
 
             int oldPOS = pointOfInsertion;
             pointOfInsertion = getLF(pointOfInsertion);
@@ -115,10 +101,7 @@ public class DynamicSACA {
 
         insertInL(storedLetter, pointOfInsertion);
 
-        OSTreeNode saNode = sa.insert(pointOfInsertion, position);
-        OSTreeNode lcpNode = lcp.insertNewNode(pointOfInsertion);
-        saNode.lcpLink = lcpNode;
-        lcpNode.saLink = saNode;
+        OSTreeNode saNode = sa.insert(pointOfInsertion, position, -1);
 
         previousCS += pointOfInsertion <= previousCS ? 1 : 0;
         posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;
@@ -136,8 +119,6 @@ public class DynamicSACA {
 
         updateLCP(pos, position);
 
-        // TODO better to update links for only inserts/deletes
-        // lcp.setLinks(sa);
     }
 
     public void deleteFactor(EditOperation edit) {
@@ -163,7 +144,6 @@ public class DynamicSACA {
             // Delete rows
             deleteInL(pointOfDeletion);
             sa.delete(pointOfDeletion);
-            lcp.deleteValue(pointOfDeletion);
 
             // Update posFirstModified if it has moved because of deletion
             posFirstModified -= pointOfDeletion <= posFirstModified ? 1 : 0;
@@ -180,7 +160,6 @@ public class DynamicSACA {
 
         deleteInL(pointOfDeletion);
         sa.delete(pointOfDeletion);
-        lcp.deleteValue(pointOfDeletion);
 
         posFirstModified -= pointOfDeletion <= posFirstModified ? 1 : 0;
 
@@ -250,10 +229,7 @@ public class DynamicSACA {
 
         int permValue = sa.get(i);
         sa.delete(i);
-        sa.insert(j, permValue);
-
-        lcp.deleteValue(i);
-        lcp.insertNewNode(j);
+        sa.insert(j, permValue, -1);
 
     }
 
@@ -268,6 +244,7 @@ public class DynamicSACA {
     }
 
     private void substituteInL(int ch, int position) {
+
         charCounts.deleteChar(waveletMatrix.get(position));
         charCounts.addChar(ch);
         waveletMatrix.delete(position);
@@ -276,9 +253,9 @@ public class DynamicSACA {
 
     private void updateLCP(int startPos, int positionOfChange) {
         int pos;
-        while ((pos = lcp.positionsToUpdate.select(0, true)) != -1) {
+        while ((pos = sa.positionsToUpdate.select(0, true)) != -1) {
 
-            lcp.positionsToUpdate.set(pos, false);
+            sa.positionsToUpdate.set(pos, false);
             if (pos >= sa.size()) {
                 continue;
             }
@@ -293,12 +270,12 @@ public class DynamicSACA {
                 prevSuffixCS = getInverseLF(prevSuffixCS);
             }
 
-            lcp.setValue(pos, lcpValue);
+            sa.setLCPValue(pos, lcpValue);
         }
 
         int cs = startPos;
         boolean hasToUpdate = true;
-        int numExtraIterations = 3;
+        int numExtraIterations = 2;
         int isFinishing = 0;
         while (numExtraIterations > 0) {
 
@@ -309,7 +286,7 @@ public class DynamicSACA {
 
             hasToUpdate = false;
             if (cs != 0) {
-                int oldLCP = lcp.get(cs);
+                int oldLCP = sa.getLCPValue(cs);
                 int currentSuffixCS = getInverseLF(cs);
                 int prevSuffixCS = getInverseLF(cs - 1);
                 int lcpValue = 0;
@@ -327,10 +304,10 @@ public class DynamicSACA {
                 if (oldLCP != lcpValue) {
                     hasToUpdate = true;
                 }
-                lcp.setValue(cs, lcpValue);
+                sa.setLCPValue(cs, lcpValue);
             }
-            if (cs < lcp.tree.size() - 1) {
-                int oldLCP = lcp.get(cs);
+            if (cs < sa.aTree.size() - 1) {
+                int oldLCP = sa.getLCPValue(cs);
 
                 int currentSuffixCS = getInverseLF(cs + 1);
                 int prevSuffixCS = getInverseLF(cs);
@@ -344,7 +321,7 @@ public class DynamicSACA {
                 if (oldLCP != lcpValue) {
                     hasToUpdate = true;
                 }
-                lcp.setValue(cs + 1, lcpValue);
+                sa.setLCPValue(cs + 1, lcpValue);
             }
 
             cs = getLF(cs);
@@ -353,7 +330,7 @@ public class DynamicSACA {
 
         // LCP[0] should always be 0, maybe we could avoid this assignment, but not too
         // important
-        lcp.setValue(0, 0);
+        sa.setLCPValue(0, 0);
 
     }
 

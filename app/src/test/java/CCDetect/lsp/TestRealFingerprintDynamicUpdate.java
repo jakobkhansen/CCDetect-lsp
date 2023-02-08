@@ -61,7 +61,7 @@ public class TestRealFingerprintDynamicUpdate {
         assertArrayEquals(expected.getInverseSuffix(),
                 dynUpdated.getInverseSuffix());
         assertArrayEquals(expected.getLcp(),
-                dynSACA.getDynLCP().toArray());
+                dynSACA.getSA().lcpToArray());
 
         reader.close();
     }

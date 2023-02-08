@@ -154,23 +154,6 @@ public class TestDynamicSACA {
         testDynamicSuffixDeleteFactor("baba", 1, 1);
     }
 
-    @Test
-    public void testRandomString() {
-        for (int i = 0; i < 1000; i++) {
-
-            UUID randomUUID = UUID.randomUUID();
-
-            String str = randomUUID.toString().replaceAll("-", "").replaceAll("\\d", "");
-            char[] withChars = str.chars().map((int num) -> {
-                return (Integer.valueOf((num)));
-            }).mapToObj(j -> Character.toString((char) j)).collect(Collectors.joining()).toCharArray();
-            String longStr = String.valueOf(withChars);
-            String shortStr = longStr;
-            // System.out.println("Generated string: " + shortStr);
-            testDeleteAllFactors(shortStr);
-        }
-    }
-
     public void testDynamicSuffixInsertFactor(String input, String edit, int position) {
         // Build arrays
         SAIS sais = new SAIS();
@@ -178,8 +161,8 @@ public class TestDynamicSACA {
         ExtendedSuffixArray eSuffBanana = sais.buildExtendedSuffixArray(originalArray);
         int[] editArray = stringToIntArray(edit);
         int[] resultArray = stringToIntArrayWithTerminator(getStringWithEdit(input, edit, position));
-        // System.out.println("input: " + Printer.print(originalArray));
-        // System.out.println("result: " + Printer.print(resultArray));
+        System.out.println("input: " + Printer.print(originalArray));
+        System.out.println("result: " + Printer.print(resultArray));
 
         // Build expected result suffix array
         Timer linearTimer = new Timer();
@@ -195,11 +178,14 @@ public class TestDynamicSACA {
         ExtendedSuffixArray eSuffUpdated = dynSACA.buildESuff();
         incrementalTimer.stop();
 
+        System.out.println("final LCP: " + Printer.print(dynSACA.getSA().lcpToArray()));
+        System.out.println("expected LCP: " + Printer.print(expected.getLcp()));
+
         assertArrayEquals(expected.getSuffix(), eSuffUpdated.getSuffix());
 
         assertArrayEquals(expected.getInverseSuffix(),
                 eSuffUpdated.getInverseSuffix());
-        assertArrayEquals(expected.getLcp(), dynSACA.getDynLCP().toArray());
+        assertArrayEquals(expected.getLcp(), dynSACA.getSA().lcpToArray());
 
     }
 
@@ -246,7 +232,7 @@ public class TestDynamicSACA {
         assertArrayEquals(expected.getInverseSuffix(),
                 eSuffUpdated.getInverseSuffix());
 
-        assertArrayEquals(expected.getLcp(), dynSACA.getDynLCP().toArray());
+        assertArrayEquals(expected.getLcp(), dynSACA.getSA().lcpToArray());
     }
 
     public void testDeleteAllFactors(String input) {
@@ -289,7 +275,7 @@ public class TestDynamicSACA {
         // System.out.println("Expected LCP: " + Printer.print(expected.getLcp()));
         // System.out.println("Expected SA: " + Printer.print(expected.getSuffix()));
 
-        assertArrayEquals(expected.getLcp(), dynSACA.getDynLCP().toArray());
+        assertArrayEquals(expected.getLcp(), dynSACA.getSA().lcpToArray());
 
     }
 
@@ -323,7 +309,7 @@ public class TestDynamicSACA {
         // System.out.println("Expected LCP: " + Printer.print(expected.getLcp()));
         // System.out.println("Expected SA: " + Printer.print(expected.getSuffix()));
 
-        assertArrayEquals(expected.getLcp(), dynSACA.getDynLCP().toArray());
+        assertArrayEquals(expected.getLcp(), dynSACA.getSA().lcpToArray());
     }
 
     public void testLCPInsertOnAllIndices(String input, String edit) {
