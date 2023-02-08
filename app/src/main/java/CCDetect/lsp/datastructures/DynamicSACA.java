@@ -1,13 +1,9 @@
 package CCDetect.lsp.datastructures;
 
-import java.util.Iterator;
 import java.util.logging.Logger;
 
-import CCDetect.lsp.datastructures.OrderStatisticTree.OSTreeNode;
 import CCDetect.lsp.datastructures.editdistance.EditOperation;
 import CCDetect.lsp.datastructures.rankselect.WaveletMatrix;
-import CCDetect.lsp.utils.Printer;
-import CCDetect.lsp.utils.Timer;
 
 /**
  * DynamicSA
@@ -19,7 +15,6 @@ public class DynamicSACA {
     int EXTRA_SIZE_INCREASE = 200;
 
     DynamicPermutation sa;
-    DynamicLCP lcp;
 
     CharacterCount charCounts;
     WaveletMatrix waveletMatrix;
@@ -50,10 +45,6 @@ public class DynamicSACA {
         return new ExtendedSuffixArray(saArr, isaArr, lcpArr);
     }
 
-    public DynamicLCP getDynLCP() {
-        return lcp;
-    }
-
     // Inserts a factor into the suffix array at position [start, end] (inclusive)
     public void insertFactor(EditOperation edit) {
         int[] newText = edit.getChars().stream().mapToInt(i -> i).toArray();
@@ -82,8 +73,7 @@ public class DynamicSACA {
             previousCS += pointOfInsertion <= previousCS ? 1 : 0;
             posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;
 
-            // Insert new rows
-            OSTreeNode saNode = sa.insert(pointOfInsertion, position, -1);
+            sa.insert(pointOfInsertion, position, -1);
 
             int oldPOS = pointOfInsertion;
             pointOfInsertion = getLF(pointOfInsertion);
@@ -101,7 +91,7 @@ public class DynamicSACA {
 
         insertInL(storedLetter, pointOfInsertion);
 
-        OSTreeNode saNode = sa.insert(pointOfInsertion, position, -1);
+        sa.insert(pointOfInsertion, position, -1);
 
         previousCS += pointOfInsertion <= previousCS ? 1 : 0;
         posFirstModified += pointOfInsertion <= posFirstModified ? 1 : 0;

@@ -13,7 +13,6 @@ import com.google.common.primitives.Ints;
 import org.eclipse.lsp4j.Range;
 
 import CCDetect.lsp.CodeClone;
-import CCDetect.lsp.datastructures.DynamicLCP;
 import CCDetect.lsp.datastructures.DynamicPermutation;
 import CCDetect.lsp.datastructures.DynamicSACA;
 import CCDetect.lsp.datastructures.ExtendedSuffixArray;
