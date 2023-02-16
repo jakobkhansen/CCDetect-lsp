@@ -22,17 +22,18 @@ public class TreeSitterLibrary {
     private static final Logger LOGGER = Logger.getLogger(
             Logger.GLOBAL_LOGGER_NAME);
 
-    private static final String LIB = "libparser.so";
+    private static final String LIB = "libparser";
 
     private static Parser parser;
 
     static {
         LOGGER.info("Loading treesitter");
         try {
-            InputStream in = TreeSitterLibrary.class.getResourceAsStream("/libparser.so");
+            String fileName = LIB + "." + getExtension();
+            InputStream in = TreeSitterLibrary.class.getResourceAsStream("/" + fileName);
 
             File fileOut = new File(
-                    System.getProperty("java.io.tmpdir") + "/" + LIB);
+                    System.getProperty("java.io.tmpdir") + "/" + fileName);
 
             OutputStream outStream = new FileOutputStream(fileOut);
 
@@ -49,6 +50,16 @@ public class TreeSitterLibrary {
             LOGGER.info(e.toString());
         } finally {
 
+        }
+    }
+
+    public static String getExtension() {
+        String os = System.getProperty("os.name");
+        switch (os) {
+            case "Mac OS X":
+                return "dylib";
+            default:
+                return "so";
         }
     }
 

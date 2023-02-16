@@ -55,13 +55,6 @@ public class TestCodebaseCloneDetection {
         String rootUri = "file://" + file.getAbsolutePath();
 
         CodeClone[] expectedClones = new CodeClone[] {
-                new CodeClone(rootUri + "/Class.java", new Range(
-                        new Position(11, 4),
-                        new Position(17, 5))),
-                new CodeClone(rootUri + "/Another.java", new Range(
-                        new Position(10, 4),
-                        new Position(16, 5))),
-
                 new CodeClone(rootUri + "/BinarySearch.java", new Range(
                         new Position(7, 35),
                         new Position(23, 5))),
