@@ -56,7 +56,7 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
     }
 
     @Override
-    public DocumentModel getDocument(String uri) {
+    public TreesitterDocumentModel getDocument(String uri) {
         return documents.get(uri);
     }
 

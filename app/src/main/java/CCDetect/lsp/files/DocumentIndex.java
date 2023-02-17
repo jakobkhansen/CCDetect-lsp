@@ -20,7 +20,7 @@ public interface DocumentIndex<T extends DocumentModel> extends Iterable<T> {
     default void updateDocument(String uri, Range range, String updatedContent) {
     };
 
-    DocumentModel getDocument(String uri);
+    T getDocument(String uri);
 
     boolean containsDocument(String uri);
 

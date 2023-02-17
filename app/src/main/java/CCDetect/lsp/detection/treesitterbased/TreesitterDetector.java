@@ -110,12 +110,6 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
 
             List<EditOperation> edits = getDocumentEdits(index);
 
-            if (edits.size() == 0) {
-                LOGGER.info("No edits found");
-                NotificationHandler.endNotification("clones", clones.size() + " clones found");
-                return;
-            }
-
             Timer updateTimer = new Timer();
             updateTimer.start();
             dynamicUpdate(edits);
@@ -132,6 +126,8 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                 Timer linearTimer = new Timer();
                 linearTimer.start();
                 int[] linearCloneIndices = extractCloneIndicesFromSA();
+                LOGGER.info("Linear clone indices: " + Printer.print(linearCloneIndices));
+
                 linearTimer.stop();
                 linearTimer.log("Linear time to extract clones");
             }
@@ -140,8 +136,8 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             int[] cloneIndices = extractCloneIndicesFromSAIncremental();
 
             LOGGER.info("Clone indices: " + Printer.print(cloneIndices));
-            cloneMap = getClonesIncremental(cloneIndices);
             extractClonesTimer.stop();
+            cloneMap = getClonesIncremental(cloneIndices);
             extractClonesTimer.log("Time to extract clones");
         } else {
             int[] cloneIndices = extractCloneIndicesFromSA();
@@ -217,16 +213,17 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         int cloneThreshold = config.getCloneTokenThreshold();
         // Fetch clones, ignore contained clones
         ArrayList<Integer> clones = new ArrayList<>();
+        // LOGGER.info("Linear LCP: " + Printer.print(eSuff.getLcp()));
         for (int i = 0; i < eSuff.size(); i++) {
             if (eSuff.getRank(i) == 0 || eSuff.getLCPMatchIndex(i) == 0) {
                 continue;
             }
-            int secondIndex = eSuff.getLCPMatchIndex(i);
             // If we find a large enough clone where the match is not contained within
             // another clone, we found a new clone
-            if (eSuff.getLCPValue(i) >= cloneThreshold
-                    && eSuff.getPreceedingSuffixLCPValue(secondIndex) <= eSuff.getLCPValue(secondIndex)) {
+            if (eSuff.getLCPValue(i) >= cloneThreshold) {
                 clones.add(i);
+                // LOGGER.info("Linear clone added: " + i);
+                // LOGGER.info("secondIndex: " + secondIndex);
                 i++;
                 // Ignore all contained clones for the new clones
                 while (i < eSuff.size() &&
@@ -243,14 +240,18 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
     private int[] extractCloneIndicesFromSAIncremental() {
         ArrayList<Integer> clones = new ArrayList<>();
 
+        int lastIndexAdded = -1;
+        int lastIndexLCP = -1;
         for (OSTreeNode node : saca.getSA().getNodesAboveThreshold()) {
 
             int index = OrderStatisticTree.inOrderRank(node.getInverseLink());
-            if (index == 0) {
-                continue;
-            }
 
-            OSTreeNode preceedingSANode = OrderStatisticTree.predecessorOf(node.getInverseLink()).getInverseLink();
+            if (lastIndexAdded != -1) {
+                int indexDifference = (index - lastIndexAdded);
+                if ((node.key + indexDifference) <= lastIndexLCP) {
+                    continue;
+                }
+            }
 
             // OSTreeNode secondNode = OrderStatisticTree.predecessorOf(node.saLink);
             // int secondIndex = sa.get(sa.getInverse(i) - 1);
@@ -261,17 +262,9 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                 continue;
             }
 
-            OSTreeNode secondPreceedingSANode = secondNodePredecessor
-                    .getInverseLink();
-
-            int firstLCP = node.key;
-            int secondLCP = secondNode.key;
-            int firstPreceedingLCP = preceedingSANode.key;
-            int secondPreceedingLCP = secondPreceedingSANode.key;
-
-            if (firstPreceedingLCP <= firstLCP && secondPreceedingLCP <= secondLCP) {
-                clones.add(index);
-            }
+            clones.add(index);
+            lastIndexAdded = index;
+            lastIndexLCP = node.key;
         }
         return Ints.toArray(clones);
 
@@ -280,13 +273,12 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
     private Map<Integer, CodeClone> getClones(int[] cloneIndices) {
         RangeConverter converter = new RangeConverter();
         Map<Integer, CodeClone> cloneMap = new HashMap<>();
+        LOGGER.info("Getting linear clones");
         for (int i = 0; i < cloneIndices.length; i++) {
             int firstIndex = cloneIndices[i];
             int secondIndex = eSuff.getLCPMatchIndex(cloneIndices[i]);
-            LOGGER.info("firstIndex: " + firstIndex + "\n secondindex: " + secondIndex);
 
             int cloneSize = eSuff.getLCPValue(firstIndex) - 1;
-            LOGGER.info("clone size: " + cloneSize);
 
             TokenSourcePair first = getTokenSourcePairFromIndex(firstIndex, cloneSize);
             TokenSourcePair second = getTokenSourcePairFromIndex(secondIndex, cloneSize);
@@ -332,6 +324,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         RangeConverter converter = new RangeConverter();
         Map<Integer, CodeClone> cloneMap = new HashMap<>();
         DynamicPermutation sa = saca.getSA();
+        LOGGER.info("Getting incremental clones");
         for (int i = 0; i < cloneIndices.length; i++) {
             int firstIndex = cloneIndices[i];
             OSTreeNode firstNode = sa.getInverseNode(firstIndex);

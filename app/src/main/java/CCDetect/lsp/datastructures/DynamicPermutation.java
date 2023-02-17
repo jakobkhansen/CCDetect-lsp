@@ -1,5 +1,6 @@
 package CCDetect.lsp.datastructures;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -25,7 +26,7 @@ public class DynamicPermutation {
 
     // LCP
     public DynamicTreeBitSet positionsToUpdate;
-    List<OSTreeNode> nodesAboveThreshold = new LinkedList<>();
+    List<OSTreeNode> nodesAboveThreshold = new ArrayList<>();
 
     public DynamicPermutation(int[] initialSA, int[] initialLCP) {
         aTree = new OrderStatisticTree();
@@ -127,6 +128,19 @@ public class DynamicPermutation {
 
     public List<OSTreeNode> getNodesAboveThreshold() {
         nodesAboveThreshold.removeIf(node -> node.key < CLONE_THRESHOLD);
+        for (OSTreeNode node : nodesAboveThreshold) {
+            node.getInverseLink().key = -1;
+        }
+        nodesAboveThreshold.sort((x, y) -> {
+            if (x.getInverseLink().key == -1) {
+                x.getInverseLink().key = OrderStatisticTree.inOrderRank(x.getInverseLink());
+            }
+            if (y.getInverseLink().key == -1) {
+                y.getInverseLink().key = OrderStatisticTree.inOrderRank(y.getInverseLink());
+            }
+            return x.getInverseLink().key
+                    - y.getInverseLink().key;
+        });
 
         return nodesAboveThreshold;
     }

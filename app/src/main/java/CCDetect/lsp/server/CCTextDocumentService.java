@@ -81,15 +81,19 @@ public class CCTextDocumentService implements TextDocumentService {
     public void didOpen(DidOpenTextDocumentParams params) {
         LOGGER.info("didOpen");
         String uri = params.getTextDocument().getUri();
+        TreesitterDocumentModel model;
         if (index.containsDocument(uri)) {
             LOGGER.info("Opened already indexed document");
+            model = index.getDocument(uri);
             return;
+        } else {
+
+            String uriFormatted = uri.substring(7);
+
+            Path path = Paths.get(uriFormatted);
+
+            model = new TreesitterDocumentModel(path, null);
         }
-        String uriFormatted = uri.substring(7);
-
-        Path path = Paths.get(uriFormatted);
-
-        TreesitterDocumentModel model = new TreesitterDocumentModel(path, null);
         model.setOpen(true);
         model.buildTree();
 
