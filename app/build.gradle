@@ -58,5 +58,14 @@ test {
 	}
     minHeapSize = "128m" // initial heap size
     maxHeapSize = "4096m" // maximum heap size
-    jvmArgs '-XX:MaxPermSize=256m' // mem argument for the test JVM
+}
+
+task evaluateBigCloneBench(type: JavaExec) {
+    systemProperty "bcbPath", System.getProperty("bcbPath")
+    group = "Execution"
+    description = "Evaluate Big Clone Bench"
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'CCDetect.lsp.evaluation.BigCloneBenchEvaluation'
+    minHeapSize = "128m" // initial heap size
+    maxHeapSize = "4096m" // maximum heap size
 }
