@@ -21,6 +21,15 @@ public class Configuration {
     private boolean dynamic_detection = true;
     private boolean update_on_save = true;
     private boolean evaluate = false;
+    private boolean excludeContainedClones = true;
+
+    public boolean getExcludeContainedClones() {
+        return excludeContainedClones;
+    }
+
+    public void setExcludeContainedClones(boolean excludeContainedClones) {
+        this.excludeContainedClones = excludeContainedClones;
+    }
 
     public static void createInstanceFromJson(String json) {
         instance = JSONUtility.toModel(json, Configuration.class);
