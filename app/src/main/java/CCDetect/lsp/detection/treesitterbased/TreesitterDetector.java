@@ -4,8 +4,12 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import com.google.common.primitives.Ints;
@@ -75,7 +79,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             sourceMap = new BinarySearchSourceMap(index);
         }
 
-        // Build fingerprint
+        // LOGGER.info("Fingerprt : " + Printer.print(getFullFingerprint(index)));
 
         // Build suffix, inverse, lcp
         LOGGER.info("Building suffix array");
@@ -126,7 +130,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                 Timer linearTimer = new Timer();
                 linearTimer.start();
                 int[] linearCloneIndices = extractCloneIndicesFromSA();
-                LOGGER.info("Linear clone indices: " + Printer.print(linearCloneIndices));
+                // LOGGER.info("Linear clone indices: " + Printer.print(linearCloneIndices));
 
                 linearTimer.stop();
                 linearTimer.log("Linear time to extract clones");
@@ -135,12 +139,13 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             extractClonesTimer.start();
             int[] cloneIndices = extractCloneIndicesFromSAIncremental();
 
-            LOGGER.info("Clone indices: " + Printer.print(cloneIndices));
+            // LOGGER.info("Clone indices: " + Printer.print(cloneIndices));
             extractClonesTimer.stop();
             cloneMap = getClonesIncremental(cloneIndices);
             extractClonesTimer.log("Time to extract clones");
         } else {
             int[] cloneIndices = extractCloneIndicesFromSA();
+            // LOGGER.info("Clone indices: " + Printer.print(cloneIndices));
             cloneMap = getClones(cloneIndices);
         }
 
@@ -213,22 +218,26 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         int cloneThreshold = config.getCloneTokenThreshold();
         // Fetch clones, ignore contained clones
         ArrayList<Integer> clones = new ArrayList<>();
+        // LOGGER.info("Indices : " + Printer.print(indices));
+        // LOGGER.info("Linear SA : " + Printer.print(eSuff.getSuffix()));
         // LOGGER.info("Linear LCP: " + Printer.print(eSuff.getLcp()));
         for (int i = 0; i < eSuff.size(); i++) {
             if (eSuff.getRank(i) == 0) {
                 continue;
             }
+
             // If we find a large enough clone where the match is not contained within
             // another clone, we found a new clone
             if (eSuff.getLCPValue(i) >= cloneThreshold) {
                 clones.add(i);
                 // LOGGER.info("Linear clone added: " + i);
                 // LOGGER.info("secondIndex: " + secondIndex);
-                i++;
-                // Ignore all contained clones for the new clones
-                while (i < eSuff.size() &&
-                        eSuff.getPreceedingSuffixLCPValue(i) > eSuff.getLCPValue(i)) {
-                    i++;
+                if (config.getExcludeContainedClones()) {
+                    // Ignore all contained clones for the new clones
+                    while (i + 1 < eSuff.size() &&
+                            eSuff.getPreceedingSuffixLCPValue(i + 1) > eSuff.getLCPValue(i + 1)) {
+                        i++;
+                    }
                 }
             }
         }
@@ -290,19 +299,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                 secondClone.setCloneSize(cloneSize);
             }
 
-            CodeClone.addMatch(firstClone, secondClone);
-
-            for (CodeClone clone : firstClone.getMatches()) {
-                if (clone != firstClone && clone != secondClone) {
-                    CodeClone.addMatch(secondClone, clone);
-                }
-            }
-
-            for (CodeClone clone : secondClone.getMatches()) {
-                if (clone != firstClone && clone != secondClone) {
-                    CodeClone.addMatch(firstClone, clone);
-                }
-            }
+            unionCloneClass(firstClone, secondClone);
 
             cloneMap.put(firstIndex, firstClone);
             cloneMap.put(secondIndex, secondClone);
@@ -342,24 +339,33 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                 secondClone.setCloneSize(cloneSize);
             }
 
-            CodeClone.addMatch(firstClone, secondClone);
-
-            for (CodeClone clone : firstClone.getMatches()) {
-                if (clone != firstClone && clone != secondClone) {
-                    CodeClone.addMatch(secondClone, clone);
-                }
-            }
-
-            for (CodeClone clone : secondClone.getMatches()) {
-                if (clone != firstClone && clone != secondClone) {
-                    CodeClone.addMatch(firstClone, clone);
-                }
-            }
+            unionCloneClass(firstClone, secondClone);
 
             cloneMap.put(firstIndex, firstClone);
             cloneMap.put(secondIndex, secondClone);
         }
         return cloneMap;
+    }
+
+    public void unionCloneClass(CodeClone first, CodeClone second) {
+        if (first.getMatches().contains(second)) {
+            return;
+        }
+        CodeClone.addMatch(first, second);
+
+        for (CodeClone match : first.getMatches()) {
+            CodeClone.addMatch(second, match);
+        }
+
+        for (CodeClone match : second.getMatches()) {
+            CodeClone.addMatch(first, match);
+        }
+
+        for (CodeClone match1 : first.getMatches()) {
+            for (CodeClone match2 : second.getMatches()) {
+                CodeClone.addMatch(match1, match2);
+            }
+        }
     }
 
     private TokenSourcePair getTokenSourcePairFromIndex(int index, int cloneSize) {

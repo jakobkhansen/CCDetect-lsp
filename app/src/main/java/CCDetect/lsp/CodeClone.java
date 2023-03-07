@@ -1,7 +1,9 @@
 package CCDetect.lsp;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.lsp4j.Range;
 
@@ -12,7 +14,7 @@ public class CodeClone {
 
     private String uri;
     private Range range;
-    private List<CodeClone> matchingClones = new ArrayList<>();
+    private Set<CodeClone> matchingClones = new HashSet<>();
     private int cloneSize = 0;
 
     public CodeClone(String uri, Range range) {
@@ -47,7 +49,7 @@ public class CodeClone {
         matchingClones.add(clone);
     }
 
-    public List<CodeClone> getMatches() {
+    public Set<CodeClone> getMatches() {
         return matchingClones;
     }
 
