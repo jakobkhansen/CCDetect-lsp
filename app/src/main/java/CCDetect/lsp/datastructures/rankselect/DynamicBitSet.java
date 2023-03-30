@@ -9,6 +9,7 @@ public class DynamicBitSet {
 
     BitSet set;
     int realSize = 0;
+    int numZeroes = 0;
 
     public DynamicBitSet(int initialSize, int availableSpace) {
         set = new BitSet(availableSpace);
@@ -16,14 +17,25 @@ public class DynamicBitSet {
     }
 
     public void set(int index) {
+        if (!set.get(index)) {
+            numZeroes--;
+        }
         set.set(index);
     }
 
     public void set(int index, boolean value) {
+        if (set.get(index) && !value) {
+            numZeroes--;
+        } else if (!set.get(index) && value) {
+            numZeroes++;
+        }
         set.set(index, value);
     }
 
     public void clear(int index) {
+        if (set.get(index)) {
+            numZeroes++;
+        }
         set.clear(index);
     }
 
@@ -75,7 +87,8 @@ public class DynamicBitSet {
     }
 
     public int getNumZeroes() {
-        return realSize - set.cardinality();
+        return numZeroes;
+        // return realSize - set.cardinality();
     }
 
     public int getNumOnes() {

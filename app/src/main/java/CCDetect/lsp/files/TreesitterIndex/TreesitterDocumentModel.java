@@ -191,31 +191,29 @@ public class TreesitterDocumentModel extends DocumentModel {
         int[] fullOldFingerprint = getFullOldFingerprint();
         int[] fullNewFingerprint = getFullFingerprint();
 
-        // int startOffset =
-        // HirschbergsAlgorithm.getEqualCharactersStart(fullOldFingerprint,
-        // fullNewFingerprint);
-        // int endOffset =
-        // HirschbergsAlgorithm.getEqualCharactersEnd(fullOldFingerprint,
-        // fullNewFingerprint, startOffset);
-        // int commonElements = (startOffset + endOffset);
+        int startOffset = HirschbergsAlgorithm.getEqualCharactersStart(fullOldFingerprint,
+                fullNewFingerprint);
+        int endOffset = HirschbergsAlgorithm.getEqualCharactersEnd(fullOldFingerprint,
+                fullNewFingerprint, startOffset);
+        int commonElements = (startOffset + endOffset);
 
-        // int oldArea = (fullOldFingerprint.length - commonElements);
-        // int newArea = (fullNewFingerprint.length - commonElements);
+        int oldArea = (fullOldFingerprint.length - commonElements);
+        int newArea = (fullNewFingerprint.length - commonElements);
 
         HirschbergsAlgorithm hirschbergs = new HirschbergsAlgorithm(fullOldFingerprint,
                 fullNewFingerprint);
         List<EditOperation> operations = hirschbergs.getOperations();
 
-        // if (operations.size() >= 5 || (operations.size() >= 10 && (oldArea < 200 &&
-        // newArea < 200))) {
-        // if (Configuration.getInstance().isEvaluate()) {
-        // for (EditOperation edit : operations) {
-        // LOGGER.info("Hirschberg edit: " + Printer.print(edit));
-        // }
-        // }
-        // return getDeleteAndInsertOnly(fullOldFingerprint, fullNewFingerprint,
-        // startOffset, endOffset);
-        // }
+        if (operations.size() >= 10 || ((oldArea < 200 &&
+                newArea < 200))) {
+            if (Configuration.getInstance().isEvaluate()) {
+                for (EditOperation edit : operations) {
+                    LOGGER.info("Hirschberg edit: " + Printer.print(edit));
+                }
+            }
+            return getDeleteAndInsertOnly(fullOldFingerprint, fullNewFingerprint,
+                    startOffset, endOffset);
+        }
 
         // Update positions of all operations based on the fingerprints offset
         for (EditOperation operation : operations) {
