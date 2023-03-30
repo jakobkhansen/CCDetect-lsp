@@ -14,7 +14,6 @@ import java.util.logging.Logger;
  * 
  * @author Rodion "rodde" Efremov
  * @version 1.6 (Feb 11, 2016)
- * @param the actual element type.
  */
 public class OrderStatisticTree implements Iterable<OrderStatisticTree.OSTreeNode> {
     private static final Logger LOGGER = Logger.getLogger(
@@ -29,7 +28,7 @@ public class OrderStatisticTree implements Iterable<OrderStatisticTree.OSTreeNod
 
         public int key = -1;
 
-        // Used when building int[] sa;
+        // Used when building int[] sa in DynamicPermutation.toArray;
         int inorderRank;
 
         int height;

@@ -183,6 +183,8 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
     }
 
     public List<EditOperation> getDocumentEdits(DocumentIndex<TreesitterDocumentModel> index) {
+        Timer timer = new Timer();
+        timer.start();
         List<EditOperation> edits = new ArrayList<>();
         for (TreesitterDocumentModel document : index) {
             if (document.hasChanged()) {
@@ -191,6 +193,8 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                 }
             }
         }
+        timer.stop();
+        timer.log("Time to get edit operations");
         return edits;
     }
 
@@ -425,7 +429,6 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                 document.addFingerprint(fingerprint);
 
             }
-            // Document has been validated, it is no longer invalid
 
             // Free document resources if it is not open
             if (!document.isOpen()) {

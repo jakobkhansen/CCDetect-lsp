@@ -160,6 +160,7 @@ public class DynamicPermutation {
         return bTree.getByRank(index);
     }
 
+    // Should only be used for debugging as it is slow
     public int[] toArray() {
         int[] out = new int[aTree.size()];
         int inorderRank = 0;

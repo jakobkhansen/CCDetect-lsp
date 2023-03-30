@@ -142,4 +142,11 @@ public class TestWaveletMatrix {
         assertEquals(0, matrix.select(0, 3));
         assertEquals(2, matrix.select(0, 1));
     }
+
+    @Test
+    public void testWriting() {
+        int[] input = { 0, 1, 1, 1, 4, 5, 2, 0, 6, 3, 3 };
+        WaveletMatrix matrix = new WaveletMatrix(input, 10);
+        System.out.println(Printer.print(matrix));
+    }
 }

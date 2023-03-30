@@ -273,7 +273,7 @@ public class DynamicSACA {
 
         int cs = startPos;
         boolean hasToUpdate = true;
-        int numExtraIterations = 100;
+        int numExtraIterations = 10;
         int isFinishing = 0;
         while (numExtraIterations > 0) {
 

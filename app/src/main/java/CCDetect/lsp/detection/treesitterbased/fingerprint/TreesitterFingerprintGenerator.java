@@ -27,8 +27,8 @@ public class TreesitterFingerprintGenerator {
         List<Integer> out = new ArrayList<>();
         TokenFetchVisitor visitor = new TokenFetchVisitor();
         NodeTraversal.traverse(node, visitor);
-
         TSRange[] ranges = visitor.getRanges();
+
         for (TSRange range : ranges) {
             if (range == null) {
                 continue;

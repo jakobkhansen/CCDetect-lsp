@@ -86,7 +86,7 @@ public class HirschbergsAlgorithm {
         }
 
         positions.add(new Pair(0, 0));
-        positions.addAll(hirschbergs_rec(0, newS1.length, 0, newS2.length));
+        positions.addAll(hirschbergs_rec(0, s1.length, 0, s2.length));
         positions.add(new Pair(s1.length, s2.length));
 
         return positions;
@@ -265,8 +265,6 @@ public class HirschbergsAlgorithm {
 
     public List<EditOperation> getOperations() {
         List<Pair> positions = getEditPositions();
-        for (Pair p : positions) {
-        }
 
         List<EditOperation> operations = new ArrayList<>();
         if (positions.size() < 2) {
