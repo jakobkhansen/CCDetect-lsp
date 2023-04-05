@@ -16,6 +16,8 @@ public interface DocumentIndex<T extends DocumentModel> extends Iterable<T> {
 
     void updateDocument(String uri, T updatedDocument);
 
+    void updateDocument(String uri, String updatedContent);
+
     // Used when you want to keep original DocumentModel instance
     default void updateDocument(String uri, Range range, String updatedContent) {
     };

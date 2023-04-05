@@ -245,7 +245,7 @@ public class DynamicSACA {
         waveletMatrix.insert(position, ch);
     }
 
-    private void updateLCP(int startPos, int shift) {
+    public void updateLCP(int startPos, int shift) {
         int pos;
         while ((pos = sa.positionsToUpdate.select(0, true)) != -1) {
 

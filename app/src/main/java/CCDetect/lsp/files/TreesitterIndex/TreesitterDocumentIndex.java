@@ -87,4 +87,10 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
         return documents.size();
     }
 
+    @Override
+    public void updateDocument(String uri, String updatedContent) {
+        documents.get(uri).setText(updatedContent);
+        documents.get(uri).setChanged(true);
+    }
+
 }

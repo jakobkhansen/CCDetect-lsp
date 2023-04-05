@@ -153,6 +153,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         for (CodeClone clone : cloneMap.values()) {
             clones.add(clone);
         }
+        LOGGER.info("Found " + clones.size() + " clones");
 
         timerIndexChange.stop();
         timerIndexChange.log("indexDidChange time");
