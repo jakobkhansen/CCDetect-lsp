@@ -11,11 +11,13 @@ import java.util.List;
 import java.util.Scanner;
 
 import CCDetect.lsp.detection.treesitterbased.TreesitterDetector;
+import CCDetect.lsp.detection.treesitterbased.sourcemap.BinarySearchSourceMap;
 import CCDetect.lsp.files.DocumentIndex;
 import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentIndex;
 import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentModel;
 import CCDetect.lsp.files.fileiterators.FiletypeIterator;
 import CCDetect.lsp.server.Configuration;
+import CCDetect.lsp.utils.Timer;
 
 /**
  * IncrementalPerformanceEvaluation
@@ -23,6 +25,7 @@ import CCDetect.lsp.server.Configuration;
 public class IncrementalPerformanceEvaluation {
     static DocumentIndex<TreesitterDocumentModel> index;
     static TreesitterDetector detector = new TreesitterDetector();
+    static String originalRoot;
 
     public static void main(String[] args) throws Exception {
         Configuration.getInstance().setCloneTokenThreshold(75);
@@ -39,15 +42,34 @@ public class IncrementalPerformanceEvaluation {
         });
 
         Arrays.sort(versionRoots);
-        initialDetection("file://" + versionRoots[0].getPath());
+
+        Timer totalTimer = new Timer();
+        totalTimer.start();
+
+        Timer initialDetectionTimer = new Timer();
+        initialDetectionTimer.start();
+
+        originalRoot = "file://" + versionRoots[0].getPath();
+        initialDetection();
+
+        initialDetectionTimer.stop();
+        initialDetectionTimer.log("Initial detection time");
+
         for (int i = 1; i < versionRoots.length; i++) {
+            Timer incrementalTimer = new Timer();
+            incrementalTimer.start();
             incrementalUpdate(versionRoots[0].getPath(), versionRoots[i].getPath());
+            incrementalTimer.stop();
+            incrementalTimer.log("Version " + i + " time");
         }
+
+        totalTimer.stop();
+        totalTimer.log("Total running time");
     }
 
-    public static void initialDetection(String root) {
-        System.out.println("Initial detection using root: " + root);
-        index = new TreesitterDocumentIndex(root, new FiletypeIterator(root, "java"));
+    public static void initialDetection() {
+        System.out.println("Initial detection using root: " + originalRoot);
+        index = new TreesitterDocumentIndex(originalRoot, new FiletypeIterator(originalRoot, "java"));
         index.indexProject();
         detector.onIndexChange(index);
     }
@@ -58,16 +80,53 @@ public class IncrementalPerformanceEvaluation {
         File changeFile = new File(root + "/changes");
         List<String> changedFiles = Files.readAllLines(Paths.get(changeFile.getPath()));
         for (String changedFile : changedFiles) {
-            String changedFilePath = changedFile.split(" ")[1];
-            changedFilePath = changedFilePath.substring(1, changedFilePath.length() - 1);
-            String originalPath = originalRoot + "/" + changedFilePath;
-            changedFilePath = root + "/" + changedFilePath;
-            String newContent = String.join("\n", Files.readAllLines(Paths.get(changedFilePath)));
-            System.out.println(originalPath);
-            index.updateDocument(originalPath, newContent);
+            String operation = changedFile.split(" ")[0];
+            switch (operation) {
+                case "M":
+                    System.out.println("Operation: M");
+                    modifyFile(changedFile.split(" ")[1], root);
+                    break;
+                case "A":
+                    System.out.println("Operation: A");
+                    addFile(changedFile.split(" ")[1], root);
+                    break;
+                case "D":
+                    System.out.println("Operation: D");
+                    deleteFile(changedFile.split(" ")[1], root);
+                    break;
+            }
 
         }
+        // detector.sourceMap = new BinarySearchSourceMap(index);
         detector.onIndexChange(index);
+    }
 
+    public static void modifyFile(String changedFilePath, String root) throws Exception {
+        changedFilePath = changedFilePath.substring(1, changedFilePath.length() - 1);
+        String originalPath = originalRoot + "/" + changedFilePath;
+        changedFilePath = root + "/" + changedFilePath;
+        String newContent = String.join("\n", Files.readAllLines(Paths.get(changedFilePath)));
+        System.out.println(originalPath);
+        index.updateDocument(originalPath, newContent);
+
+    }
+
+    public static void addFile(String changedFilePath, String root) throws Exception {
+        changedFilePath = changedFilePath.substring(1, changedFilePath.length() - 1);
+        String originalPath = originalRoot + "/" + changedFilePath;
+        changedFilePath = root + "/" + changedFilePath;
+        String newContent = String.join("\n", Files.readAllLines(Paths.get(changedFilePath)));
+        System.out.println(originalPath);
+        TreesitterDocumentModel model = new TreesitterDocumentModel(Paths.get(originalPath), newContent);
+        model.setChanged(true);
+        index.updateDocument(originalPath, model);
+
+    }
+
+    public static void deleteFile(String changedFilePath, String root) {
+        changedFilePath = changedFilePath.substring(1, changedFilePath.length() - 1);
+        String originalPath = originalRoot + "/" + changedFilePath;
+        index.markFileDeleted(originalPath);
+        index.deleteFile(originalPath);
     }
 }

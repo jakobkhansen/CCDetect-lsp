@@ -6,20 +6,21 @@ import java.util.stream.StreamSupport;
 
 import CCDetect.lsp.detection.treesitterbased.fingerprint.Fingerprint;
 import CCDetect.lsp.files.DocumentIndex;
+import CCDetect.lsp.files.DocumentModel;
 import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentModel;
+import CCDetect.lsp.utils.Printer;
 
 /**
  * BinarySearchSourceMap
  */
 public class BinarySearchSourceMap implements SourceMap {
-    TreesitterDocumentModel[] documents;
+    public TreesitterDocumentModel[] documents;
 
     private static final Logger LOGGER = Logger.getLogger(
             Logger.GLOBAL_LOGGER_NAME);
 
     public BinarySearchSourceMap(DocumentIndex<TreesitterDocumentModel> index) {
         documents = StreamSupport.stream(index.spliterator(), false).sorted(new Comparator<TreesitterDocumentModel>() {
-
             @Override
             public int compare(TreesitterDocumentModel arg0, TreesitterDocumentModel arg1) {
                 return arg0.getFingerprintStart() - arg1.getFingerprintEnd();
@@ -43,17 +44,23 @@ public class BinarySearchSourceMap implements SourceMap {
             } else {
                 TreesitterDocumentModel model = documents[mid];
                 int current = index - model.getFingerprintStart();
+
                 for (Fingerprint fingerprint : model.getFingerprint()) {
                     if (current < fingerprint.getRanges().length) {
                         return new TokenSource(model.getUri(), fingerprint.getRanges()[current]);
                     }
                     current -= fingerprint.getRanges().length;
                 }
-                return null;
+                Fingerprint last = model.getFingerprint().get(model.getFingerprint().size() - 1);
+                return new TokenSource(model.getUri(), last.getRanges()[last.getRanges().length - 1]);
             }
         }
 
         return null;
     }
 
+    @Override
+    public TreesitterDocumentModel[] getDocuments() {
+        return documents;
+    }
 }

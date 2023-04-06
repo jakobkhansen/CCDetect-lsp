@@ -39,4 +39,10 @@ public class DocumentSourceMap implements SourceMap {
         return model.getFingerprintStart() <= index && index <= model.getFingerprintEnd();
     }
 
+    @Override
+    public TreesitterDocumentModel[] getDocuments() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

@@ -6,23 +6,36 @@ import java.util.logging.Logger;
 
 import org.eclipse.lsp4j.CompletionOptions;
 import org.eclipse.lsp4j.ExecuteCommandOptions;
+import org.eclipse.lsp4j.FileOperationOptions;
+import org.eclipse.lsp4j.FileOperationsServerCapabilities;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
+import org.eclipse.lsp4j.WorkspaceServerCapabilities;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
 
+import CCDetect.lsp.detection.CloneDetector;
+import CCDetect.lsp.detection.treesitterbased.TreesitterDetector;
+import CCDetect.lsp.files.DocumentIndex;
+import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentIndex;
+import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentModel;
+import CCDetect.lsp.files.fileiterators.GitProjectIterator;
+
 public class CCLanguageServer implements LanguageServer, LanguageClientAware {
 
     private static CCLanguageServer instance;
 
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+
+    private DocumentIndex<TreesitterDocumentModel> index;
+    private CloneDetector<TreesitterDocumentModel> detector = new TreesitterDetector();
 
     private CCTextDocumentService textDocumentService;
     private CCWorkspaceService workspaceService;
@@ -44,8 +57,13 @@ public class CCLanguageServer implements LanguageServer, LanguageClientAware {
             InitializeParams params) {
         LOGGER.info("Server initializing");
         // Initialize the InitializeResult for this LS.
+        ServerCapabilities serverCapabilities = new ServerCapabilities();
+        WorkspaceServerCapabilities workspaceCapabilities = new WorkspaceServerCapabilities();
+        FileOperationsServerCapabilities fileOperationsServerCapabilities = new FileOperationsServerCapabilities();
+        workspaceCapabilities.setFileOperations(fileOperationsServerCapabilities);
+
         final InitializeResult initializeResult = new InitializeResult(
-                new ServerCapabilities());
+                serverCapabilities);
 
         // Set the capabilities of the LS to inform the client.
         initializeResult
@@ -67,7 +85,10 @@ public class CCLanguageServer implements LanguageServer, LanguageClientAware {
         // Initialize index and detector
         String rootUri = params.getWorkspaceFolders().get(0).getUri();
         LOGGER.info("rootUri: " + rootUri);
-        textDocumentService.initialize(rootUri);
+
+        createIndex(rootUri);
+        textDocumentService.initialize(index, detector);
+        workspaceService.initialize(index, detector);
 
         LOGGER.info("Server initialized");
 
@@ -106,5 +127,11 @@ public class CCLanguageServer implements LanguageServer, LanguageClientAware {
         }
 
         return instance;
+    }
+
+    public void createIndex(String rootUri) {
+        Configuration config = Configuration.getInstance();
+        index = new TreesitterDocumentIndex(rootUri, new GitProjectIterator(rootUri, config.getLanguage()));
+        index.indexProject();
     }
 }

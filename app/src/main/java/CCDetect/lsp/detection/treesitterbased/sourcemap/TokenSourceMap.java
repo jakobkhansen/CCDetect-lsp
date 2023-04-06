@@ -3,6 +3,7 @@ package CCDetect.lsp.detection.treesitterbased.sourcemap;
 import java.util.ArrayList;
 import java.util.List;
 
+import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentModel;
 import ai.serenade.treesitter.TSRange;
 
 /**
@@ -22,5 +23,10 @@ public class TokenSourceMap implements SourceMap {
 
     public int size() {
         return sourceMap.size();
+    }
+
+    @Override
+    public TreesitterDocumentModel[] getDocuments() {
+        return null;
     }
 }

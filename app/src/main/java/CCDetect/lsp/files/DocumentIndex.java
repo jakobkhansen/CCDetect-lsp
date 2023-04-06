@@ -22,6 +22,10 @@ public interface DocumentIndex<T extends DocumentModel> extends Iterable<T> {
     default void updateDocument(String uri, Range range, String updatedContent) {
     };
 
+    void markFileDeleted(String uri);
+
+    void deleteFile(String uri);
+
     T getDocument(String uri);
 
     boolean containsDocument(String uri);

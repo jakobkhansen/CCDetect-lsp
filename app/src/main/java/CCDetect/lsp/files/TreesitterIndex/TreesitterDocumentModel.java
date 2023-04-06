@@ -27,6 +27,7 @@ public class TreesitterDocumentModel extends DocumentModel {
     private ArrayList<Fingerprint> fingerprints = new ArrayList<>();
     private ArrayList<Fingerprint> oldFingerprints = new ArrayList<>();
     private boolean hasChanged = true;
+    private boolean deleted = false;
 
     int tokenCount = 0;
 
@@ -200,12 +201,17 @@ public class TreesitterDocumentModel extends DocumentModel {
         int oldArea = (fullOldFingerprint.length - commonElements);
         int newArea = (fullNewFingerprint.length - commonElements);
 
+        LOGGER.info("old size: " + fullOldFingerprint.length + ", new size: " + fullNewFingerprint.length);
+        LOGGER.info("Using insert+delete edit distance optimization, startOffset: " + startOffset + ", endOffset: "
+                + endOffset);
         HirschbergsAlgorithm hirschbergs = new HirschbergsAlgorithm(fullOldFingerprint,
                 fullNewFingerprint);
         List<EditOperation> operations = hirschbergs.getOperations();
 
         if (operations.size() >= 10 || ((oldArea < 200 &&
                 newArea < 200))) {
+            LOGGER.info("Using insert+delete edit distance optimization, startOffset: " + startOffset + ", endOffset: "
+                    + endOffset);
             if (Configuration.getInstance().isEvaluate()) {
                 for (EditOperation edit : operations) {
                     LOGGER.info("Hirschberg edit: " + Printer.print(edit));
@@ -248,5 +254,24 @@ public class TreesitterDocumentModel extends DocumentModel {
         }
 
         return operations;
+    }
+
+    public void setMarkedDeleted(boolean value) {
+        this.deleted = value;
+    }
+
+    public boolean getMarkedDeleted() {
+        return this.deleted;
+    }
+
+    public EditOperation getDeleteFileOperation() {
+
+        int[] fullFingerprint = getFullFingerprint();
+        EditOperation delete = new EditOperation(EditOperationType.DELETE, fingerprintStart);
+        for (int i = 0; i < fullFingerprint.length; i++) {
+            delete.getChars().add(fullFingerprint[i]);
+        }
+
+        return delete;
     }
 }

@@ -41,11 +41,14 @@ public class CCTextDocumentService implements TextDocumentService {
     private DocumentIndex<TreesitterDocumentModel> index;
     private CloneDetector<TreesitterDocumentModel> detector;
 
-    public void initialize(String rootUri) {
+    public void initialize(DocumentIndex<TreesitterDocumentModel> index,
+            CloneDetector<TreesitterDocumentModel> detector) {
         Timer timer = new Timer();
         timer.start();
-        createIndex(rootUri);
-        createDetector();
+
+        this.index = index;
+        this.detector = detector;
+
         findClones();
         updateDiagnostics();
         timer.stop();

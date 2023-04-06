@@ -93,4 +93,15 @@ public class TreesitterDocumentIndex implements DocumentIndex<TreesitterDocument
         documents.get(uri).setChanged(true);
     }
 
+    @Override
+    public void deleteFile(String uri) {
+        documents.remove(uri);
+
+    }
+
+    @Override
+    public void markFileDeleted(String uri) {
+        documents.get(uri).setMarkedDeleted(true);
+    }
+
 }

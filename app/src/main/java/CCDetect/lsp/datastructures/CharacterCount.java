@@ -32,7 +32,18 @@ public class CharacterCount {
     }
 
     public void addChar(int ch) {
+        if (ch >= charCounts.length) {
+            increaseAlphabetSize(ch);
+        }
         charCounts[ch]++;
+    }
+
+    public void increaseAlphabetSize(int minSize) {
+        int[] newArray = new int[minSize * 2];
+        for (int i = 0; i < charCounts.length; i++) {
+            newArray[i] = charCounts[i];
+        }
+        charCounts = newArray;
     }
 
     public int getCharCount(int ch) {

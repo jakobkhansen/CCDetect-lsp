@@ -54,7 +54,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             Logger.GLOBAL_LOGGER_NAME);
     List<CodeClone> clones;
     TreesitterFingerprintGenerator fingerprintGenerator = new TreesitterFingerprintGenerator();
-    SourceMap sourceMap;
+    public SourceMap sourceMap;
     ExtendedSuffixArray eSuff;
     int tokenCount = 0;
     Configuration config = Configuration.getInstance();
@@ -75,9 +75,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
 
         buildFingerprints(index);
 
-        if (sourceMap == null) {
-            sourceMap = new BinarySearchSourceMap(index);
-        }
+        sourceMap = new BinarySearchSourceMap(index);
 
         // LOGGER.info("Fingerprt : " + Printer.print(getFullFingerprint(index)));
 
@@ -324,6 +322,8 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             int secondIndex = OrderStatisticTree
                     .inOrderRank(OrderStatisticTree.predecessorOf(firstNode).getInverseLink());
 
+            LOGGER.info("firstIndex: " + firstIndex);
+            LOGGER.info("secondIndex: " + secondIndex);
             TokenSourcePair first = getTokenSourcePairFromIndex(firstIndex, cloneSize);
             TokenSourcePair second = getTokenSourcePairFromIndex(secondIndex, cloneSize);
 
@@ -389,6 +389,12 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
         int documentsProcessed = 0;
         tokenCount = 0;
         for (TreesitterDocumentModel document : index) {
+            if (document.getMarkedDeleted()) {
+                document.resetFingerprint();
+                document.setChanged(true);
+                documentsProcessed++;
+                continue;
+            }
             if (!document.hasChanged()) {
                 documentsProcessed++;
                 document.setFingerprintRange(tokenCount, tokenCount + document.getTokenCount() - 1);
