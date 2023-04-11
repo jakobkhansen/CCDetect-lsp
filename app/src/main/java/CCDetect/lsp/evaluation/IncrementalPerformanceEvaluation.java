@@ -53,18 +53,18 @@ public class IncrementalPerformanceEvaluation {
         initialDetection();
 
         initialDetectionTimer.stop();
-        initialDetectionTimer.log("Initial detection time");
+        initialDetectionTimer.logstdout("Initial detection time");
 
         for (int i = 1; i < versionRoots.length; i++) {
             Timer incrementalTimer = new Timer();
             incrementalTimer.start();
             incrementalUpdate(versionRoots[0].getPath(), versionRoots[i].getPath());
             incrementalTimer.stop();
-            incrementalTimer.log("Version " + i + " time");
+            incrementalTimer.logstdout("Version " + i + " time");
         }
 
         totalTimer.stop();
-        totalTimer.log("Total running time");
+        totalTimer.logstdout("Total running time");
     }
 
     public static void initialDetection() {

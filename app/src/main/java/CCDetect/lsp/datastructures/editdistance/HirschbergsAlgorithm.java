@@ -53,7 +53,7 @@ public class HirschbergsAlgorithm {
                 return i;
             }
         }
-        return s1.length;
+        return Math.min(s1.length, s2.length);
     }
 
     public static int getEqualCharactersEnd(int[] s1, int[] s2, int startOffset) {
@@ -69,7 +69,6 @@ public class HirschbergsAlgorithm {
 
     public List<Pair> getEditPositions() {
         int commonElements = (startOffset + endOffset);
-
         int[] newS1 = new int[s1.length - commonElements];
         int[] newS2 = new int[s2.length - commonElements];
         for (int i = 0; i < newS1.length; i++) {

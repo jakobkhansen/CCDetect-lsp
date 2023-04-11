@@ -196,27 +196,20 @@ public class TreesitterDocumentModel extends DocumentModel {
                 fullNewFingerprint);
         int endOffset = HirschbergsAlgorithm.getEqualCharactersEnd(fullOldFingerprint,
                 fullNewFingerprint, startOffset);
-        int commonElements = (startOffset + endOffset);
 
-        int oldArea = (fullOldFingerprint.length - commonElements);
-        int newArea = (fullNewFingerprint.length - commonElements);
-
-        LOGGER.info("old size: " + fullOldFingerprint.length + ", new size: " + fullNewFingerprint.length);
-        LOGGER.info("Using insert+delete edit distance optimization, startOffset: " + startOffset + ", endOffset: "
-                + endOffset);
         HirschbergsAlgorithm hirschbergs = new HirschbergsAlgorithm(fullOldFingerprint,
                 fullNewFingerprint);
         List<EditOperation> operations = hirschbergs.getOperations();
 
-        if (operations.size() >= 10 || ((oldArea < 200 &&
-                newArea < 200))) {
+        if (Configuration.getInstance().isEvaluate()) {
+            for (EditOperation edit : operations) {
+                LOGGER.info("Hirschberg edit: " + Printer.print(edit));
+            }
+        }
+
+        if (operations.size() >= 10) {
             LOGGER.info("Using insert+delete edit distance optimization, startOffset: " + startOffset + ", endOffset: "
                     + endOffset);
-            if (Configuration.getInstance().isEvaluate()) {
-                for (EditOperation edit : operations) {
-                    LOGGER.info("Hirschberg edit: " + Printer.print(edit));
-                }
-            }
             return getDeleteAndInsertOnly(fullOldFingerprint, fullNewFingerprint,
                     startOffset, endOffset);
         }

@@ -37,4 +37,12 @@ public class Timer {
         }
         LOGGER.info(message + ": " + getTotal());
     }
+
+    public void logstdout(String message) {
+        if (stdout) {
+            System.out.println(message + ":" + getTotal());
+            return;
+        }
+        System.out.println(message + ": " + getTotal());
+    }
 }
