@@ -169,7 +169,7 @@ public class TreesitterDocumentModel extends DocumentModel {
         setText(prefix + updatedContent + suffix);
         setChanged(true);
 
-        if (ast == null) {
+        if (ast == null || !Configuration.getInstance().isIncrementalParsing()) {
             buildTree();
             return;
         }

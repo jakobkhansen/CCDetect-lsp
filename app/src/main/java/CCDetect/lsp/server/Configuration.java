@@ -22,6 +22,11 @@ public class Configuration {
     private boolean update_on_save = true;
     private boolean evaluate = false;
     private boolean excludeContainedClones = true;
+    private boolean incrementalParsing = false;
+
+    public boolean isIncrementalParsing() {
+        return incrementalParsing;
+    }
 
     public boolean getExcludeContainedClones() {
         return excludeContainedClones;

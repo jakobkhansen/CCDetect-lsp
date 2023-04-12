@@ -1,5 +1,7 @@
 package CCDetect.lsp.datastructures.rankselect;
 
+import java.util.logging.Logger;
+
 import CCDetect.lsp.utils.Printer;
 
 public class WaveletMatrix {
@@ -7,6 +9,9 @@ public class WaveletMatrix {
     int inputSize;
     int bitSetSize;
     int numBitsUsed;
+
+    private static final Logger LOGGER = Logger.getLogger(
+            Logger.GLOBAL_LOGGER_NAME);
 
     public WaveletMatrix(int[] input, int initialSize) {
         this.inputSize = input.length;
@@ -21,21 +26,16 @@ public class WaveletMatrix {
         fillMatrix(input, 0);
     }
 
-    public void rebuildMatrix(int numBitsUsed, int newSize) {
-
-        int[] oldInput = new int[inputSize];
-        for (int i = 0; i < inputSize; i++) {
-            oldInput[i] = get(i);
+    public void insertNewRow() {
+        LOGGER.info("Inserting new row in wavelet matrix");
+        int oldSize = matrix.length;
+        DynamicTreeBitSet[] newMatrix = new DynamicTreeBitSet[oldSize + 1];
+        newMatrix[0] = new DynamicTreeBitSet(inputSize);
+        for (int i = 1; i < newMatrix.length; i++) {
+            newMatrix[i] = matrix[i - 1];
         }
-        this.numBitsUsed = numBitsUsed;
-        this.bitSetSize = newSize;
-        matrix = new DynamicTreeBitSet[numBitsUsed];
-        for (int i = 0; i < numBitsUsed; i++) {
-            matrix[i] = new DynamicTreeBitSet(oldInput.length);
-        }
-
-        fillMatrix(oldInput, 0);
-
+        matrix = newMatrix;
+        this.numBitsUsed += 1;
     }
 
     // TODO make this iterative for performance
@@ -166,8 +166,8 @@ public class WaveletMatrix {
         int level = 0;
         int currIndex = index;
         int numBits = 32 - Integer.numberOfLeadingZeros(value);
-        if (numBits > numBitsUsed) {
-            rebuildMatrix(numBits, bitSetSize + 100);
+        while (numBits > numBitsUsed) {
+            insertNewRow();
         }
         while (level < matrix.length) {
             int currentBit = numBitsUsed - level - 1;
