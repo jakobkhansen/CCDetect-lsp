@@ -28,7 +28,7 @@ public class IncrementalPerformanceEvaluation {
     static String originalRoot;
 
     public static void main(String[] args) throws Exception {
-        Configuration.getInstance().setCloneTokenThreshold(75);
+        Configuration.getInstance().setCloneTokenThreshold(100);
         String root = System.getProperty("root");
         System.out.println("Running performance evaluation at root: " + root);
 

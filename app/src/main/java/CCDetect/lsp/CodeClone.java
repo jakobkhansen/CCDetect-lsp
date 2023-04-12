@@ -80,6 +80,9 @@ public class CodeClone {
     }
 
     public static void addMatch(CodeClone clone1, CodeClone clone2) {
+        if (clone1 == clone2) {
+            return;
+        }
         clone1.addMatchingClone(clone2);
         clone2.addMatchingClone(clone1);
     }

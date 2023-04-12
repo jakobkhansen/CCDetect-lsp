@@ -14,7 +14,7 @@ public class Configuration {
     private static Configuration instance;
     // Create some sort of map for getting initialization options
     private String language = "java";
-    private String fragment_query = "(method_declaration) @method";
+    private String fragment_query = "(method_declaration) @method (constructor_declaration) @constructor";
     private int clone_token_threshold = 100;
     private String[] ignore_nodes = new String[0];
     private String[] extra_nodes = new String[0];

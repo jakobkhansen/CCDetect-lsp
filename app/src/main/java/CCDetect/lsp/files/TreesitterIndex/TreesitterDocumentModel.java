@@ -174,8 +174,8 @@ public class TreesitterDocumentModel extends DocumentModel {
             return;
         }
 
-        int numLinesInEdit = text.split("\n").length;
-        int numCharsInLastLineOfEdit = text.split("\n")[text.split("\n").length - 1].length();
+        int numLinesInEdit = updatedContent.split("\n").length - 1;
+        int numCharsInLastLineOfEdit = updatedContent.split("\n")[numLinesInEdit - 1].length();
 
         TSPoint startPoint = new TSPoint(startLine, startChar);
         TSPoint oldEndPoint = new TSPoint(endLine, endChar);

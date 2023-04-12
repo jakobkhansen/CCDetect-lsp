@@ -88,7 +88,6 @@ public class CCTextDocumentService implements TextDocumentService {
         if (index.containsDocument(uri)) {
             LOGGER.info("Opened already indexed document");
             model = index.getDocument(uri);
-            return;
         } else {
 
             String uriFormatted = uri.substring(7);
