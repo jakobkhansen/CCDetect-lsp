@@ -67,9 +67,12 @@ task evaluateBigCloneBench(type: JavaExec) {
 
 task evaluateIncrementalPerformance(type: JavaExec) {
     systemProperty "root", System.getProperty("root")
+    systemProperty "outputFile", System.getProperty("outputFile")
+    systemProperty "mode", System.getProperty("mode")
     group = "Execution"
     description = "Evaluate incremental performance"
     classpath = sourceSets.main.runtimeClasspath
+    jvmArgs "-Xmx60g -Xmn3g -XX:+UseParallelOldGC"
     main = 'CCDetect.lsp.evaluation.IncrementalPerformanceEvaluation'
     minHeapSize = "128m" // initial heap size
     maxHeapSize = "4096m" // maximum heap size

@@ -1,5 +1,6 @@
 package CCDetect.lsp.datastructures;
 
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import CCDetect.lsp.datastructures.editdistance.EditOperation;
@@ -18,6 +19,9 @@ public class DynamicSACA {
 
     CharacterCount charCounts;
     WaveletMatrix waveletMatrix;
+
+    ArrayList<Integer> shifts = new ArrayList<>();
+    ArrayList<Integer> startPositions = new ArrayList<>();
 
     // Assume initial arrays are of same size
     // Creates a dynamic suffix array datastructure with initialSize potential size
@@ -108,7 +112,10 @@ public class DynamicSACA {
             expectedPos = getLF(expectedPos);
             shift++;
         }
+        LOGGER.info("num shifts: " + shift);
 
+        shifts.add(shift);
+        startPositions.add(expectedPos);
         updateLCP(expectedPos, shift);
 
     }
@@ -180,6 +187,13 @@ public class DynamicSACA {
         updateLCP(expectedPos, shift);
     }
 
+    public void updateLCPLazy() {
+
+        updateLCPPositions();
+
+        // updateLCP(startPos, shift);
+    }
+
     // Returns L in an array with custom extra size
     public static int[] calculateL(int[] suff, int[] text, int size) {
         int[] l = new int[size];
@@ -224,7 +238,6 @@ public class DynamicSACA {
         int permValue = sa.get(i);
         sa.delete(i);
         sa.insert(j, permValue, -1);
-
     }
 
     private void insertInL(int ch, int position) {
@@ -246,6 +259,13 @@ public class DynamicSACA {
     }
 
     public void updateLCP(int startPos, int shift) {
+        updateLCPPositions();
+
+        updateLCPShifts(startPos, shift);
+    }
+
+    public void updateLCPPositions() {
+
         int pos;
         while ((pos = sa.positionsToUpdate.select(0, true)) != -1) {
 
@@ -256,6 +276,9 @@ public class DynamicSACA {
 
             updateLCPValue(pos, 0);
         }
+    }
+
+    public void updateLCPShifts(int startPos, int shift) {
 
         int cs = startPos;
         boolean hasToUpdate = true;
@@ -283,7 +306,6 @@ public class DynamicSACA {
             shift++;
 
         }
-
     }
 
     public boolean updateLCPValue(int pos, int lowerBound) {
