@@ -35,6 +35,7 @@ public class IncrementalPerformanceEvaluation {
 
     public static void main(String[] args) throws Exception {
         Configuration.getInstance().setCloneTokenThreshold(100);
+        // Configuration.getInstance().setLazyLCPUpdates(true);
         String root = System.getProperty("root");
         outputFile = System.getProperty("outputFile");
         String mode = System.getProperty("mode");

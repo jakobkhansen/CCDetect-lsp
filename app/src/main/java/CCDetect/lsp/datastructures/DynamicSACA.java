@@ -3,8 +3,11 @@ package CCDetect.lsp.datastructures;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+
 import CCDetect.lsp.datastructures.editdistance.EditOperation;
 import CCDetect.lsp.datastructures.rankselect.WaveletMatrix;
+import CCDetect.lsp.server.Configuration;
 
 /**
  * DynamicSA
@@ -112,12 +115,12 @@ public class DynamicSACA {
             expectedPos = getLF(expectedPos);
             shift++;
         }
-        LOGGER.info("num shifts: " + shift);
 
         shifts.add(shift);
         startPositions.add(expectedPos);
-        updateLCP(expectedPos, shift);
-
+        if (!Configuration.getInstance().isLazyLCPUpdates()) {
+            updateLCP(expectedPos, shift);
+        }
     }
 
     public void deleteFactor(EditOperation edit) {
@@ -184,14 +187,21 @@ public class DynamicSACA {
             shift++;
         }
 
-        updateLCP(expectedPos, shift);
+        if (!Configuration.getInstance().isLazyLCPUpdates()) {
+            updateLCP(expectedPos, shift);
+        }
     }
 
     public void updateLCPLazy() {
 
         updateLCPPositions();
 
+        for (int i = 0; i < shifts.size(); i++) {
+            updateLCPShifts(startPositions.get(i), shifts.get(i));
+        }
         // updateLCP(startPos, shift);
+        shifts = new ArrayList<>();
+        startPositions = new ArrayList<>();
     }
 
     // Returns L in an array with custom extra size
@@ -218,8 +228,18 @@ public class DynamicSACA {
             j += charCounts.getCharCount(i);
             i++;
         }
-        int res = waveletMatrix.select(index - j, i);
-        return res;
+        return waveletMatrix.select(index - j, i);
+    }
+
+    public ImmutablePair<Integer, Integer> getCharInF(int index) {
+        int i = 0;
+        int j = 0;
+
+        while ((j + charCounts.getCharCount(i) <= index)) {
+            j += charCounts.getCharCount(i);
+            i++;
+        }
+        return new ImmutablePair<Integer, Integer>(i, j);
     }
 
     private int getCharsBefore(int ch) {
@@ -264,7 +284,7 @@ public class DynamicSACA {
         updateLCPShifts(startPos, shift);
     }
 
-    public void updateLCPPositions() {
+    private void updateLCPPositions() {
 
         int pos;
         while ((pos = sa.positionsToUpdate.select(0, true)) != -1) {
@@ -276,9 +296,10 @@ public class DynamicSACA {
 
             updateLCPValue(pos, 0);
         }
+
     }
 
-    public void updateLCPShifts(int startPos, int shift) {
+    private void updateLCPShifts(int startPos, int shift) {
 
         int cs = startPos;
         boolean hasToUpdate = true;
@@ -308,7 +329,7 @@ public class DynamicSACA {
         }
     }
 
-    public boolean updateLCPValue(int pos, int lowerBound) {
+    private boolean updateLCPValue(int pos, int lowerBound) {
         int oldLCP = sa.getLCPValue(pos);
 
         if (oldLCP < 0 || oldLCP >= lowerBound) {
@@ -320,10 +341,16 @@ public class DynamicSACA {
             int prevSuffixCSValue = waveletMatrix.get(prevSuffixCS);
             while (currentSuffixCSValue == prevSuffixCSValue && currentSuffixCSValue != 1) {
                 lcpValue++;
-                currentSuffixCS = getInverseLF(currentSuffixCS);
-                prevSuffixCS = getInverseLF(prevSuffixCS);
-                currentSuffixCSValue = waveletMatrix.get(currentSuffixCS);
-                prevSuffixCSValue = waveletMatrix.get(prevSuffixCS);
+                ImmutablePair<Integer, Integer> charInF = getCharInF(currentSuffixCS);
+                ImmutablePair<Integer, Integer> prevCharInF = getCharInF(prevSuffixCS);
+                currentSuffixCSValue = charInF.getLeft();
+                prevSuffixCSValue = prevCharInF.getLeft();
+                currentSuffixCS = waveletMatrix.select(currentSuffixCS - charInF.getRight(), charInF.getLeft());
+                prevSuffixCS = waveletMatrix.select(prevSuffixCS - prevCharInF.getRight(), prevCharInF.getLeft());
+                // currentSuffixCS = getInverseLF(currentSuffixCS);
+                // prevSuffixCS = getInverseLF(prevSuffixCS);
+                // currentSuffixCSValue = waveletMatrix.get(currentSuffixCS);
+                // prevSuffixCSValue = waveletMatrix.get(prevSuffixCS);
             }
             if (oldLCP != lcpValue) {
                 sa.setLCPValue(pos, lcpValue);

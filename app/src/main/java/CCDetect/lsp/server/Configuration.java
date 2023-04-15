@@ -23,6 +23,15 @@ public class Configuration {
     private boolean evaluate = false;
     private boolean excludeContainedClones = true;
     private boolean incrementalParsing = false;
+    private boolean lazyLCPUpdates = false;
+
+    public boolean isLazyLCPUpdates() {
+        return lazyLCPUpdates;
+    }
+
+    public void setLazyLCPUpdates(boolean lazyLCPUpdates) {
+        this.lazyLCPUpdates = lazyLCPUpdates;
+    }
 
     public boolean isIncrementalParsing() {
         return incrementalParsing;

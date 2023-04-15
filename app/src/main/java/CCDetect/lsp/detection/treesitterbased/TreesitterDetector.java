@@ -3,6 +3,7 @@ package CCDetect.lsp.detection.treesitterbased;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -101,15 +102,6 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             }
         } else {
 
-            if (config.isEvaluate()) {
-                Timer timer = new Timer();
-                timer.start();
-                int[] fingerprint = getFullFingerprint(index);
-                ExtendedSuffixArray linearEsuff = new SAIS().buildExtendedSuffixArray(fingerprint);
-                timer.stop();
-                timer.log("Linear time");
-            }
-
             List<EditOperation> edits = getDocumentEdits(index);
 
             Timer updateTimer = new Timer();
@@ -117,6 +109,21 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             dynamicUpdate(edits);
             updateTimer.stop();
             updateTimer.log("Time to update sa");
+
+            if (config.isEvaluate()) {
+                Timer timer = new Timer();
+                timer.start();
+                int[] fingerprint = getFullFingerprint(index);
+                ExtendedSuffixArray linearEsuff = new SAIS().buildExtendedSuffixArray(fingerprint);
+                int[] sacaArray = saca.getSA().toArray();
+                if (Arrays.equals(sacaArray, linearEsuff.getSuffix())) {
+                    LOGGER.info("SA equals correct");
+                } else {
+                    LOGGER.info("SA equals incorrect");
+                }
+                timer.stop();
+                timer.log("Linear time");
+            }
         }
         for (TreesitterDocumentModel document : index) {
             document.setChanged(false);
@@ -214,6 +221,9 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                 default:
                     break;
             }
+        }
+        if (Configuration.getInstance().isLazyLCPUpdates()) {
+            saca.updateLCPLazy();
         }
     }
 

@@ -36,6 +36,7 @@ dependencies {
     implementation 'com.github.jakobkhansen:java-tree-sitter:master-SNAPSHOT'
 
     implementation 'org.apache.commons:commons-pool2:2.11.1'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
 }
 
 
