@@ -55,12 +55,6 @@ public class CCTextDocumentService implements TextDocumentService {
         timer.log("Initialize time");
     }
 
-    public void createIndex(String rootUri) {
-        Configuration config = Configuration.getInstance();
-        index = new TreesitterDocumentIndex(rootUri, new GitProjectIterator(rootUri, config.getLanguage()));
-        index.indexProject();
-    }
-
     public void createDetector() {
         detector = new TreesitterDetector();
     }

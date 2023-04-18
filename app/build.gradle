@@ -37,6 +37,7 @@ dependencies {
 
     implementation 'org.apache.commons:commons-pool2:2.11.1'
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
+    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
 }
 
 
@@ -77,4 +78,17 @@ task evaluateIncrementalPerformance(type: JavaExec) {
     main = 'CCDetect.lsp.evaluation.IncrementalPerformanceEvaluation'
     minHeapSize = "128m" // initial heap size
     maxHeapSize = "4096m" // maximum heap size
+}
+
+task generateTest(type: JavaExec) {
+    systemProperty "root", System.getProperty("root")
+    systemProperty "fileType", System.getProperty("fileType")
+    systemProperty "changes", System.getProperty("changes")
+    systemProperty "versions", System.getProperty("versions")
+    systemProperty "minSize", System.getProperty("minSize")
+    systemProperty "maxSize", System.getProperty("maxSize")
+    group = "Execution"
+    description = "Generate evaluation test"
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'CCDetect.lsp.evaluation.GenerateEvaluationTest'
 }

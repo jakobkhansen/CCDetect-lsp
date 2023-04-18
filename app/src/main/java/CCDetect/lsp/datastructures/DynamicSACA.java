@@ -287,6 +287,7 @@ public class DynamicSACA {
     private void updateLCPPositions() {
 
         int pos;
+        int numUpdates = 0;
         while ((pos = sa.positionsToUpdate.select(0, true)) != -1) {
 
             sa.positionsToUpdate.set(pos, false);
@@ -295,7 +296,9 @@ public class DynamicSACA {
             }
 
             updateLCPValue(pos, 0);
+            numUpdates++;
         }
+        LOGGER.info("Num LCP position updates: " + numUpdates);
 
     }
 

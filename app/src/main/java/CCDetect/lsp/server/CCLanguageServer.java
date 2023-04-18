@@ -26,7 +26,9 @@ import CCDetect.lsp.detection.treesitterbased.TreesitterDetector;
 import CCDetect.lsp.files.DocumentIndex;
 import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentIndex;
 import CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentModel;
+import CCDetect.lsp.files.fileiterators.FiletypeIterator;
 import CCDetect.lsp.files.fileiterators.GitProjectIterator;
+import CCDetect.lsp.files.fileiterators.ProjectFileIterator;
 
 public class CCLanguageServer implements LanguageServer, LanguageClientAware {
 
@@ -131,7 +133,13 @@ public class CCLanguageServer implements LanguageServer, LanguageClientAware {
 
     public void createIndex(String rootUri) {
         Configuration config = Configuration.getInstance();
-        index = new TreesitterDocumentIndex(rootUri, new GitProjectIterator(rootUri, config.getLanguage()));
+        ProjectFileIterator iterator;
+        if (config.shouldIndexGitFilesOnly()) {
+            iterator = new GitProjectIterator(rootUri, config.getLanguage());
+        } else {
+            iterator = new FiletypeIterator(rootUri, config.getLanguage());
+        }
+        index = new TreesitterDocumentIndex(rootUri, iterator);
         index.indexProject();
     }
 }

@@ -16,6 +16,7 @@ public class Configuration {
     private String language = "java";
     private String fragment_query = "(method_declaration) @method (constructor_declaration) @constructor";
     private int clone_token_threshold = 100;
+    private boolean indexGitFilesOnly = true;
     private String[] ignore_nodes = new String[0];
     private String[] extra_nodes = new String[0];
     private boolean dynamic_detection = true;
@@ -24,6 +25,14 @@ public class Configuration {
     private boolean excludeContainedClones = true;
     private boolean incrementalParsing = false;
     private boolean lazyLCPUpdates = false;
+
+    public boolean shouldIndexGitFilesOnly() {
+        return indexGitFilesOnly;
+    }
+
+    public void setIndexGitFilesOnly(boolean indexGitFilesOnly) {
+        this.indexGitFilesOnly = indexGitFilesOnly;
+    }
 
     public boolean isLazyLCPUpdates() {
         return lazyLCPUpdates;
