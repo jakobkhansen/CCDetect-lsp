@@ -22,9 +22,7 @@ public class Configuration {
     private boolean dynamic_detection = true;
     private boolean update_on_save = true;
     private boolean evaluate = false;
-    private boolean excludeContainedClones = true;
     private boolean incrementalParsing = false;
-    private boolean lazyLCPUpdates = false;
 
     public boolean shouldIndexGitFilesOnly() {
         return indexGitFilesOnly;
@@ -34,32 +32,21 @@ public class Configuration {
         this.indexGitFilesOnly = indexGitFilesOnly;
     }
 
-    public boolean isLazyLCPUpdates() {
-        return lazyLCPUpdates;
-    }
-
-    public void setLazyLCPUpdates(boolean lazyLCPUpdates) {
-        this.lazyLCPUpdates = lazyLCPUpdates;
-    }
-
     public boolean isIncrementalParsing() {
         return incrementalParsing;
     }
 
-    public boolean getExcludeContainedClones() {
-        return excludeContainedClones;
-    }
-
-    public void setExcludeContainedClones(boolean excludeContainedClones) {
-        this.excludeContainedClones = excludeContainedClones;
-    }
-
     public static void createInstanceFromJson(String json) {
         instance = JSONUtility.toModel(json, Configuration.class);
+        LOGGER.info("instance: " + instance);
     }
 
     public static Configuration getInstance() {
         if (instance == null) {
+            LOGGER.info("Creating new instance!!!");
+            for (StackTraceElement st : Thread.currentThread().getStackTrace()) {
+                LOGGER.info("stacktrace: " + st.toString());
+            }
             instance = new Configuration();
         }
         return instance;

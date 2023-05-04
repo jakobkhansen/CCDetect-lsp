@@ -163,12 +163,14 @@ public class WaveletMatrix {
     }
 
     public void insert(int index, int value) {
-        int level = 0;
-        int currIndex = index;
         int numBits = 32 - Integer.numberOfLeadingZeros(value);
         while (numBits > numBitsUsed) {
             insertNewRow();
         }
+
+        int level = 0;
+        int currIndex = index;
+
         while (level < matrix.length) {
             int currentBit = numBitsUsed - level - 1;
             matrix[level].insert(currIndex, getBitBool(value, currentBit));

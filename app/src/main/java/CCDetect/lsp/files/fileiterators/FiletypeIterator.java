@@ -31,8 +31,7 @@ public class FiletypeIterator implements ProjectFileIterator {
                     .find(
                             Paths.get(uri),
                             Integer.MAX_VALUE,
-                            (filePath, fileAttr) -> (fileAttr.isRegularFile() ||
-                                    fileAttr.isDirectory()) &&
+                            (filePath, fileAttr) -> (fileAttr.isRegularFile()) &&
                                     com.google.common.io.Files
                                             .getFileExtension(filePath.toString())
                                             .equals(filetype))

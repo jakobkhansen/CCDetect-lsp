@@ -37,7 +37,7 @@ public class CCLanguageServer implements LanguageServer, LanguageClientAware {
     private final static Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     private DocumentIndex<TreesitterDocumentModel> index;
-    private CloneDetector<TreesitterDocumentModel> detector = new TreesitterDetector();
+    private CloneDetector<TreesitterDocumentModel> detector;
 
     private CCTextDocumentService textDocumentService;
     private CCWorkspaceService workspaceService;
@@ -89,6 +89,7 @@ public class CCLanguageServer implements LanguageServer, LanguageClientAware {
         LOGGER.info("rootUri: " + rootUri);
 
         createIndex(rootUri);
+        detector = new TreesitterDetector();
         textDocumentService.initialize(index, detector);
         workspaceService.initialize(index, detector);
 

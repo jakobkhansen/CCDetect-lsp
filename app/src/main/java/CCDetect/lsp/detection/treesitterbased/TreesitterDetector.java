@@ -58,8 +58,12 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
     public SourceMap sourceMap;
     ExtendedSuffixArray eSuff;
     int tokenCount = 0;
-    Configuration config = Configuration.getInstance();
+    Configuration config;
     DynamicSACA saca;
+
+    public TreesitterDetector() {
+        config = Configuration.getInstance();
+    }
 
     @Override
     public List<CodeClone> getClones() {
@@ -92,6 +96,8 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             eSuff = new SAIS().buildExtendedSuffixArray(fingerprint);
             timer.stop();
             timer.log("Linear time");
+            LOGGER.info("here: " + config.isDynamicDetection());
+            LOGGER.info("here: " + config.getCloneTokenThreshold());
             if (config.isDynamicDetection() && saca == null) {
                 LOGGER.info("Building dynamic structures");
                 saca = new DynamicSACA(fingerprint, eSuff);
@@ -222,9 +228,6 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                     break;
             }
         }
-        if (Configuration.getInstance().isLazyLCPUpdates()) {
-            saca.updateLCPLazy();
-        }
     }
 
     private int[] extractCloneIndicesFromSA() {
@@ -245,12 +248,10 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                 clones.add(i);
                 // LOGGER.info("Linear clone added: " + i);
                 // LOGGER.info("secondIndex: " + secondIndex);
-                if (config.getExcludeContainedClones()) {
-                    // Ignore all contained clones for the new clones
-                    while (i + 1 < eSuff.size() &&
-                            eSuff.getPreceedingSuffixLCPValue(i + 1) > eSuff.getLCPValue(i + 1)) {
-                        i++;
-                    }
+                // Ignore all contained clones for the new clones
+                while (i + 1 < eSuff.size() &&
+                        eSuff.getPreceedingSuffixLCPValue(i + 1) > eSuff.getLCPValue(i + 1)) {
+                    i++;
                 }
             }
         }
