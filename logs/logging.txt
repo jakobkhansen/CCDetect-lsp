@@ -1,0 +1,64 @@
+May 05, 2023 8:54:08 PM CCDetect.lsp.server.CCLanguageServer initialize
+INFO: Server initializing
+May 05, 2023 8:54:08 PM CCDetect.lsp.server.CCLanguageServer initialize
+INFO: {"language":"py","update_on_save":true,"dynamic_detection":false,"clone_token_threshold":100,"fragment_query":"(program) @program","evaluate":false,"ignore_nodes":[],"extra_nodes":[],"excludeContainedClones":true}
+May 05, 2023 8:54:08 PM CCDetect.lsp.utils.JSONUtility toModel
+INFO: gson parsing: {"language":"py","update_on_save":true,"dynamic_detection":false,"clone_token_threshold":100,"fragment_query":"(program) @program","evaluate":false,"ignore_nodes":[],"extra_nodes":[],"excludeContainedClones":true}
+May 05, 2023 8:54:08 PM CCDetect.lsp.utils.JSONUtility toModel
+INFO: gson here: 100
+May 05, 2023 8:54:08 PM CCDetect.lsp.server.Configuration createInstanceFromJson
+INFO: instance: CCDetect.lsp.server.Configuration@729cb58e
+May 05, 2023 8:54:08 PM CCDetect.lsp.server.CCLanguageServer initialize
+INFO: rootUri: file:///home/jakob/Documents/Dev/LSP/CCDetect-lsp
+May 05, 2023 8:54:08 PM CCDetect.lsp.files.fileiterators.GitProjectIterator <init>
+INFO: rootUri file:///home/jakob/Documents/Dev/LSP/CCDetect-lsp
+May 05, 2023 8:54:08 PM CCDetect.lsp.files.fileiterators.GitProjectIterator getFilePathsInProject
+INFO: command git --git-dir=./.git ls-files
+May 05, 2023 8:54:08 PM CCDetect.lsp.files.fileiterators.GitProjectIterator getFilePathsInProject
+INFO: 0
+May 05, 2023 8:54:08 PM CCDetect.lsp.detection.treesitterbased.TreesitterDetector onIndexChange
+INFO: onIndexChange TreesitterDetector
+May 05, 2023 8:54:08 PM CCDetect.lsp.utils.Timer log
+INFO: Time to fetch tokens: 3.809864
+May 05, 2023 8:54:08 PM CCDetect.lsp.detection.treesitterbased.TreesitterDetector onIndexChange
+INFO: Building suffix array
+May 05, 2023 8:54:08 PM CCDetect.lsp.utils.Timer log
+INFO: Time to concat full fingerprint: 0.003897
+May 05, 2023 8:54:08 PM CCDetect.lsp.utils.Timer log
+INFO: Linear time: 11.372778
+May 05, 2023 8:54:08 PM CCDetect.lsp.detection.treesitterbased.TreesitterDetector onIndexChange
+INFO: here: false
+May 05, 2023 8:54:08 PM CCDetect.lsp.detection.treesitterbased.TreesitterDetector onIndexChange
+INFO: here: 100
+May 05, 2023 8:54:08 PM CCDetect.lsp.detection.treesitterbased.TreesitterDetector getClones
+INFO: Getting linear clones
+May 05, 2023 8:54:08 PM CCDetect.lsp.detection.treesitterbased.TreesitterDetector onIndexChange
+INFO: Found 0 clones
+May 05, 2023 8:54:08 PM CCDetect.lsp.utils.Timer log
+INFO: indexDidChange time: 28.861985
+May 05, 2023 8:54:08 PM CCDetect.lsp.detection.treesitterbased.TreesitterDetector getClones
+INFO: clones: 0
+May 05, 2023 8:54:08 PM CCDetect.lsp.utils.Timer log
+INFO: Initialize time: 33.628016
+May 05, 2023 8:54:08 PM CCDetect.lsp.diagnostics.DiagnosticsPublisher lambda$publishCloneDiagnosticsFromIndex$1
+INFO: Publishing diagnostics
+May 05, 2023 8:54:08 PM CCDetect.lsp.server.CCLanguageServer initialize
+INFO: Server initialized
+May 05, 2023 8:54:08 PM CCDetect.lsp.diagnostics.DiagnosticsPublisher lambda$publishCloneDiagnosticsFromIndex$1
+INFO: Diagnostics published
+May 05, 2023 8:54:08 PM CCDetect.lsp.server.CCTextDocumentService didOpen
+INFO: didOpen
+May 05, 2023 8:54:08 PM CCDetect.lsp.files.DocumentModel getDocumentContent
+INFO: java.nio.file.NoSuchFileException: /home/jakob/Documents/Dev/LSP/CCDetect-lsp/another.py
+May 05, 2023 8:54:08 PM CCDetect.lsp.treesitter.TreeSitterLibrary <clinit>
+INFO: Loading treesitter
+May 05, 2023 8:54:08 PM CCDetect.lsp.treesitter.TreeSitterLibrary <clinit>
+INFO: Treesitter loaded
+May 05, 2023 8:54:08 PM CCDetect.lsp.files.TreesitterIndex.TreesitterDocumentAST <init>
+INFO: java.lang.NullPointerException
+May 05, 2023 8:54:08 PM CCDetect.lsp.detection.treesitterbased.TreesitterDetector getClones
+INFO: clones: 0
+May 05, 2023 8:54:08 PM CCDetect.lsp.diagnostics.DiagnosticsPublisher lambda$publishCloneDiagnosticsFromIndex$1
+INFO: Publishing diagnostics
+May 05, 2023 8:54:08 PM CCDetect.lsp.diagnostics.DiagnosticsPublisher lambda$publishCloneDiagnosticsFromIndex$1
+INFO: Diagnostics published

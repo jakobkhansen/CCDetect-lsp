@@ -19,8 +19,14 @@ public class TreeSitterLanguageResolver {
                 return Languages.javascript();
             case "ts":
                 return Languages.typescript();
+            case "tsx":
+                return Languages.tsx();
             case "py":
                 return Languages.python();
+            case "go":
+                return Languages.go();
+            case "rs":
+                return Languages.rust();
             // TODO add more I guess
 
             default:
