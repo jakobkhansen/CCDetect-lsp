@@ -2,11 +2,9 @@
 
 Incremental, language agnostic and IDE agnostic duplicate code detection.
 
-Code clone diagnostics     |  Diagnostics overview
-:-------------------------:|:-------------------------:
-![](https://user-images.githubusercontent.com/8071566/217652306-e46e8fd1-2ba4-4d46-8442-85538da18283.png)  |  ![](https://user-images.githubusercontent.com/8071566/217652682-dd38eb9c-a746-406e-85d5-f6144a8ba945.png)
-
-
+|                                          Code clone diagnostics                                           |                                           Diagnostics overview                                            |
+| :-------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------: |
+| ![](https://user-images.githubusercontent.com/8071566/217652306-e46e8fd1-2ba4-4d46-8442-85538da18283.png) | ![](https://user-images.githubusercontent.com/8071566/217652682-dd38eb9c-a746-406e-85d5-f6144a8ba945.png) |
 
 This is an LSP tool which does duplicate code detection, otherwise known as code-clone
 detection. The goal of this tool is to create a completely incremental updating static
@@ -124,6 +122,38 @@ The following init options are available to configure CCDetect-lsp:
     extra_nodes = {}
 
 },
+```
+
+## Recommended language setup
+
+For any language which is to be analyzed, there are two language-specific options you need
+to change in your configuration. The `language` option is straightforward, if it is
+supported, set this to the file extension of the language (such as `java`, `py`, `rs`).
+For the `fragment_query` option, this should be set to what tree-sitter AST node you want
+to be selected for clone detection. This could for example be functions, methods, classes,
+or just the root node of the AST, which means the entire program will be considered for
+clone detection. A separate option to use just the root node might be added, which makes
+it simpler to get a new language up and running without knowing anything about its AST.
+
+The following section gives some possible fragment queries you can set for different
+languages:
+
+```md
+Java, file: (program) @program
+Java, methods and constructors: (method_declaration) @method (constructor_declaration) @constructor
+
+C, file: (translation_unit) @program
+C, functions: (function_definition) @function
+
+Python, file: (module) @module
+Python, functions: (function_definition) @function
+Python, classes: (class_definition) @class
+
+Rust, file: (source_file) @file
+Rust, functions: (function_item) @function
+
+Go, file: (source_file) @file
+Go, functions: (function_declaration) @function
 ```
 
 ## Incremental clone detection algorithm
