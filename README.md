@@ -128,7 +128,7 @@ The following init options are available to configure CCDetect-lsp:
 
 For any language which is to be analyzed, there are two language-specific options you need
 to change in your configuration. The `language` option is straightforward, if it is
-supported, set this to the file extension of the language (such as `java`, `py`, `rs`).
+supported, set this to the file extension of the language (such as `js`, `py`, `rs`).
 For the `fragment_query` option, this should be set to what tree-sitter AST node you want
 to be selected for clone detection. This could for example be functions, methods, classes,
 or just the root node of the AST, which means the entire program will be considered for
@@ -139,6 +139,9 @@ The following section gives some possible fragment queries you can set for diffe
 languages:
 
 ```md
+Javascript, file: (program) @program
+Javascript, functions: (function_declaration) @function
+
 Java, file: (program) @program
 Java, methods and constructors: (method_declaration) @method (constructor_declaration) @constructor
 
