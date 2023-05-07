@@ -138,7 +138,7 @@ it simpler to get a new language up and running without knowing anything about i
 The following section gives some possible fragment queries you can set for different
 languages:
 
-```md
+```txt
 Javascript, file: (program) @program
 Javascript, functions: (function_declaration) @function
 
