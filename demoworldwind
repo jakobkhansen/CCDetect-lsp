@@ -5,4 +5,4 @@ image=`cat /tmp/ccdetectdocker | cut -b 8-19`
 echo "Starting container with id $image ..."
 container=`docker run -dit $image`
 echo "Entering container..."
-docker exec -it $container /bin/bash -c "cd WorldWindJava; nvim -c 'Lazy! sync|close' src/gov/nasa/worldwind/View.java"
+docker exec -it $container /bin/bash -c "cd WorldWindJava; nvim --headless '+Lazy! sync' +qa; nvim src/gov/nasa/worldwind/View.java; /bin/bash"
