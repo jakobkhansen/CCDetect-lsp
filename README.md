@@ -159,6 +159,40 @@ Go, file: (source_file) @file
 Go, functions: (function_declaration) @function
 ```
 
-## Incremental clone detection algorithm
+## Demo
 
-TODO
+To test out CCDetect-LSP in a Docker environment, run:
+
+```bash
+git clone https://github.com/jakobkhansen/CCDetect-lsp.git
+cd CCDetect-lsp
+
+# Builds, starts and connects to a Docker container where CCDetect-LSP and a pre-configured Neovim is available
+./demo
+
+# Or run this which launches the same container, but automatically starts Neovim in a project, just to test it out.
+./demoworldwind
+```
+
+Note that building the image can take 5-10 minutes, as dependencies need to be downloaded
+and CCDetect-LSP needs to be built.
+
+In the Docker container, the `nvim` command, launches Neovim with a pre-configured setup
+for Java projects. `~/.config/nvim/init.lua` can be edited to change configurations such
+as language and token threshold.
+
+To run CCDetect-LSP in Neovim, clone a repo, cd into its root folder and run `nvim`. When
+Neovim is then opened, open any file of the selected file-type (`.java` by default).
+
+To navigate files and interact with clones, the following hotkeys have been setup:
+
+```txt
+Alt+t = Fuzzy-find files
+Alt+f = File-tree
+Alt+c = Code clone view (diagnostics view)
+Alt+a = Code action (navigate to clone match)
+```
+
+Note that each run of `./demo` builds an image and starts a Docker container, it might be
+smart to reconnect to an already built demo container, to avoid the long build time and
+the space usage of the image.
