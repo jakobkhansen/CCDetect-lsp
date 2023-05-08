@@ -82,7 +82,7 @@ local function start_ccdetect()
                 fragment_query = "(method_declaration) @method",
                 clone_token_threshold = 100,
                 dynamic_detection = true,
-                update_on_save = false,
+                update_on_save = true,
             },
         })
     end
@@ -167,10 +167,13 @@ To test out CCDetect-LSP in a Docker environment, run:
 git clone https://github.com/jakobkhansen/CCDetect-lsp.git
 cd CCDetect-lsp
 
-# Builds, starts and connects to a Docker container where CCDetect-LSP and a pre-configured Neovim is available
+# Builds, starts and connects to a Docker container where CCDetect-LSP and a
+# pre-configured Neovim is available
 ./demo
 
-# Or run this which launches the same container, but automatically starts Neovim in a project, just to test it out.
+# Or run this which launches the same container, but also automatically starts Neovim in a
+# project at the location of a known clone.
+
 ./demoworldwind
 ```
 
@@ -182,15 +185,15 @@ for Java projects. `~/.config/nvim/init.lua` can be edited to change configurati
 as language and token threshold.
 
 To run CCDetect-LSP in Neovim, clone a repo, cd into its root folder and run `nvim`. When
-Neovim is then opened, open any file of the selected file-type (`.java` by default).
+Neovim is open, open any file of the selected file-type (`.java` by default).
 
-To navigate files and interact with clones, the following hotkeys have been setup:
+To navigate files and interact with clones, the following hotkeys have been defined:
 
 ```txt
-Alt+t = Fuzzy-find files
-Alt+f = File-tree
-Alt+c = Code clone view (diagnostics view)
-Alt+a = Code action (navigate to clone match)
+Ctrl+t = Fuzzy-find files (:Telescope find_files)
+Ctrl+f = File-tree (:Neotree toggle)
+Ctrl+c = Code clone view (:Telescope diagnostics)
+Ctrl+a = Code action (:lua vim.lsp.buf.code_action())
 ```
 
 Note that each run of `./demo` builds an image and starts a Docker container, it might be
