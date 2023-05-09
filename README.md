@@ -69,23 +69,21 @@ local function on_show_document(err, result, ctx, config, params)
 end
 
 local function start_ccdetect()
-    if vim.g.javaserveroff ~= nil then
-        vim.lsp.start({
-            cmd = cmd,
-            name = "CCDetect",
-            root_dir = vim.fs.dirname(vim.fs.find({ ".git" }, { upward = true })[1]),
-            handlers = {
-                ["window/showDocument"] = on_show_document,
-            },
-            init_options = {
-                language = "java",
-                fragment_query = "(method_declaration) @method",
-                clone_token_threshold = 100,
-                dynamic_detection = true,
-                update_on_save = true,
-            },
-        })
-    end
+    vim.lsp.start({
+        cmd = cmd,
+        name = "CCDetect",
+        root_dir = vim.fs.dirname(vim.fs.find({ ".git" }, { upward = true })[1]),
+        handlers = {
+            ["window/showDocument"] = on_show_document,
+        },
+        init_options = {
+            language = "java",
+            fragment_query = "(method_declaration) @method",
+            clone_token_threshold = 100,
+            dynamic_detection = true,
+            update_on_save = true,
+        },
+    })
 end
 
 autocmd("FileType", { pattern = "java", callback = start_ccdetect })
