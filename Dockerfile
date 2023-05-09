@@ -1,4 +1,4 @@
-FROM archlinux:latest AS build
+FROM --platform=linux/amd64 archlinux:latest AS build
 COPY --chown=root:root . /root/CCDetect-lsp
 
 WORKDIR /root/CCDetect-lsp
