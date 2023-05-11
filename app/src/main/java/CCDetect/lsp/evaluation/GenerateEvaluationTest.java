@@ -37,6 +37,9 @@ public class GenerateEvaluationTest {
     static String query = "(method_declaration) @method (constructor_declaration) @constructor";
     static Set<Path> usedPaths = new HashSet<>();
 
+    // Quick hack to allow an increasing amount of changes
+    static int DELTA_CHANGES = 5;
+
     public static void main(String[] args) throws Exception {
         Configuration.getInstance()
                 .setIgnoreNodes(
@@ -52,7 +55,9 @@ public class GenerateEvaluationTest {
         }
 
         for (int v = 1; v < versions; v++) {
+            System.out.println("Changes in version " + v + ": " + changes);
             createVersion(v);
+            changes = (changes + DELTA_CHANGES) - (changes % DELTA_CHANGES);
         }
     }
 
@@ -95,7 +100,6 @@ public class GenerateEvaluationTest {
 
                 int numTokens = numberOfTokensInNode(matchNode);
                 if (numTokens >= minSize && numTokens <= maxSize) {
-                    System.out.println("Match of type: " + matchNode.getType());
                     for (int i = version; i < versions; i++) {
                         String versionRoot = root + "/" + ((char) ('a' + i));
                         File newFile = new File(p.toString().replace(previousRoot, versionRoot));
