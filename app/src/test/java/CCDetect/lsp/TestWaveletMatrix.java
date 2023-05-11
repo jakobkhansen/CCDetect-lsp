@@ -45,10 +45,8 @@ public class TestWaveletMatrix {
     public void testWaveletInsert() {
         int[] input = { 2, 0, 1 };
         WaveletMatrix matrix = new WaveletMatrix(input, 20);
-        System.out.println(Printer.print(matrix));
 
         matrix.insert(1, 2);
-        System.out.println(Printer.print(matrix));
 
         assertEquals(2, matrix.get(0));
         assertEquals(2, matrix.get(1));
@@ -141,12 +139,5 @@ public class TestWaveletMatrix {
         assertEquals(4, matrix.select(1, 2));
         assertEquals(0, matrix.select(0, 3));
         assertEquals(2, matrix.select(0, 1));
-    }
-
-    @Test
-    public void testWriting() {
-        int[] input = { 0, 1, 1, 1, 4, 5, 2, 0, 6, 3, 3 };
-        WaveletMatrix matrix = new WaveletMatrix(input, 10);
-        System.out.println(Printer.print(matrix));
     }
 }

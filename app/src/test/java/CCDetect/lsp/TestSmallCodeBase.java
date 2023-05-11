@@ -33,12 +33,12 @@ public class TestSmallCodeBase {
 
     @Before
     public void init() {
-        // LOGGER.setFilter(new Filter() {
-        // @Override
-        // public boolean isLoggable(LogRecord record) {
-        // return false;
-        // }
-        // });
+        LOGGER.setFilter(new Filter() {
+            @Override
+            public boolean isLoggable(LogRecord record) {
+                return false;
+            }
+        });
         config = Configuration.getInstance();
         config.setLanguage("java");
         config.setCloneTokenThreshold(10);
@@ -71,13 +71,6 @@ public class TestSmallCodeBase {
         TreesitterDetector detector = new TreesitterDetector();
         detector.onIndexChange(index);
         List<CodeClone> clones = detector.getClones();
-        for (CodeClone clone : clones) {
-            LOGGER.info(clone.toString());
-        }
-        for (TreesitterDocumentModel doc : index) {
-            System.out.println("doc " + doc.getUri() + " " + doc.getFingerprintStart() +
-                    " " + doc.getFingerprintEnd());
-        }
 
         for (CodeClone expectedClone : expectedClones) {
             boolean found = false;

@@ -33,12 +33,12 @@ public class FingerprintGeneratorTest {
 
     @Before
     public void init() {
-        // LOGGER.setFilter(new Filter() {
-        // @Override
-        // public boolean isLoggable(LogRecord record) {
-        // return false;
-        // }
-        // });
+        LOGGER.setFilter(new Filter() {
+            @Override
+            public boolean isLoggable(LogRecord record) {
+                return false;
+            }
+        });
         config = Configuration.getInstance();
         config.setLanguage("java");
         config.setCloneTokenThreshold(75);

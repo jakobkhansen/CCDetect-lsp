@@ -46,11 +46,7 @@ public class TestDynamicBitSet {
         set.delete(2);
         assertEquals(true, set.get(2));
         assertEquals(false, set.get(4));
-        System.out.println(Printer.print(set));
         set.delete(0);
-        System.out.println(Printer.print(set));
         set.delete(2);
-        System.out.println(Printer.print(set));
-
     }
 }

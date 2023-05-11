@@ -101,7 +101,6 @@ public class TestDynamicTreeBitSet {
         set.set(2, true);
         set.set(3, true);
         set.set(9, true);
-        System.out.println(Printer.print(set.toBitSet()));
 
         assertEquals(1, set.select(0, true));
         assertEquals(2, set.select(1, true));

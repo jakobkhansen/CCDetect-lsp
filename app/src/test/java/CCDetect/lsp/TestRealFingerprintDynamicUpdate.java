@@ -53,10 +53,6 @@ public class TestRealFingerprintDynamicUpdate {
         linearTimer.log("Linear time");
         incrementalTimer.log("Incremental time");
 
-        System.out.println("insert " + position);
-        System.out.println("old size: " + oldFingerprint.length);
-        System.out.println("new size: " + newArray.length);
-
         assertArrayEquals(expected.getSuffix(), dynUpdated.getSuffix());
         assertArrayEquals(expected.getInverseSuffix(),
                 dynUpdated.getInverseSuffix());

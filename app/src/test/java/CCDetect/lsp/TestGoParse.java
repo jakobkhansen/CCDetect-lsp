@@ -15,5 +15,6 @@ public class TestGoParse {
         parser.setLanguage(Languages.go());
         Tree tree = parser.parseString("package main");
         System.out.println(tree.getRootNode().getNodeString());
+        parser.close();
     }
 }

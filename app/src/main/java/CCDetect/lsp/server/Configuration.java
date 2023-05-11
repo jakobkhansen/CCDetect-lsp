@@ -43,10 +43,6 @@ public class Configuration {
 
     public static Configuration getInstance() {
         if (instance == null) {
-            LOGGER.info("Creating new instance!!!");
-            for (StackTraceElement st : Thread.currentThread().getStackTrace()) {
-                LOGGER.info("stacktrace: " + st.toString());
-            }
             instance = new Configuration();
         }
         return instance;

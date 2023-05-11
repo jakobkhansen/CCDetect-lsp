@@ -27,7 +27,6 @@ public class WaveletMatrix {
     }
 
     public void insertNewRow() {
-        LOGGER.info("Inserting new row in wavelet matrix");
         int oldSize = matrix.length;
         DynamicTreeBitSet[] newMatrix = new DynamicTreeBitSet[oldSize + 1];
         newMatrix[0] = new DynamicTreeBitSet(inputSize);
