@@ -9,6 +9,7 @@ import ai.serenade.treesitter.Node;
 public class NodeFilter {
     Map<String, Boolean> nodesToFilter = new HashMap<>();
     Map<String, Boolean> extraNodes = new HashMap<>();
+    Map<String, Boolean> blindNodes = new HashMap<>();
 
     public NodeFilter() {
         Configuration config = Configuration.getInstance();
@@ -17,6 +18,9 @@ public class NodeFilter {
         }
         for (String node : config.getExtraNodes()) {
             extraNodes.put(node, true);
+        }
+        for (String node : config.getBlindNodes()) {
+            blindNodes.put(node, true);
         }
     }
 
@@ -34,5 +38,13 @@ public class NodeFilter {
 
     public boolean isExtra(Node node) {
         return isExtra(node.getType());
+    }
+
+    public boolean isBlind(String node) {
+        return blindNodes.containsKey(node);
+    }
+
+    public boolean isBlind(Node node) {
+        return isBlind(node.getType());
     }
 }

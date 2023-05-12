@@ -8,8 +8,10 @@ import java.util.logging.Logger;
 
 import com.google.common.primitives.Ints;
 
+import CCDetect.lsp.detection.treesitterbased.nodetraversal.NodeFilter;
 import CCDetect.lsp.detection.treesitterbased.nodetraversal.NodeTraversal;
 import CCDetect.lsp.detection.treesitterbased.nodetraversal.TokenFetchVisitor;
+import CCDetect.lsp.server.Configuration;
 import ai.serenade.treesitter.Node;
 import ai.serenade.treesitter.TSRange;
 
@@ -24,24 +26,29 @@ public class TreesitterFingerprintGenerator {
     // Generate the fingerprint of a single node, same token types will get same
     // char
     public Fingerprint getFingerprint(String text, String uri, Node node) {
+        NodeFilter filter = new NodeFilter();
         List<Integer> out = new ArrayList<>();
         TokenFetchVisitor visitor = new TokenFetchVisitor();
         NodeTraversal.traverse(node, visitor);
-        TSRange[] ranges = visitor.getRanges();
+        Node[] nodes = visitor.getNodes();
 
-        for (TSRange range : ranges) {
-            if (range == null) {
+        for (Node tokenNode : nodes) {
+            if (tokenNode == null) {
                 continue;
             }
-            String token = text.substring(range.getStartByte(), range.getEndByte());
-            out.add(tokenToValue(token));
+            if (filter.isBlind(tokenNode)) {
+                out.add(tokenToValue(tokenNode.getType()));
+            } else {
+                String token = text.substring(tokenNode.getStartByte(), tokenNode.getEndByte());
+                out.add(tokenToValue(token));
+            }
             tokensSeen++;
         }
 
         // Method delimiter
         out.add(1);
 
-        return new Fingerprint(Ints.toArray(out), ranges, uri);
+        return new Fingerprint(Ints.toArray(out), visitor.getRanges(), uri);
     }
 
     public int tokenToValue(String token) {

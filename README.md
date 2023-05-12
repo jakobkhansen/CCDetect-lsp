@@ -113,6 +113,15 @@ The following init options are available to configure CCDetect-lsp:
     -- Update only on save (Better for large projects)
     update_on_save = true,
 
+    -- Ignore certain nodes in the AST
+    ignore_nodes = {},
+
+    -- Type-2 clone detection, AST nodes where we don't care about the value, which allows
+    -- for clones to be detected even if things such as variable-names or literals are different
+    -- Java example: { "name", "identifier", "string_literal", "decimal_integer_literal", "decimal_floating_point_literal","type_identifier"}
+    blind_nodes = {},
+
+
     -- Special option when non-leaf nodes of the AST contains tokens which should be considered.
     -- For C, "string_literal" is a good option to add, since tree-sitter grammar of C doesn't
     -- have a leaf node which contains the string-literal value of a string

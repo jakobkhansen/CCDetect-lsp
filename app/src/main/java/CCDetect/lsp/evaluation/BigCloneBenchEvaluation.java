@@ -36,6 +36,15 @@ public class BigCloneBenchEvaluation {
         Configuration.getInstance().setDynamicDetection(false);
         Configuration.getInstance()
                 .setFragmentQuery("(method_declaration) @method (constructor_declaration) @constructor");
+        Configuration.getInstance()
+                .setBlindNodes(new String[] {
+                        "name",
+                        "identifier",
+                        "string_literal",
+                        "decimal_integer_literal",
+                        "decimal_floating_point_literal",
+                        "type_identifier",
+                });
         String root = System.getProperty("bcbPath");
 
         DocumentIndex<TreesitterDocumentModel> index = new TreesitterDocumentIndex(root,

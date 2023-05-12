@@ -19,6 +19,8 @@ public class Configuration {
     private boolean indexGitFilesOnly = true;
     private String[] ignore_nodes = new String[0];
     private String[] extra_nodes = new String[0];
+    private String[] blind_nodes = new String[0];
+
     private boolean dynamic_detection = true;
     private boolean update_on_save = true;
     private boolean evaluate = false;
@@ -140,4 +142,11 @@ public class Configuration {
         this.evaluate = evaluate;
     }
 
+    public String[] getBlindNodes() {
+        return blind_nodes;
+    }
+
+    public void setBlindNodes(String[] blind_nodes) {
+        this.blind_nodes = blind_nodes;
+    }
 }

@@ -1,10 +1,12 @@
 package CCDetect.lsp.detection.treesitterbased.nodetraversal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import CCDetect.lsp.utils.Printer;
 import ai.serenade.treesitter.Node;
@@ -12,7 +14,7 @@ import ai.serenade.treesitter.TSRange;
 
 public class TokenFetchVisitor implements NodeVisitor {
 
-    List<TSRange> ranges = new ArrayList<>();
+    List<Node> nodes = new ArrayList<>();
     NodeFilter filter = new NodeFilter();
 
     @Override
@@ -25,11 +27,17 @@ public class TokenFetchVisitor implements NodeVisitor {
             return;
         }
 
-        ranges.add(node.toRange());
+        nodes.add(node);
+    }
+
+    public Node[] getNodes() {
+        Node[] out = new Node[nodes.size() + 1];
+        return nodes.toArray(out);
     }
 
     public TSRange[] getRanges() {
-        TSRange[] out = new TSRange[ranges.size() + 1];
+        TSRange[] out = new TSRange[nodes.size() + 1];
+        List<TSRange> ranges = nodes.stream().map((x) -> x.toRange()).collect(Collectors.toList());
         return ranges.toArray(out);
     }
 }
