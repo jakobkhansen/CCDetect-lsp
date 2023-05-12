@@ -74,10 +74,10 @@ task evaluateIncrementalPerformance(type: JavaExec) {
     group = "Execution"
     description = "Evaluate incremental performance"
     classpath = sourceSets.main.runtimeClasspath
-    jvmArgs "-Xmx60g -Xmn3g -XX:+UseParallelOldGC"
+    jvmArgs "-XX:+UseParallelOldGC"
     main = 'CCDetect.lsp.evaluation.IncrementalPerformanceEvaluation'
-    minHeapSize = "128m" // initial heap size
-    maxHeapSize = "4096m" // maximum heap size
+    minHeapSize = "3g" // initial heap size
+    maxHeapSize = "60g" // maximum heap size
 }
 
 task generateTest(type: JavaExec) {

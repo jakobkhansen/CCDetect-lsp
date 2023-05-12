@@ -31,9 +31,8 @@ This will compile the CCDetect-lsp server in a jar file located in
 
 [This plugin](https://github.com/jakobkhansen/CCDetect-vscode) runs CCDetect-lsp as a
 language server in VSCode. However, since CCDetect-lsp relies on compiled C code (for
-tree-sitter parsing), you should compile CCDetect-lsp from this repo, and replace the
-plugins `launcher/launcher.jar` file with the jar you compiled, otherwise things will
-likely not work.
+tree-sitter parsing), CCDetect-lsp needs to be compiled as a submodule. Running `make`
+from this repo will build CCDetect-lsp and the extension.
 
 ### Neovim
 
