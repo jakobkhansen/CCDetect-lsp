@@ -1,0 +1,22 @@
+#! /usr/bin/python
+
+import sys
+import os
+import shutil
+
+root = sys.argv[1]
+out = sys.argv[2]
+
+print(root)
+dirs = sorted(os.listdir(root))
+low = 0
+high = len(dirs) - 1
+
+while (low < high):
+    pathLow = str(dirs[low])
+    pathHigh = str(dirs[high])
+    low += 1
+    high -= 1
+    shutil.copytree(root + "/" +  pathLow, out + "/" +  pathHigh)
+    shutil.copytree(root + "/" +  pathHigh, out + "/" + pathLow)
+

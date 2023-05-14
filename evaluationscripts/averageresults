@@ -1,0 +1,23 @@
+#! /usr/bin/python
+import sys
+import pandas as pd
+import os
+
+folders = sys.argv[1].split(",")
+output_folder = sys.argv[2]
+root = os.path.dirname(__file__)
+print(root)
+print(folders)
+print(output_folder)
+
+for file in os.listdir(folders[0]):
+    try:
+        first = pd.read_csv(os.path.join(root, folders[0], file), header=None)
+        all = [first]
+        for other in folders[1:]:
+            result = pd.read_csv(os.path.join(root, other, file), header=None)
+            all.append(result)
+        result = pd.concat(all).groupby(level=0).mean()
+        result.to_csv(os.path.join(root, output_folder, file))
+    except:
+        continue

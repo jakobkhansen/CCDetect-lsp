@@ -1,0 +1,29 @@
+#! /usr/bin/python
+
+import sys
+import os
+import shutil
+dirname=os.path.dirname
+
+root = sys.argv[1]
+out = sys.argv[2]
+
+print(root, "->", out)
+dirs = sorted(os.listdir(root))
+
+shutil.copytree(root + "/" + dirs[0], out + "/" + dirs[0])
+
+for dir in dirs[1:]:
+    print(dir)
+    changeFile = open("{}/{}/changes".format(root, dir))
+    changes = changeFile.read().split("\n")
+    for change in changes:
+        if change.strip() != "":
+            filename = change.split(" ")[1].replace("\"", "")
+            print(filename)
+            print("{}/{}/{}".format(out, dir, filename))
+            os.makedirs("{}/{}/{}".format(out, dir, dirname(filename)), exist_ok=True)
+            shutil.copy("{}/{}/{}".format(root, dir, filename), "{}/{}/{}".format(out,
+                                                                                  dir, filename))
+
+    shutil.copy("{}/{}/changes".format(root, dir), "{}/{}/changes".format(out, dir))
