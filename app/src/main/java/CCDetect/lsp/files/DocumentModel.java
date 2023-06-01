@@ -39,9 +39,25 @@ public class DocumentModel {
     public String getDocumentContent() {
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(Files.newInputStream(path), "utf-8"));
-            String content = reader.lines().collect(Collectors.joining("\n"));
+            StringBuilder buffer = new StringBuilder();
+            List<String> lines = new ArrayList<>();
+
+            int c;
+            while ((c = reader.read()) != -1) {
+                char z = (char) c;
+                if (z == '\n') {
+                    lines.add(buffer.toString());
+                    if (buffer.length() > 0) {
+                        buffer = new StringBuilder();
+                    }
+                } else {
+                    buffer.append(z);
+                }
+            }
+            // String content = reader.lines().collect(Collectors.joining("\n"));
             reader.close();
-            return content;
+            // return content;
+            return lines.stream().collect(Collectors.joining("\n"));
         } catch (Exception e) {
             LOGGER.info(e.toString());
         }
