@@ -46,7 +46,6 @@ public class TestCodebaseCloneDetection {
         config.setIgnoreNodes(new String[] {});
         config.setFragmentQuery("(method_declaration) @method");
         config.setDynamicDetection(true);
-        config.setEvaluate(true);
     }
 
     @Test

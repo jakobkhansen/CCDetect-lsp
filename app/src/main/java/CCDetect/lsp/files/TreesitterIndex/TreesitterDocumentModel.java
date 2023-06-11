@@ -201,12 +201,6 @@ public class TreesitterDocumentModel extends DocumentModel {
                 fullNewFingerprint);
         List<EditOperation> operations = hirschbergs.getOperations();
 
-        if (Configuration.getInstance().isEvaluate()) {
-            for (EditOperation edit : operations) {
-                LOGGER.info("Hirschberg edit: " + Printer.print(edit));
-            }
-        }
-
         if (operations.size() >= 10) {
             LOGGER.info("Using insert+delete edit distance optimization, startOffset: " + startOffset + ", endOffset: "
                     + endOffset);

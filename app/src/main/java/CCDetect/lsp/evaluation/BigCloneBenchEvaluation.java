@@ -68,6 +68,9 @@ public class BigCloneBenchEvaluation {
         String end = (clone.getRange().getEnd().getLine() + 1) + "";
 
         for (CodeClone match : clone.getMatches()) {
+            if (clone.equals(match)) {
+                continue;
+            }
             String matchSubfolder = match.getUri().split("/")[match.getUri().split("/").length - 2];
             String matchFilename = match.getUri().split("/")[match.getUri().split("/").length - 1];
             String matchStart = (match.getRange().getStart().getLine() + 1) + "";

@@ -23,7 +23,6 @@ public class Configuration {
 
     private boolean dynamic_detection = true;
     private boolean update_on_save = true;
-    private boolean evaluate = false;
     private boolean incrementalParsing = false;
 
     public boolean shouldIndexGitFilesOnly() {
@@ -40,7 +39,6 @@ public class Configuration {
 
     public static void createInstanceFromJson(String json) {
         instance = JSONUtility.toModel(json, Configuration.class);
-        LOGGER.info("instance: " + instance);
     }
 
     public static Configuration getInstance() {
@@ -132,14 +130,6 @@ public class Configuration {
 
     public boolean shouldUpdateOnSave() {
         return update_on_save;
-    }
-
-    public boolean isEvaluate() {
-        return evaluate;
-    }
-
-    public void setEvaluate(boolean evaluate) {
-        this.evaluate = evaluate;
     }
 
     public String[] getBlindNodes() {

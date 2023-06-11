@@ -100,9 +100,7 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
                 LOGGER.info("Building dynamic structures");
                 saca = new DynamicSACA(fingerprint, eSuff);
                 LOGGER.info("Built dynamic structures");
-                if (!config.isEvaluate()) {
-                    eSuff = null;
-                }
+                eSuff = null;
             }
         } else {
 
@@ -114,20 +112,6 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
             updateTimer.stop();
             updateTimer.log("Time to update sa");
 
-            if (config.isEvaluate()) {
-                Timer timer = new Timer();
-                timer.start();
-                int[] fingerprint = getFullFingerprint(index);
-                ExtendedSuffixArray linearEsuff = new SAIS().buildExtendedSuffixArray(fingerprint);
-                int[] sacaArray = saca.getSA().toArray();
-                if (Arrays.equals(sacaArray, linearEsuff.getSuffix())) {
-                    LOGGER.info("SA equals correct");
-                } else {
-                    LOGGER.info("SA equals incorrect");
-                }
-                timer.stop();
-                timer.log("Linear time");
-            }
         }
         for (TreesitterDocumentModel document : index) {
             document.setChanged(false);
@@ -135,26 +119,15 @@ public class TreesitterDetector implements CloneDetector<TreesitterDocumentModel
 
         Map<Integer, CodeClone> cloneMap = null;
         if (config.isDynamicDetection()) {
-            if (config.isEvaluate()) {
-                Timer linearTimer = new Timer();
-                linearTimer.start();
-                int[] linearCloneIndices = extractCloneIndicesFromSA();
-                // LOGGER.info("Linear clone indices: " + Printer.print(linearCloneIndices));
-
-                linearTimer.stop();
-                linearTimer.log("Linear time to extract clones");
-            }
             Timer extractClonesTimer = new Timer();
             extractClonesTimer.start();
             int[] cloneIndices = extractCloneIndicesFromSAIncremental();
 
-            // LOGGER.info("Clone indices: " + Printer.print(cloneIndices));
             extractClonesTimer.stop();
             cloneMap = getClonesIncremental(cloneIndices);
             extractClonesTimer.log("Time to extract clones");
         } else {
             int[] cloneIndices = extractCloneIndicesFromSA();
-            // LOGGER.info("Clone indices: " + Printer.print(cloneIndices));
             cloneMap = getClones(cloneIndices);
         }
 
