@@ -12,7 +12,7 @@ analysis tool, which works in the editor setting to provide clone detection in r
 The tool is editor and language agnostic, utilizing tree-sitter grammars to parse any
 language incrementally. The incremental detection algorithm implemented gives the tool fast
 incremental updates (on save or on each keystroke) on even very large code bases. This
-tool and algorithm is the basis for my master thesis at The University of Oslo.
+tool and algorithm is the basis for my [master thesis](https://github.com/jakobkhansen/master-thesis/blob/main/thesis/thesis.pdf) at The University of Oslo.
 
 ## Installation
 
@@ -166,6 +166,12 @@ Go, functions: (function_declaration) @function
 ```
 
 ## Benchmarks
+
+The following benchmarks compare CCDetect-LSP suffix array construction algorithm with its incremental algorithm, in addition to comparing against [iClones](http://www.softwareclones.org/iclones.php). More benchmarks can be found in the [master thesis](https://github.com/jakobkhansen/master-thesis/blob/main/thesis/thesis.pdf).
+
+| Inserting 10x10 tokens | Inserting 10x100 tokens |
+|-------|-------|
+| ![elasticsearch_INS10](https://github.com/jakobkhansen/CCDetect-lsp/assets/8071566/ccd7a5de-a1af-4d8a-ae24-2c372787c4de) | ![elasticsearch_INS100](https://github.com/jakobkhansen/CCDetect-lsp/assets/8071566/08ff2ff3-2569-42f1-b4d7-c9a0e5b55517) |
 
 ## Demo
 
