@@ -8,10 +8,11 @@ Incremental, language agnostic and IDE agnostic duplicate code detection.
 
 This is an LSP tool which does duplicate code detection, otherwise known as code-clone
 detection. The goal of this tool is to create a completely incremental updating static
-analysis tool, which works in the editor setting to provide code analysis in real-time.
+analysis tool, which works in the editor setting to provide clone detection in real-time.
 The tool is editor and language agnostic, utilizing tree-sitter grammars to parse any
-language incrementally. This tool and algorithm is the basis for my master thesis at The
-University of Oslo.
+language incrementally. The incremental detection algorithm implemented gives the tool fast
+incremental updates (on save or on each keystroke) on even very large code bases. This
+tool and algorithm is the basis for my master thesis at The University of Oslo.
 
 ## Installation
 
@@ -138,8 +139,7 @@ supported, set this to the file extension of the language (such as `js`, `py`, `
 For the `fragment_query` option, this should be set to what tree-sitter AST node you want
 to be selected for clone detection. This could for example be functions, methods, classes,
 or just the root node of the AST, which means the entire program will be considered for
-clone detection. A separate option to use just the root node might be added, which makes
-it simpler to get a new language up and running without knowing anything about its AST.
+clone detection.
 
 The following section gives some possible fragment queries you can set for different
 languages:
@@ -164,6 +164,8 @@ Rust, functions: (function_item) @function
 Go, file: (source_file) @file
 Go, functions: (function_declaration) @function
 ```
+
+## Benchmarks
 
 ## Demo
 
