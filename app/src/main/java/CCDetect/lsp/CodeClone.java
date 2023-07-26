@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import org.eclipse.lsp4j.Range;
 
 /**
@@ -75,7 +74,7 @@ public class CodeClone {
 
     @Override
     public String toString() {
-        String out = "CodeClone(" + this.uri + range + "\nMatches: " + this.matchingClones.size() + ")";
+        String out = "CodeClone(" + this.uri + "\n" + range + "\nMatches: " + this.matchingClones.size() + ")";
         return out;
     }
 

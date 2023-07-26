@@ -1,0 +1,10 @@
+#! /bin/bash
+
+if [ $# -ne 1 ]
+then
+    echo "Usage: cli <root of project>"
+    exit
+fi
+
+path=$(readlink -f $1)
+gradle cli -Droot="file://$path"

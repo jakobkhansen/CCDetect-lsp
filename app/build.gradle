@@ -92,3 +92,11 @@ task generateTest(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     main = 'CCDetect.lsp.evaluation.GenerateEvaluationTest'
 }
+
+task cli(type: JavaExec) {
+    systemProperty "root", System.getProperty("root")
+    group = "Execution"
+    description = "Detect clones in CLI mode"
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'CCDetect.lsp.evaluation.CLI'
+}
